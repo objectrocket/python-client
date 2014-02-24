@@ -7,17 +7,25 @@ ObjectRocket API bindings for Python. To use the bindings, simply do the followi
     import objectrocket
     >>>
 
-    client = objectrocket.ORClient(<str:api_server>, <str:user_key>, <str:pass_key>)
+    client = objectrocket.ORClient('http://localhost:5050/', '<user_key>', '<pass_key>')
     >>>
 
     # To get information on all of your instances.
     client.instances.get()
-    >>> {'data': [{u'name': u'testinstance1', ...}, ...]}
+    >>> {u'data': [{u'name': u'testinstance1', ...}, ...]}
 
     # To get information on one of your instances.
-    client.instances.get(<str:instance_name>)
-    >>> {'data': [{u'name': u'testinstance1', ...}]}
+    client.instances.get('testinstance1')
+    >>> {u'data': [{u'name': u'testinstance1', ...}]}
 
     # To create a new instance.
-    client.instances.create(<str:test_name>, <int:size>, <str:zone>)
-    >>> {'data': [{u'name': u'testinstance1', ...}]}
+    client.instances.create('testinstance2', 5, 'US-West')
+    >>> {u'data': [{u'name': u'testinstance2', ...}]}
+
+    # To request instance compaction.
+    client.instances.compact('testinstance2', request_compaction=True)
+    >>> {u'data': 'Success'}
+
+    # To see instance compaction state.
+    client.instances.compact('testinstance2')
+    >>> {u'data': {u'state': u'requested', u'updated': u'2014-02-24 23:14:30.322166'}}
