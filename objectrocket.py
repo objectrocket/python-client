@@ -11,11 +11,15 @@ class ORClient(object):
                 not isinstance(pass_key, str)):
             raise self.ORClientException('All parameters should be an instance or subclass of str.')
 
-        if not api_url.strip().endswith('/'):
-            api_url = api_url.strip() + '/'
+        api_url = api_url.strip()
+        if not api_url.endswith('/'):
+            api_url += '/'
+
+        if not api_url.endswith('/v2/'):
+            api_url += 'v2/'
 
         # ORClient properties.
-        self._api_url = api_url + 'v2/'
+        self._api_url = api_url
         self._user_key = user_key
         self._pass_key = pass_key
 
@@ -59,6 +63,9 @@ class Instances(object):
     @property
     def client(self):
         return self._client
+
+    def compact(self, instance_name):
+        pass
 
     def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
         if not isinstance(name, str):
