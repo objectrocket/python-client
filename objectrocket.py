@@ -116,5 +116,42 @@ class Instances(object):
         request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
         return request.json()
 
+    def stepdown_window(self, instance_name):
+        if not isinstance(instance_name, str):
+            raise self.InstancesException('Parameter "instance_name" must be an instance or subclass of str.')
+
+        url = self.api_instances_url + instance_name + '/stepdown/'
+
+        request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+        return request.json()
+
+    def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
+        # TODO: Finish this type checking.
+        if not isinstance(instance_name, str):
+            raise self.InstancesException('Parameter "instance_name" must be an instance or subclass of str.')
+        if not isinstance(start, float):
+            raise self.InstancesException()
+        if not isinstance(end, float):
+            raise self.InstancesException()
+        if not isinstance(enabled, bool):
+            raise self.InstancesException()
+        if not isinstance(scheduled, bool):
+            raise self.InstancesException()
+        if not isinstance(weekly, bool):
+            raise self.InstancesException()
+
+        url = self.api_instances_url + instance_name + '/stepdown/'
+
+        data = {
+            'start': start,
+            'end': end,
+            'enabled': enabled,
+            'scheduled': scheduled,
+            'weekly': weekly,
+        }
+
+        request = requests.post(url, data=data, auth=(self.client.user_key, self.client.pass_key))
+        return request.json()
+
     class InstancesException(Exception):
         pass

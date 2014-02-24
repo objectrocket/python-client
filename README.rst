@@ -7,7 +7,7 @@ ObjectRocket API bindings for Python. To use the bindings, simply do the followi
     import objectrocket
     >>>
 
-    client = objectrocket.ORClient('<api_server>', '<user_key>', '<pass_key>')
+    client = objectrocket.ORClient(<str:api_server>, <str:user_key>, <str:pass_key>)
     >>>
 
     # To get information on all of your instances.
@@ -15,5 +15,9 @@ ObjectRocket API bindings for Python. To use the bindings, simply do the followi
     >>> {'data': [{u'name': u'testinstance1', ...}, ...]}
 
     # To get information on one of your instances.
-    client.instances.get('<instance_name>')
+    client.instances.get(<str:instance_name>)
+    >>> {'data': [{u'name': u'testinstance1', ...}]}
+
+    # To create a new instance.
+    client.instances.create(<str:test_name>, <int:size>, <str:zone>)
     >>> {'data': [{u'name': u'testinstance1', ...}]}
