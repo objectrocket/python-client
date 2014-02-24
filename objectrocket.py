@@ -64,8 +64,18 @@ class Instances(object):
     def client(self):
         return self._client
 
-    def compact(self, instance_name):
-        pass
+    def compact(self, instance_name, request_compaction=False):
+        if not isinstance(instance_name, str):
+            raise self.InstancesException()
+
+        url = self.api_instances_url + instance_name + '/compact/'
+
+        if request_compaction:
+            request = requests.post(url, data={}, auth=(self.client.user_key, self.client.pass_key))
+        else:
+            request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+
+        return request.json()
 
     def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
         if not isinstance(name, str):
