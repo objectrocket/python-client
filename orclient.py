@@ -3,21 +3,7 @@
 import requests
 
 
-# class ORBaseObject(object):
-#     def __init__(self, api_url, user_key, pass_key):
-#         if (not isinstance(api_url, str) or
-#                 not isinstance(user_key, str) or
-#                 not isinstance(pass_key, str)):
-#             raise TypeError('All parameters should be an instance or subclass of str.')
-
-#         if not api_url.strip().endswith('/'):
-#             api_url = api_url.strip() + '/'
-
-#         self._api_url = api_url
-#         self._user_key = user_key
-#         self._pass_key = pass_key
-
-
+# TODO: api_url should default to our v2 api. Overwrite with a kwarg.
 class ORClient(object):
     def __init__(self, api_url, user_key, pass_key):
         if (not isinstance(api_url, str) or
@@ -73,6 +59,34 @@ class Instances(object):
     @property
     def client(self):
         return self._client
+
+    def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
+        if not isinstance(name, str):
+            raise self.InstancesException()
+
+        if not isinstance(zone, str):
+            raise self.InstancesException()
+
+        if not isinstance(size, int):
+            raise self.InstancesException()
+
+        if service_type not in ('mongodb',):
+            raise self.InstancesException()
+
+        if version not in ('2.4.6',):
+            raise self.InstancesException()
+
+        url = self.api_instances_url
+        data = {
+            'name': name,
+            'size': size,
+            'zone': zone,
+            'type': service_type,
+            'version': version,
+        }
+
+        request = requests.post(url, data=data, auth=(self.client.user_key, self.client.pass_key))
+        return request.json()
 
     def get(self, instance_name=None):
         if instance_name is not None and not isinstance(instance_name, str):
