@@ -1,5 +1,6 @@
 """
 """
+import datetime
 import requests
 
 
@@ -129,9 +130,9 @@ class Instances(object):
         # TODO: Finish this type checking.
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance or subclass of str.')
-        if not isinstance(start, float):
+        if not isinstance(start, datetime.datetime):
             raise self.InstancesException()
-        if not isinstance(end, float):
+        if not isinstance(end, datetime.datetime):
             raise self.InstancesException()
         if not isinstance(enabled, bool):
             raise self.InstancesException()
@@ -143,8 +144,8 @@ class Instances(object):
         url = self.api_instances_url + instance_name + '/stepdown/'
 
         data = {
-            'start': start,
-            'end': end,
+            'start': start.strftime('%s'),
+            'end': end.strftime('%s'),
             'enabled': enabled,
             'scheduled': scheduled,
             'weekly': weekly,
