@@ -1,6 +1,7 @@
 """
 """
 import datetime
+import json
 import requests
 
 
@@ -52,7 +53,7 @@ class ORClient(object):
 class Instances(object):
     def __init__(self, client):
         if not isinstance(client, ORClient):
-            raise self.InstancesException('Parameter "client" must be an instance or subclass of ORClient.')
+            raise self.InstancesException('Parameter "client" must be an instance of ORClient.')
 
         self._client = client
         self._api_instances_url = self.client.api_url + 'instance/'
@@ -67,7 +68,7 @@ class Instances(object):
 
     def compact(self, instance_name, request_compaction=False):
         if not isinstance(instance_name, str):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
         url = self.api_instances_url + instance_name + '/compact/'
 
@@ -80,19 +81,21 @@ class Instances(object):
 
     def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
         if not isinstance(name, str):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "name" must be an instance of str.')
 
         if not isinstance(zone, str):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "zone" must be an instance of str.')
 
         if not isinstance(size, int):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "size" must be an instance of int.')
 
-        if service_type not in ('mongodb',):
-            raise self.InstancesException()
+        valid_service_types = ('mongodb', )
+        if service_type not in valid_service_types:
+            raise self.InstancesException('Invalid value for "service_type". Must be one of %s.' % valid_service_types)
 
-        if version not in ('2.4.6',):
-            raise self.InstancesException()
+        valid_versions = ('2.4.6', )
+        if version not in valid_versions:
+            raise self.InstancesException('Invalid value for "version". Must be one of %s.' % valid_versions)
 
         url = self.api_instances_url
         data = {
@@ -103,23 +106,32 @@ class Instances(object):
             'version': version,
         }
 
+        # Not passing service type ATM. Probably will soon though.
+        data.pop('type')
+
         request = requests.post(url, data=data, auth=(self.client.user_key, self.client.pass_key))
         return request.json()
 
-    def get(self, instance_name=None):
+    def get(self, instance_name=None, account_login=None):
         if instance_name is not None and not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "instance_name" must be an instance or subclass of str.')
+            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
+        if instance_name is not None and not isinstance(instance_name, str):
+            raise self.InstancesException('Parameter "account_login" must be an instance of str.')
 
         url = self.api_instances_url
         if instance_name is not None:
-            url = self.api_instances_url + instance_name + '/'
+            url += instance_name + '/'
 
-        request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+        data = {}
+        if account_login is not None:
+            data = {'account': account_login}
+
+        request = requests.get(url, data=json.dumps(data), auth=(self.client.user_key, self.client.pass_key))
         return request.json()
 
     def stepdown_window(self, instance_name):
         if not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "instance_name" must be an instance or subclass of str.')
+            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
         url = self.api_instances_url + instance_name + '/stepdown/'
 
@@ -129,17 +141,17 @@ class Instances(object):
     def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
         # TODO: Finish this type checking.
         if not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "instance_name" must be an instance or subclass of str.')
+            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
         if not isinstance(start, datetime.datetime):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "start" must be an instance of datetime.')
         if not isinstance(end, datetime.datetime):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "end" must be an instance of datetime.')
         if not isinstance(enabled, bool):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "enabled" must be a boolean.')
         if not isinstance(scheduled, bool):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "scheduled" must be a boolean.')
         if not isinstance(weekly, bool):
-            raise self.InstancesException()
+            raise self.InstancesException('Parameter "weekly" must be a boolean.')
 
         url = self.api_instances_url + instance_name + '/stepdown/'
 
@@ -156,3 +168,8 @@ class Instances(object):
 
     class InstancesException(Exception):
         pass
+
+
+class ClientUtils(object):
+    def construct_datetime(self, dtstr):
+        form = '%Y-%m-%dT%H:%M:%S'
