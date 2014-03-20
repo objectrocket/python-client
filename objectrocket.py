@@ -5,20 +5,18 @@ import json
 import requests
 
 
-# TODO: api_url should default to our v2 api. Overwrite with a kwarg.
+# TODO(Anthony): api_url should default to our v2 api. Overwrite with a kwarg.
 class ORClient(object):
-    def __init__(self, api_url, user_key, pass_key):
-        if (not isinstance(api_url, str) or
-                not isinstance(user_key, str) or
+    def __init__(self, user_key, pass_key, api_url=None):
+        if (not isinstance(user_key, str) or
                 not isinstance(pass_key, str)):
-            raise self.ORClientException('All parameters should be an instance or subclass of str.')
+            raise self.ORClientException('All parameters should be instances of str.')
 
-        api_url = api_url.strip()
-        if not api_url.endswith('/'):
-            api_url += '/'
-
-        if not api_url.endswith('/v2/'):
-            api_url += 'v2/'
+        if api_url is not None:
+            # FIXME(Anthony): Probably shouldn't do this long term.
+            api_url = self._check_api_url(api_url)
+        else:
+            api_url = 'http://localhost:5050/v2/'  # Point this to the LB when deployed.
 
         # ORClient properties.
         self._api_url = api_url
@@ -30,6 +28,19 @@ class ORClient(object):
     @property
     def api_url(self):
         return self._api_url
+
+    def _check_api_url(self, api_url):
+        api_url = api_url.strip()
+        if not api_url.endswith('/'):
+            api_url += '/'
+
+        if not api_url.endswith('/v2/'):
+            api_url += 'v2/'
+
+        if not api_url.startswith(('http://', 'https://')):
+            api_url = 'https://' + api_url
+
+        return api_url
 
     @property
     def instances(self):
@@ -83,11 +94,11 @@ class Instances(object):
         if not isinstance(name, str):
             raise self.InstancesException('Parameter "name" must be an instance of str.')
 
-        if not isinstance(zone, str):
-            raise self.InstancesException('Parameter "zone" must be an instance of str.')
-
         if not isinstance(size, int):
             raise self.InstancesException('Parameter "size" must be an instance of int.')
+
+        if not isinstance(zone, str):
+            raise self.InstancesException('Parameter "zone" must be an instance of str.')
 
         valid_service_types = ('mongodb', )
         if service_type not in valid_service_types:
@@ -109,24 +120,19 @@ class Instances(object):
         # Not passing service type ATM. Probably will soon though.
         data.pop('type')
 
-        request = requests.post(url, data=data, auth=(self.client.user_key, self.client.pass_key))
+        # FIXME(Anthony): Make this POST data as JSON.
+        request = requests.post(url, data=json.dumps(data), auth=(self.client.user_key, self.client.pass_key))
         return request.json()
 
-    def get(self, instance_name=None, account_login=None):
+    def get(self, instance_name=None):
         if instance_name is not None and not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
-        if instance_name is not None and not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "account_login" must be an instance of str.')
 
         url = self.api_instances_url
         if instance_name is not None:
             url += instance_name + '/'
 
-        data = {}
-        if account_login is not None:
-            data = {'account': account_login}
-
-        request = requests.get(url, data=json.dumps(data), auth=(self.client.user_key, self.client.pass_key))
+        request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
         return request.json()
 
     def stepdown_window(self, instance_name):
@@ -172,4 +178,4 @@ class Instances(object):
 
 class ClientUtils(object):
     def construct_datetime(self, dtstr):
-        form = '%Y-%m-%dT%H:%M:%S'
+        form = '%Y-%m-%d %H:%M:%S.%f'
