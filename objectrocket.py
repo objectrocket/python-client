@@ -120,9 +120,11 @@ class Instances(object):
         # Not passing service type ATM. Probably will soon though.
         data.pop('type')
 
-        # FIXME(Anthony): Make this POST data as JSON.
-        request = requests.post(url, data=json.dumps(data), auth=(self.client.user_key, self.client.pass_key))
-        return request.json()
+        response = requests.post(url,
+                                 auth=(self.client.user_key, self.client.pass_key),
+                                 data=json.dumps(data),
+                                 headers={'Content-Type': 'application/json'})
+        return response.json()
 
     def get(self, instance_name=None):
         if instance_name is not None and not isinstance(instance_name, str):
