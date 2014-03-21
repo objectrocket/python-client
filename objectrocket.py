@@ -77,14 +77,15 @@ class Instances(object):
     def client(self):
         return self._client
 
-    def compact(self, instance_name, request_compaction=False):
+    def compaction(self, instance_name, request_compaction=False):
+        """Compaction."""
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
-        url = self.api_instances_url + instance_name + '/compact/'
+        url = self.api_instances_url + instance_name + '/compaction/'
 
         if request_compaction:
-            request = requests.post(url, data={}, auth=(self.client.user_key, self.client.pass_key))
+            request = requests.post(url, auth=(self.client.user_key, self.client.pass_key))
         else:
             request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
 
@@ -176,8 +177,3 @@ class Instances(object):
 
     class InstancesException(Exception):
         pass
-
-
-class ClientUtils(object):
-    def construct_datetime(self, dtstr):
-        form = '%Y-%m-%d %H:%M:%S.%f'
