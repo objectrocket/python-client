@@ -163,13 +163,13 @@ class Instances(object):
         response = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
         return response.json()
 
-    def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly, weekly_compaction):
+    def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
         """Use UTC date times."""
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
-        if not isinstance(start, datetime.datetime):
+        if not isinstance(start, str):
             raise self.InstancesException('Parameter "start" must be an instance of datetime.')
-        if not isinstance(end, datetime.datetime):
+        if not isinstance(end, str):
             raise self.InstancesException('Parameter "end" must be an instance of datetime.')
         if not isinstance(enabled, bool):
             raise self.InstancesException('Parameter "enabled" must be a boolean.')
@@ -177,18 +177,21 @@ class Instances(object):
             raise self.InstancesException('Parameter "scheduled" must be a boolean.')
         if not isinstance(weekly, bool):
             raise self.InstancesException('Parameter "weekly" must be a boolean.')
-        if not isinstance(weekly_compaction, bool):
-            raise self.InstancesException('Parameter "weekly_compaction" must be a boolean.')
+
+        try:
+            datetime.datetime.strptime(start, TIME_FORMAT)
+            datetime.datetime.strptime(end, TIME_FORMAT)
+        except ValueError as ex:
+            raise self.InstancesException(str(ex))
 
         url = self.api_instances_url + instance_name + '/stepdown/'
 
         data = {
-            'start': start.strftime(TIME_FORMAT),
-            'end': end.strftime(TIME_FORMAT),
+            'start': start,
+            'end': end,
             'enabled': enabled,
             'scheduled': scheduled,
             'weekly': weekly,
-            'weekly_compaction': weekly_compaction,
         }
 
         response = requests.post(url,
