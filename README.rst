@@ -1,6 +1,11 @@
 ObjectRocket Python Client
 --------------------------
-ObjectRocket API bindings for Python. To use the bindings, simply do the following:
+ObjectRocket API bindings for Python.
+
+
+Examples
+~~~~~~~~
+To use the bindings, simply do the following:
 
 .. code-block:: python
 
@@ -31,6 +36,17 @@ ObjectRocket API bindings for Python. To use the bindings, simply do the followi
     >>> {u'data': {u'state': u'compressing', ...}}
 
 
+Installation
+~~~~~~~~~~~~
+Because we do not have the package up on PyPi yet, build the package manually
+as mentioned below in `Development Notes`_. E.G., ``tox -e build``. After you
+have the ObjectRocket wheel package, install it like so:
+
+.. code-block:: bash
+
+    pip install objectrocket-0.1.0-py27-none-any.whl
+
+
 Development Notes
 ~~~~~~~~~~~~~~~~~
 Before you push your code, run ``tox`` from the top level directory. If errors
@@ -38,4 +54,5 @@ are reported, fix them. If a PEP8 issue is reported, and you do not believe
 that it is accurate, place ``# noqa`` at the end of the line.
 
 To build the client, invoke ``tox -e build`` from the top level directory.
-Your artifact will appear in the ``dist`` directory.
+Your artifact will appear in the ``dist`` directory, and will look
+something like ``objectrocket-<version>-py27-<abi>-<platform>.whl``.
