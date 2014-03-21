@@ -4,9 +4,13 @@ import datetime
 import json
 import requests
 
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
+
 
 # TODO(Anthony): api_url should default to our v2 api. Overwrite with a kwarg.
 class ORClient(object):
+    """ORClient."""
+
     def __init__(self, user_key, pass_key, api_url=None):
         if (not isinstance(user_key, str) or
                 not isinstance(pass_key, str)):
@@ -62,6 +66,8 @@ class ORClient(object):
 
 
 class Instances(object):
+    """Instance operations."""
+
     def __init__(self, client):
         if not isinstance(client, ORClient):
             raise self.InstancesException('Parameter "client" must be an instance of ORClient.')
@@ -71,10 +77,12 @@ class Instances(object):
 
     @property
     def api_instances_url(self):
+        """The base URL for instance operations."""
         return self._api_instances_url
 
     @property
     def client(self):
+        """The ORClient object."""
         return self._client
 
     def compaction(self, instance_name, request_compaction=False):
@@ -85,13 +93,14 @@ class Instances(object):
         url = self.api_instances_url + instance_name + '/compaction/'
 
         if request_compaction:
-            request = requests.post(url, auth=(self.client.user_key, self.client.pass_key))
+            response = requests.post(url, auth=(self.client.user_key, self.client.pass_key))
         else:
-            request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+            response = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
 
-        return request.json()
+        return response.json()
 
     def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
+        """Create an instance."""
         if not isinstance(name, str):
             raise self.InstancesException('Parameter "name" must be an instance of str.')
 
@@ -128,6 +137,7 @@ class Instances(object):
         return response.json()
 
     def get(self, instance_name=None):
+        """Get details on one or all instances."""
         if instance_name is not None and not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
@@ -135,20 +145,21 @@ class Instances(object):
         if instance_name is not None:
             url += instance_name + '/'
 
-        request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
-        return request.json()
+        response = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+        return response.json()
 
     def stepdown_window(self, instance_name):
+        """Get information on the instance's stepdown window."""
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
         url = self.api_instances_url + instance_name + '/stepdown/'
 
-        request = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
-        return request.json()
+        response = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+        return response.json()
 
-    def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
-        # TODO: Finish this type checking.
+    def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly, weekly_compaction):
+        """Use UTC date times."""
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
         if not isinstance(start, datetime.datetime):
@@ -161,19 +172,25 @@ class Instances(object):
             raise self.InstancesException('Parameter "scheduled" must be a boolean.')
         if not isinstance(weekly, bool):
             raise self.InstancesException('Parameter "weekly" must be a boolean.')
+        if not isinstance(weekly_compaction, bool):
+            raise self.InstancesException('Parameter "weekly_compaction" must be a boolean.')
 
         url = self.api_instances_url + instance_name + '/stepdown/'
 
         data = {
-            'start': start.strftime('%s'),
-            'end': end.strftime('%s'),
+            'start': start.strftime(TIME_FORMAT),
+            'end': end.strftime(TIME_FORMAT),
             'enabled': enabled,
             'scheduled': scheduled,
             'weekly': weekly,
+            'weekly_compaction': weekly_compaction,
         }
 
-        request = requests.post(url, data=data, auth=(self.client.user_key, self.client.pass_key))
-        return request.json()
+        response = requests.post(url,
+                                 auth=(self.client.user_key, self.client.pass_key),
+                                 data=json.dumps(data),
+                                 headers={'Content-Type': 'application/json'})
+        return response.json()
 
     class InstancesException(Exception):
         pass
