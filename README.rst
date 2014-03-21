@@ -38,7 +38,7 @@ To use the bindings, simply do the following:
 
 Installation
 ~~~~~~~~~~~~
-Because we do not have the package up on PyPi yet, build the package manually
+Because we do not have the package up on PyPI yet, build the package manually
 as mentioned below in `Development Notes`_. E.G., ``tox -e build``. After you
 have the ObjectRocket wheel package, install it like so:
 
