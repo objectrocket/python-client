@@ -38,4 +38,4 @@ are reported, fix them. If a PEP8 issue is reported, and you do not believe
 that it is accurate, place ``# noqa`` at the end of the line.
 
 To build the client, invoke ``tox -e build`` from the top level directory.
-Your artifact will appear in the ./dist/ directory.
+Your artifact will appear in the ``dist`` directory.
