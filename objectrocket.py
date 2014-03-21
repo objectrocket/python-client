@@ -4,6 +4,8 @@ import datetime
 import json
 import requests
 
+__version__ = '0.1.0'
+
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 
