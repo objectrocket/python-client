@@ -31,9 +31,11 @@ class ORClient(object):
 
     @property
     def api_url(self):
+        """The base API URL the ORClient is using."""
         return self._api_url
 
     def _check_api_url(self, api_url):
+        """Ensure that a custom url is somewhat usable."""
         api_url = api_url.strip()
         if not api_url.endswith('/'):
             api_url += '/'
@@ -48,6 +50,7 @@ class ORClient(object):
 
     @property
     def instances(self):
+        """The instance operations layer."""
         if self._instances is None:
             self._instances = Instances(self)
 
@@ -55,10 +58,12 @@ class ORClient(object):
 
     @property
     def pass_key(self):
+        """The password key currently being used by the ORClient."""
         return self._pass_key
 
     @property
     def user_key(self):
+        """The user key currently being used by the ORClient."""
         return self._user_key
 
     class ORClientException(Exception):
