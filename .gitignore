@@ -1,4 +1,7 @@
+*.egg-info
 *.pyc
 *.sublime-project
 *.sublime-workspace
 .tox
+build
+dist
