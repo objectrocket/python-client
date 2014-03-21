@@ -119,11 +119,13 @@ class Instances(object):
 
         valid_service_types = ('mongodb', )
         if service_type not in valid_service_types:
-            raise self.InstancesException('Invalid value for "service_type". Must be one of %s.' % valid_service_types)
+            raise self.InstancesException('Invalid value for "service_type". Must be one of %s.'
+                                          % valid_service_types)
 
         valid_versions = ('2.4.6', )
         if version not in valid_versions:
-            raise self.InstancesException('Invalid value for "version". Must be one of %s.' % valid_versions)
+            raise self.InstancesException('Invalid value for "version". Must be one of %s.'
+                                          % valid_versions)
 
         url = self.api_instances_url
         data = {

@@ -22,7 +22,7 @@ setup(
     package_data={},
     package_dir={},
     packages=[],
-    py_modules = ['objectrocket'],
+    py_modules=['objectrocket'],
     url='',
     version=objectrocket.__version__,
     zip_safe=False,
