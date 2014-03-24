@@ -56,3 +56,6 @@ that it is accurate, place ``# noqa`` at the end of the line.
 To build the client, invoke ``tox -e build`` from the top level directory.
 Your artifact will appear in the ``dist`` directory, and will look
 something like ``objectrocket-<version>-py27-<abi>-<platform>.whl``.
+
+To build the documentation, invoke ``tox -e doc`` from the top level directory.
+The HTML index can then be found at ``doc/build/html/index.html``.
