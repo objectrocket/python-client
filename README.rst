@@ -49,13 +49,19 @@ have the ObjectRocket wheel package, install it like so:
 
 Development Notes
 ~~~~~~~~~~~~~~~~~
+Running Tests
+^^^^^^^^^^^^^
 Before you push your code, run ``tox`` from the top level directory. If errors
 are reported, fix them. If a PEP8 issue is reported, and you do not believe
 that it is accurate, place ``# noqa`` at the end of the line.
 
+Building a Wheel
+^^^^^^^^^^^^^^^^
 To build the client, invoke ``tox -e build`` from the top level directory.
 Your artifact will appear in the ``dist`` directory, and will look
 something like ``objectrocket-<version>-py27-<abi>-<platform>.whl``.
 
+Building Documentation
+^^^^^^^^^^^^^^^^^^^^^^
 To build the documentation, invoke ``tox -e doc`` from the top level directory.
 The HTML index can then be found at ``doc/build/html/index.html``.
