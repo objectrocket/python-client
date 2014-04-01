@@ -183,6 +183,7 @@ class Instances(object):
             raise self.InstancesException('Parameter "weekly" must be a boolean.')
 
         try:
+            # Ensure that time strings can be parsed properly.
             datetime.datetime.strptime(start, TIME_FORMAT)
             datetime.datetime.strptime(end, TIME_FORMAT)
         except ValueError as ex:
