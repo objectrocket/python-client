@@ -73,7 +73,11 @@ class ORClient(object):
 
 
 class Instances(object):
-    """Instance operations."""
+    """Instance operations.
+
+    :param objectrocket.ORClient ORClient: An instance of the objectrocket
+        ORClient.
+    """
 
     def __init__(self, client):
         if not isinstance(client, ORClient):

@@ -2,8 +2,12 @@
 # -*- coding: utf8 -*-
 """Cleanup build artifacts."""
 import argparse
+import logging
 import os
 import shutil
+import sys
+
+logger = logging.getLogger()
 
 
 class BuildCleanup(object):
@@ -16,11 +20,13 @@ class BuildCleanup(object):
         self.egginfo = os.path.join(self.toplevel, 'objectrocket.egg-info')
 
     def main(self):
-        shutil.rmtree(self.build)
-        shutil.rmtree(self.egginfo)
+        self.rmtree(self.build)
+        self.rmtree(self.egginfo)
 
         if self.args.all:
-            shutil.rmtree(self.dist)
+            self.rmtree(self.dist)
+
+        return 0
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
@@ -29,5 +35,15 @@ class BuildCleanup(object):
 
         self.args = parser.parse_args()
 
+    def rmtree(self, tree):
+        try:
+            shutil.rmtree(tree)
+        except OSError as ex:
+            logger.critical(str(ex))
+
 if __name__ == '__main__':
-    BuildCleanup().main()
+    handler = logging.StreamHandler()
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+    sys.exit(BuildCleanup().main())
