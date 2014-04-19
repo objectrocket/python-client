@@ -9,10 +9,10 @@ To use the bindings, simply do the following:
 
 .. code-block:: python
 
-    import objectrocket
+    from objectrocket.client import Client
     >>>
 
-    client = objectrocket.ORClient('<user_key>', '<pass_key>')
+    client = Client('<user_key>', '<pass_key>')
     >>>
 
     # To get information on one of your instances.
@@ -64,4 +64,4 @@ something like ``objectrocket-<version>-py27-<abi>-<platform>.whl``.
 Building Documentation
 ^^^^^^^^^^^^^^^^^^^^^^
 To build the documentation, invoke ``tox -e doc`` from the top level directory.
-The HTML index can then be found at ``doc/build/html/index.html``.
+The HTML index can then be found at ``docs/build/html/index.html``.

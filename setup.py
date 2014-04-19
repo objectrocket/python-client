@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 """Setup script for ObjectRocket Python client."""
 import objectrocket
-from setuptools import setup
+from setuptools import find_packages, setup
 
 with open("README.rst") as f:
     readme = f.read()
@@ -12,27 +12,22 @@ with open("requirements.txt") as f:
 
 setup(
     author='ObjectRocket engineering team.',
-    author_email='Anthony@ObjectRocket.com',
+    author_email='Engineering@ObjectRocket.com',  # TODO(Anthony): Make this email.
     description='ObjectRocket Python client.',
     include_package_data=True,
     install_requires=requires,
-    license='',
     long_description=readme,
     name='objectrocket',
-    package_data={},
-    package_dir={},
-    packages=[],
-    py_modules=['objectrocket'],
-    url='',
+    # Gather any data files.
+    # package_data={'': ['datafiles/*']},
+    packages=find_packages(exclude=['tests*']),
     version=objectrocket.__version__,
     zip_safe=False,
     classifiers=(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python',
         'Topic :: Database',

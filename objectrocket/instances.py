@@ -1,89 +1,20 @@
-"""
-"""
+"""Instances layer."""
 import datetime
 import json
 import requests
 
-__version__ = '0.1.0'
-
-TIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
-
-
-# TODO(Anthony): api_url should default to our v2 api. Overwrite with a kwarg.
-class ORClient(object):
-    """ORClient."""
-
-    def __init__(self, user_key, pass_key, api_url=None):
-        if (not isinstance(user_key, str) or
-                not isinstance(pass_key, str)):
-            raise self.ORClientException('All parameters should be instances of str.')
-
-        if api_url is not None:
-            # FIXME(Anthony): Probably shouldn't do this long term.
-            api_url = self._check_api_url(api_url)
-        else:
-            api_url = 'http://localhost:5050/v2/'  # Point this to the LB when deployed.
-
-        # ORClient properties.
-        self._api_url = api_url
-        self._user_key = user_key
-        self._pass_key = pass_key
-
-        self._instances = None
-
-    @property
-    def api_url(self):
-        """The base API URL the ORClient is using."""
-        return self._api_url
-
-    def _check_api_url(self, api_url):
-        """Ensure that a custom url is somewhat usable."""
-        api_url = api_url.strip()
-        if not api_url.endswith('/'):
-            api_url += '/'
-
-        if not api_url.endswith('/v2/'):
-            api_url += 'v2/'
-
-        if not api_url.startswith(('http://', 'https://')):
-            api_url = 'https://' + api_url
-
-        return api_url
-
-    @property
-    def instances(self):
-        """The instance operations layer."""
-        if self._instances is None:
-            self._instances = Instances(self)
-
-        return self._instances
-
-    @property
-    def pass_key(self):
-        """The password key currently being used by the ORClient."""
-        return self._pass_key
-
-    @property
-    def user_key(self):
-        """The user key currently being used by the ORClient."""
-        return self._user_key
-
-    class ORClientException(Exception):
-        pass
+from objectrocket.utils import Utils
 
 
 class Instances(object):
     """Instance operations.
 
-    :param objectrocket.ORClient ORClient: An instance of the objectrocket
-        ORClient.
+    :param objectrocket.client.Client client_instance: An instance of
+        objectrocket.client.Client.
     """
 
-    def __init__(self, client):
-        if not isinstance(client, ORClient):
-            raise self.InstancesException('Parameter "client" must be an instance of ORClient.')
-
-        self._client = client
+    def __init__(self, client_instance):
+        self._client = client_instance
         self._api_instances_url = self.client.api_url + 'instance/'
 
     @property
@@ -93,7 +24,7 @@ class Instances(object):
 
     @property
     def client(self):
-        """The ORClient object."""
+        """The Client instance object."""
         return self._client
 
     def compaction(self, instance_name, request_compaction=False):
@@ -188,8 +119,8 @@ class Instances(object):
 
         try:
             # Ensure that time strings can be parsed properly.
-            datetime.datetime.strptime(start, TIME_FORMAT)
-            datetime.datetime.strptime(end, TIME_FORMAT)
+            datetime.datetime.strptime(start, Utils.TIME_FORMAT)
+            datetime.datetime.strptime(end, Utils.TIME_FORMAT)
         except ValueError as ex:
             raise self.InstancesException(str(ex))
 
