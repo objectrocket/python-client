@@ -63,5 +63,5 @@ something like ``objectrocket-<version>-py27-<abi>-<platform>.whl``.
 
 Building Documentation
 ^^^^^^^^^^^^^^^^^^^^^^
-To build the documentation, invoke ``tox -e doc`` from the top level directory.
+To build the documentation, invoke ``tox -e docs`` from the top level directory.
 The HTML index can then be found at ``docs/build/html/index.html``.

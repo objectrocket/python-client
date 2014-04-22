@@ -1,8 +1,7 @@
-ObjectRocket Instances
-======================
-
-Module contents
----------------
+Instances
+=========
 
 .. automodule:: objectrocket.instances
     :members:
+    :undoc-members:
+    :show-inheritance:

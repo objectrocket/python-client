@@ -1,8 +1,7 @@
-ObjectRocket Utilities
-======================
-
-Module contents
----------------
+Utilities
+=========
 
 .. automodule:: objectrocket.utils
     :members:
+    :undoc-members:
+    :show-inheritance:

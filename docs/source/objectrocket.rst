@@ -7,8 +7,5 @@ ObjectRocket Python Client
     objectrocket.instances
     objectrocket.utils
 
-Module contents
----------------
-
 .. automodule:: objectrocket
     :members:
