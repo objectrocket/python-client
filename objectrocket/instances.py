@@ -3,6 +3,8 @@ import datetime
 import json
 import requests
 
+import bson
+
 from objectrocket.utils import Utils
 
 
@@ -142,3 +144,29 @@ class Instances(object):
 
     class InstancesException(Exception):
         pass
+
+
+class Instance(object):
+    """The base class of an ObjectRocket service.
+
+    :param dict instance_document: A dictionary representing the instance object.
+    """
+
+    def __init__(self, instance_document):
+        self.instance_document = instance_document
+
+        self.api_key = instance_document.get('api_key', None)
+        self.compression = instance_document.get('compression', {})
+        self.creation_date = instance_document.get('dtcreated', None)
+        self.id = instance_document.get('_id', None)
+        self.instance_name_prior = instance_document.get('instance_name_prior', None)
+        self.login = instance_document.get('login', None)
+        self.login_prior = instance_document.get('login_prior', None)
+        self.name = instance_document.get('name', None)
+        self.object_id = bson.objectid.ObjectId(self.id)
+        self.plan = int(instance_document.get('plan', 0))
+        self.port = int(instance_document.get('port', 0))
+        self.service = instance_document.get('instance_service', 'mongodb')
+        self.settings = instance_document.get('settings', {})
+        self.version = instance_document.get('mongo_version', None)
+        self.zone = instance_document.get('zone', None)
