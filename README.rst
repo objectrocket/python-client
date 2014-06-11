@@ -16,7 +16,7 @@ To use the bindings, simply do the following:
     >>>
 
     # To create a new instance.
-    client.instances.create('instance0', 5, 'US-West')
+    client.instances.create(name='instance0', size=5, zone='US-West', service_type='mongodb', version='2.4.6')
     >>> <objectrocket.instances.Instance at 0x10afeacd0>
 
     # To get one of your instances as an Instance object.
