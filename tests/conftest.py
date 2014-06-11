@@ -12,6 +12,7 @@ import datetime
 import pytest
 
 from objectrocket.client import Client
+from objectrocket.instances import Instance
 from objectrocket import constants
 
 
@@ -31,7 +32,7 @@ def mocked_request(request):
 
 
 @pytest.fixture
-def instance_document():
+def mongo_sharded_doc():
     now = datetime.datetime.utcnow()
     doc = {
         "api_endpoint": constants.API_URL_MAP['testing'],
@@ -45,3 +46,29 @@ def instance_document():
         "version": "2.4.6",
     }
     return doc
+
+
+@pytest.fixture
+def mongo_replica_doc():
+    now = datetime.datetime.utcnow()
+    doc = {
+        "api_endpoint": constants.API_URL_MAP['testing'],
+        "connect_string": "localhost:50002",
+        "created": datetime.datetime.strftime(now, constants.TIME_FORMAT),
+        "name": "testinstance",
+        "plan": 5,
+        "service": "mongodb",
+        "type": "mongodb_replica_set",
+        "version": "2.4.6",
+    }
+    return doc
+
+
+@pytest.fixture
+def mongo_sharded_instance(mongo_sharded_doc):
+    return Instance(instance_document=mongo_sharded_doc)
+
+
+@pytest.fixture
+def mongo_replica_instance(mongo_replica_doc):
+    return Instance(instance_document=mongo_replica_doc)
