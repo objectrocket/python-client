@@ -33,7 +33,7 @@ def mocked_request(request):
 @pytest.fixture
 def instance_document():
     now = datetime.datetime.utcnow()
-    instance_document = {
+    doc = {
         "api_endpoint": constants.API_URL_MAP['testing'],
         "connect_string": "localhost:50002",
         "created": datetime.datetime.strftime(now, constants.TIME_FORMAT),
@@ -44,4 +44,4 @@ def instance_document():
         "type": "mongodb_sharded",
         "version": "2.4.6",
     }
-    return instance_document
+    return doc
