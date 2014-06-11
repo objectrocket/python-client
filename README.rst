@@ -9,31 +9,31 @@ To use the bindings, simply do the following:
 
 .. code-block:: python
 
-    from objectrocket.client import Client
+    import objectrocket
     >>>
 
-    client = Client('<user_key>', '<pass_key>')
+    client = objectrocket.Client('<user_key>', '<pass_key>')
     >>>
-
-    # To get information on one of your instances.
-    client.instances.get('instance1')
-    >>> {u'data': {u'name': u'instance1', ...}}
-
-    # To get information on all of your instances.
-    client.instances.get()
-    >>> {u'data': [{u'name': u'instance1', ...}, ...]}
 
     # To create a new instance.
-    client.instances.create('instance2', 5, 'US-West')
-    >>> {u'data': {u'name': u'instance2', ...}}
+    client.instances.create('instance0', 5, 'US-West')
+    >>> <objectrocket.instances.Instance at 0x10afeacd0>
 
-    # To request instance compaction.
-    client.instances.compaction('instance2', request_compaction=True)
-    >>> {u'data': {u'state': u'requested', ...}}
+    # To get one of your instances as an Instance object.
+    client.instances.get('instance0')
+    >>> <objectrocket.instances.Instance at 0x1097a8390>
 
-    # To see instance compaction state.
-    client.instances.compaction('instance2')
+    # To get all of your instances in a list.
+    client.instances.get()
+    >>> [<objectrocket.instances.Instance at 0x1091f9990>]
+
+    # To see an instance's compaction state.
+    client.instances.compaction('instance0')
     >>> {u'data': {u'state': u'compressing', ...}}
+
+    # To request compaction for an instance.
+    client.instances.compaction('instance0', request_compaction=True)
+    >>> {u'data': {u'state': u'requested', ...}}
 
 
 Installation
