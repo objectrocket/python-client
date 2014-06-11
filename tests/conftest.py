@@ -26,6 +26,18 @@ class BaseClientTest(object):
         self.client = Client(user_key, pass_key)
 
 
+class BaseInstanceTest(object):
+    """Base class for testing instance objects."""
+
+    def pytest_generate_tests(self, metafunc):
+        """Generate tests for the different input types."""
+        if '_docs' in metafunc.fixturenames:
+            metafunc.parametrize('_docs', [
+                mongo_replica_doc(),
+                mongo_sharded_doc(),
+            ])
+
+
 @pytest.fixture
 def mocked_request(request):
     return

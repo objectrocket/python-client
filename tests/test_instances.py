@@ -9,7 +9,7 @@ class TestInstances(conftest.BaseClientTest):
     pass
 
 
-class TestInstance(object):
+class TestInstance(conftest.BaseInstanceTest):
     """Tests for objectrocket.instances.Instance objects with mongodb_sharded input."""
 
     def _pop_needed_key_and_assert(self, doc, needed_key):
@@ -24,44 +24,41 @@ class TestInstance(object):
     # -----------------
     # CONSTRUCTOR TESTS
     # -----------------
-    def test_constructor_passes_with_expected_document(self, mongo_sharded_doc):
-        inst = Instance(instance_document=mongo_sharded_doc)
+    def test_constructor_passes_with_expected_document(self, _docs):
+        inst = Instance(instance_document=_docs)
         assert isinstance(inst, Instance)
 
-    def test_constructor_fails_with_missing_api_endpoint(self, mongo_sharded_doc):
-        self._pop_needed_key_and_assert(mongo_sharded_doc, 'api_endpoint')
+    def test_constructor_fails_with_missing_api_endpoint(self, _docs):
+        self._pop_needed_key_and_assert(_docs, 'api_endpoint')
 
-    def test_constructor_fails_with_missing_connect_string(self, mongo_sharded_doc):
-        self._pop_needed_key_and_assert(mongo_sharded_doc, 'connect_string')
+    def test_constructor_fails_with_missing_connect_string(self, _docs):
+        self._pop_needed_key_and_assert(_docs, 'connect_string')
 
-    def test_constructor_fails_with_missing_created(self, mongo_sharded_doc):
-        self._pop_needed_key_and_assert(mongo_sharded_doc, 'created')
+    def test_constructor_fails_with_missing_created(self, _docs):
+        self._pop_needed_key_and_assert(_docs, 'created')
 
-    def test_constructor_fails_with_missing_name(self, mongo_sharded_doc):
-        self._pop_needed_key_and_assert(mongo_sharded_doc, 'name')
+    def test_constructor_fails_with_missing_name(self, _docs):
+        self._pop_needed_key_and_assert(_docs, 'name')
 
-    def test_constructor_fails_with_missing_plan(self, mongo_sharded_doc):
-        self._pop_needed_key_and_assert(mongo_sharded_doc, 'plan')
+    def test_constructor_fails_with_missing_plan(self, _docs):
+        self._pop_needed_key_and_assert(_docs, 'plan')
 
-    def test_constructor_passes_without_ssl_connect_string(self, mongo_sharded_doc):
-        mongo_sharded_doc.pop('ssl_connect_string')
-        inst = Instance(instance_document=mongo_sharded_doc)
+    def test_constructor_passes_without_ssl_connect_string(self, _docs):
+        _docs.pop('ssl_connect_string', None)
+        inst = Instance(instance_document=_docs)
         assert isinstance(inst, Instance)
 
-    def test_constructor_fails_with_missing_service(self, mongo_sharded_doc):
-        self._pop_needed_key_and_assert(mongo_sharded_doc, 'service')
+    def test_constructor_fails_with_missing_service(self, _docs):
+        self._pop_needed_key_and_assert(_docs, 'service')
 
-    def test_constructor_fails_with_missing_type(self, mongo_sharded_doc):
-        self._pop_needed_key_and_assert(mongo_sharded_doc, 'type')
+    def test_constructor_fails_with_missing_type(self, _docs):
+        self._pop_needed_key_and_assert(_docs, 'type')
 
-    def test_constructor_fails_with_missing_version(self, mongo_sharded_doc):
-        self._pop_needed_key_and_assert(mongo_sharded_doc, 'version')
+    def test_constructor_fails_with_missing_version(self, _docs):
+        self._pop_needed_key_and_assert(_docs, 'version')
 
     # -----------------------
     # INSTANCE PROPERTY TESTS
     # -----------------------
-    def test_api_endpoint_property(self, mongo_sharded_instance, mongo_sharded_doc):
-        assert mongo_sharded_instance.api_endpoint == mongo_sharded_doc['api_endpoint']
-
-    def test_connection_property(self, mongo_sharded_instance, mongo_sharded_doc):
-        assert mongo_sharded_instance.api_endpoint == mongo_sharded_doc['api_endpoint']
+    # def test_api_endpoint_property(self, instance, doc):
+    #     assert instance.api_endpoint == doc['api_endpoint']
