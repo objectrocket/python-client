@@ -2,46 +2,29 @@
 from objectrocket import instances
 
 
-# TODO(Anthony): api_url should default to our v2 api. Overwrite with a kwarg.
 class Client(object):
-    """Client."""
+    """The base client for ObjectRocket API Python interface.
 
-    def __init__(self, user_key, pass_key, api_url=None):
-        if (not isinstance(user_key, str) or
-                not isinstance(pass_key, str)):
+    :param str user_key: This is the user key to be used for API authentication.
+    :param str pass_key: This is the password key to be used for API authentication.
+    """
+
+    def __init__(self, user_key, pass_key):
+        if not isinstance(user_key, str) or not isinstance(pass_key, str):
             raise self.ClientException('All parameters should be instances of str.')
 
-        if api_url is not None:
-            # FIXME(Anthony): Probably shouldn't do this long term.
-            api_url = self._check_api_url(api_url)
-        else:
-            api_url = 'http://localhost:5050/v2/'  # Point this to the LB when deployed.
-
         # Client properties.
-        self._api_url = api_url
+        self._api_url = 'http://localhost:5050/v2/'  # Point this to the LB when deployed.
         self._user_key = user_key
         self._pass_key = pass_key
 
+        # Lazily-created properties.
         self._instances = None
 
     @property
     def api_url(self):
         """The base API URL the Client is using."""
         return self._api_url
-
-    def _check_api_url(self, api_url):
-        """Ensure that a custom url is somewhat usable."""
-        api_url = api_url.strip()
-        if not api_url.endswith('/'):
-            api_url += '/'
-
-        if not api_url.endswith('/v2/'):
-            api_url += 'v2/'
-
-        if not api_url.startswith(('http://', 'https://')):
-            api_url = 'https://' + api_url
-
-        return api_url
 
     @property
     def instances(self):

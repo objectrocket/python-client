@@ -1,11 +1,29 @@
 """Instances layer."""
 import datetime
 import json
+
 import requests
+import pymongo
 
-import bson
+from functools import wraps
 
+from objectrocket import constants
 from objectrocket.utils import Utils
+
+
+def return_instance_objects(func):
+    """Translate responses into :py:class:`objectrocket.instances.Instance` objects."""
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        response = func(*args, **kwargs)
+        if isinstance(response['data'], dict):
+            return Instance(response['data'])
+        elif isinstance(response['data'], list):
+            return [Instance(doc) for doc in response['data']]
+        else:
+            return response
+
+    return wrapped
 
 
 class Instances(object):
@@ -17,32 +35,23 @@ class Instances(object):
 
     def __init__(self, client_instance):
         self._client = client_instance
-        self._api_instances_url = self.client.api_url + 'instance/'
-
-    @property
-    def api_instances_url(self):
-        """The base URL for instance operations."""
-        return self._api_instances_url
-
-    @property
-    def client(self):
-        """The Client instance object."""
-        return self._client
+        self._api_instances_url = self._client.api_url + 'instance/'
 
     def compaction(self, instance_name, request_compaction=False):
         """Compaction."""
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
-        url = self.api_instances_url + instance_name + '/compaction/'
+        url = self._api_instances_url + instance_name + '/compaction/'
 
         if request_compaction:
-            response = requests.post(url, auth=(self.client.user_key, self.client.pass_key))
+            response = requests.post(url, auth=(self._client.user_key, self._client.pass_key))
         else:
-            response = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+            response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
 
         return response.json()
 
+    @return_instance_objects
     def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
         """Create an instance."""
         if not isinstance(name, str):
@@ -64,7 +73,7 @@ class Instances(object):
             raise self.InstancesException('Invalid value for "version". Must be one of %s.'
                                           % valid_versions)
 
-        url = self.api_instances_url
+        url = self._api_instances_url
         data = {
             'name': name,
             'size': size,
@@ -77,21 +86,22 @@ class Instances(object):
         data.pop('type')
 
         response = requests.post(url,
-                                 auth=(self.client.user_key, self.client.pass_key),
+                                 auth=(self._client.user_key, self._client.pass_key),
                                  data=json.dumps(data),
                                  headers={'Content-Type': 'application/json'})
         return response.json()
 
+    @return_instance_objects
     def get(self, instance_name=None):
         """Get details on one or all instances."""
         if instance_name is not None and not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
-        url = self.api_instances_url
+        url = self._api_instances_url
         if instance_name is not None:
             url += instance_name + '/'
 
-        response = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+        response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
         return response.json()
 
     def stepdown_window(self, instance_name):
@@ -99,9 +109,9 @@ class Instances(object):
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
-        url = self.api_instances_url + instance_name + '/stepdown/'
+        url = self._api_instances_url + instance_name + '/stepdown/'
 
-        response = requests.get(url, auth=(self.client.user_key, self.client.pass_key))
+        response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
         return response.json()
 
     def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
@@ -124,9 +134,10 @@ class Instances(object):
             datetime.datetime.strptime(start, Utils.TIME_FORMAT)
             datetime.datetime.strptime(end, Utils.TIME_FORMAT)
         except ValueError as ex:
-            raise self.InstancesException(str(ex))
+            raise self.InstancesException(str(ex) + 'Time strings should be of the following '
+                                                    'format: %s' % Utils.TIME_FORMAT)
 
-        url = self.api_instances_url + instance_name + '/stepdown/'
+        url = self._api_instances_url + instance_name + '/stepdown/'
 
         data = {
             'start': start,
@@ -137,7 +148,7 @@ class Instances(object):
         }
 
         response = requests.post(url,
-                                 auth=(self.client.user_key, self.client.pass_key),
+                                 auth=(self._client.user_key, self._client.pass_key),
                                  data=json.dumps(data),
                                  headers={'Content-Type': 'application/json'})
         return response.json()
@@ -155,18 +166,83 @@ class Instance(object):
     def __init__(self, instance_document):
         self.instance_document = instance_document
 
-        self.api_key = instance_document.get('api_key', None)
-        self.compression = instance_document.get('compression', {})
-        self.creation_date = instance_document.get('dtcreated', None)
-        self.id = instance_document.get('_id', None)
-        self.instance_name_prior = instance_document.get('instance_name_prior', None)
-        self.login = instance_document.get('login', None)
-        self.login_prior = instance_document.get('login_prior', None)
-        self.name = instance_document.get('name', None)
-        self.object_id = bson.objectid.ObjectId(self.id)
-        self.plan = int(instance_document.get('plan', 0))
-        self.port = int(instance_document.get('port', 0))
-        self.service = instance_document.get('instance_service', 'mongodb')
-        self.settings = instance_document.get('settings', {})
-        self.version = instance_document.get('mongo_version', None)
-        self.zone = instance_document.get('zone', None)
+        # Bind pseudo private attributes from instance_document.
+        self._api_endpoint = instance_document['api_endpoint']
+        self._connect_string = instance_document['connect_string']
+        self._created = instance_document['created']
+        self._name = instance_document['name']
+        self._plan = instance_document['plan']
+        self._service = instance_document['service']
+        self._ssl_connect_string = instance_document.get('ssl_connect_string')
+        self._type = instance_document['type']
+        self._version = instance_document['version']
+
+        # Lazily-created properties.
+        self._connection = None
+
+    @property
+    def api_endpoint(self):
+        """The optimal API endpoint for this instance."""
+        return self._api_endpoint
+
+    @property
+    def connection(self):
+        """A live connection to this instance."""
+        if self._connection is None:
+            self._connection = self._get_connection()
+        return self._connection
+
+    @property
+    def connect_string(self):
+        """This instance's connection string."""
+        return self._connect_string
+
+    @property
+    def created(self):
+        """The date this instance was created."""
+        return self._created
+
+    def _get_connection(self):
+        """Establish a live connection to the instance."""
+        if self.type == constants.MONGODB_SHARDED_INSTANCE:
+            host, port = self.connect_string.split(':')
+            port = int(port)
+            return pymongo.MongoClient(host=host, port=port)
+        elif self.type == constants.MONGODB_REPLICA_SET_INSTANCE:
+            replica_set_name, member_list = self.connect_string.split('/')
+            member_list = member_list.strip().strip(',')
+            return pymongo.MongoReplicaSetClient(hosts_or_uri=member_list)
+
+    @property
+    def name(self):
+        """This instance's name."""
+        return self._name
+
+    @property
+    def plan(self):
+        """This instance's plan."""
+        return self._plan
+
+    @property
+    def service(self):
+        """The service this instance provides."""
+        return self._service
+
+    @property
+    def ssl_connect_string(self):
+        """This instance's SSL connection string."""
+        return self._ssl_connect_string
+
+    def to_dict(self):
+        """Render this object as a dictionary."""
+        return self.instance_document
+
+    @property
+    def type(self):
+        """The type of service this instance provides."""
+        return self._type
+
+    @property
+    def version(self):
+        """The version of this instance's service."""
+        return self._version
