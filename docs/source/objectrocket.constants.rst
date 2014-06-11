@@ -1,7 +1,7 @@
-Utilities
+Constants
 =========
 
-.. automodule:: objectrocket.utils
+.. automodule:: objectrocket.constants
     :members:
     :undoc-members:
     :show-inheritance:

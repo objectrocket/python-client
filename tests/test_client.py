@@ -27,6 +27,11 @@ class TestClient(object):
         client = Client(user_key, pass_key)
         assert client.api_url == 'http://localhost:5050/v2/'
 
+    def test_client_has_correct_testing_api_url(self):
+        user_key, pass_key = 'test_user_key', 'test_pass_key'
+        client = Client(user_key, pass_key, api_url='testing')
+        assert client.api_url == 'http://localhost:5050/v2/'
+
     def test_client_has_proper_user_and_pass_key_properties(self):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key)

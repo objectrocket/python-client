@@ -1,5 +1,6 @@
 """Client layer."""
 from objectrocket import instances
+from objectrocket import constants
 
 
 class Client(object):
@@ -9,12 +10,12 @@ class Client(object):
     :param str pass_key: This is the password key to be used for API authentication.
     """
 
-    def __init__(self, user_key, pass_key):
+    def __init__(self, user_key, pass_key, api_url='default'):
         if not isinstance(user_key, str) or not isinstance(pass_key, str):
             raise self.ClientException('All parameters should be instances of str.')
 
         # Client properties.
-        self._api_url = 'http://localhost:5050/v2/'  # Point this to the LB when deployed.
+        self._api_url = constants.API_URL_MAP[api_url]
         self._user_key = user_key
         self._pass_key = pass_key
 

@@ -8,7 +8,6 @@ import pymongo
 from functools import wraps
 
 from objectrocket import constants
-from objectrocket.utils import Utils
 
 
 def return_instance_objects(func):
@@ -119,9 +118,9 @@ class Instances(object):
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
         if not isinstance(start, str):
-            raise self.InstancesException('Parameter "start" must be an instance of datetime.')
+            raise self.InstancesException('Parameter "start" must be an instance of str.')
         if not isinstance(end, str):
-            raise self.InstancesException('Parameter "end" must be an instance of datetime.')
+            raise self.InstancesException('Parameter "end" must be an instance of str.')
         if not isinstance(enabled, bool):
             raise self.InstancesException('Parameter "enabled" must be a boolean.')
         if not isinstance(scheduled, bool):
@@ -131,11 +130,11 @@ class Instances(object):
 
         try:
             # Ensure that time strings can be parsed properly.
-            datetime.datetime.strptime(start, Utils.TIME_FORMAT)
-            datetime.datetime.strptime(end, Utils.TIME_FORMAT)
+            datetime.datetime.strptime(start, constants.TIME_FORMAT)
+            datetime.datetime.strptime(end, constants.TIME_FORMAT)
         except ValueError as ex:
             raise self.InstancesException(str(ex) + 'Time strings should be of the following '
-                                                    'format: %s' % Utils.TIME_FORMAT)
+                                                    'format: %s' % constants.TIME_FORMAT)
 
         url = self._api_instances_url + instance_name + '/stepdown/'
 

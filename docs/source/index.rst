@@ -5,8 +5,8 @@ ObjectRocket Python Client
     :maxdepth: 2
 
     objectrocket.client
+    objectrocket.constants
     objectrocket.instances
-    objectrocket.utils
 
 .. automodule:: objectrocket
     :members:
