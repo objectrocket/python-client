@@ -37,6 +37,12 @@ class BaseInstanceTest(object):
                 mongo_sharded_doc(),
             ])
 
+        if '_instances_and_docs' in metafunc.fixturenames:
+            metafunc.parametrize('_instances_and_docs', [
+                (mongo_replica_instance(mongo_replica_doc()), mongo_replica_doc()),
+                (mongo_sharded_instance(mongo_sharded_doc()), mongo_sharded_doc()),
+            ])
+
 
 @pytest.fixture
 def mocked_request(request):
@@ -65,10 +71,10 @@ def mongo_replica_doc():
     now = datetime.datetime.utcnow()
     doc = {
         "api_endpoint": constants.API_URL_MAP['testing'],
-        "connect_string": "localhost:50002",
+        "connect_string": "REPLSET_60000/localhost:60000,localhost:60001,localhost:60002",
         "created": datetime.datetime.strftime(now, constants.TIME_FORMAT),
         "name": "testinstance",
-        "plan": 5,
+        "plan": 1,
         "service": "mongodb",
         "type": "mongodb_replica_set",
         "version": "2.4.6",
