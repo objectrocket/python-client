@@ -11,9 +11,6 @@ class Client(object):
     """
 
     def __init__(self, user_key, pass_key, api_url='default'):
-        if not isinstance(user_key, str) or not isinstance(pass_key, str):
-            raise self.ClientException('All parameters should be instances of str.')
-
         # Client properties.
         self._api_url = constants.API_URL_MAP[api_url]
         self._user_key = user_key

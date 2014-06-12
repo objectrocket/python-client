@@ -211,7 +211,7 @@ class TestInstance(conftest.BaseInstanceTest):
         assert instance.api_endpoint == doc['api_endpoint']
 
     def test_client_property_with_valid_client(self, _instances_and_docs):
-        instance, doc = _instances_and_docs[0], _instances_and_docs[1]
+        instance = _instances_and_docs[0]
         assert isinstance(instance.client, Client)
 
     def test_mongo_sharded_connection_property(self, mongo_sharded_instance, mongo_sharded_doc):

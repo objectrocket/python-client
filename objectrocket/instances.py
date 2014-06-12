@@ -26,9 +26,6 @@ class Instances(object):
         :param str instance_name: The name of the instance to operate upon.
         :param bool request_compaction: A boolean indicating whether or not to request compaction.
         """
-        if not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
-
         url = self._api_instances_url + instance_name + '/compaction/'
 
         if request_compaction:
@@ -47,15 +44,6 @@ class Instances(object):
         :param str service_type: The type of service that the new instance is to provide.
         :param str version: The version of the service the new instance is to provide.
         """
-        if not isinstance(name, str):
-            raise self.InstancesException('Parameter "name" must be an instance of str.')
-
-        if not isinstance(size, int):
-            raise self.InstancesException('Parameter "size" must be an instance of int.')
-
-        if not isinstance(zone, str):
-            raise self.InstancesException('Parameter "zone" must be an instance of str.')
-
         valid_service_types = ('mongodb', )
         if service_type not in valid_service_types:
             raise self.InstancesException('Invalid value for "service_type". Must be one of "%s".'
@@ -90,9 +78,6 @@ class Instances(object):
         :param str instance_name: The name of the instance to retrieve. If ``None``, then retrieve
             a list of all instances which you have access to.
         """
-        if instance_name is not None and not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
-
         url = self._api_instances_url
         if instance_name is not None:
             url += instance_name + '/'
@@ -123,9 +108,6 @@ class Instances(object):
         :param bool add_shard: A boolean indicating whether to add a new shard to the specified
             instance.
         """
-        if not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
-
         url = self._api_instances_url + instance_name + '/shard/'
         if add_shard:
             response = requests.post(url, auth=(self._client.user_key, self._client.pass_key))
@@ -139,9 +121,6 @@ class Instances(object):
 
         :param str instance_name: The name of the instance to operate upon.
         """
-        if not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
-
         url = self._api_instances_url + instance_name + '/stepdown/'
 
         response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
@@ -161,19 +140,6 @@ class Instances(object):
         :param bool scheduled: A boolean indicating whether or not to schedule stepdown.
         :param bool weekly: A boolean indicating whether or not to schedule compaction weekly.
         """
-        if not isinstance(instance_name, str):
-            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
-        if not isinstance(start, str):
-            raise self.InstancesException('Parameter "start" must be an instance of str.')
-        if not isinstance(end, str):
-            raise self.InstancesException('Parameter "end" must be an instance of str.')
-        if not isinstance(enabled, bool):
-            raise self.InstancesException('Parameter "enabled" must be a boolean.')
-        if not isinstance(scheduled, bool):
-            raise self.InstancesException('Parameter "scheduled" must be a boolean.')
-        if not isinstance(weekly, bool):
-            raise self.InstancesException('Parameter "weekly" must be a boolean.')
-
         try:
             # Ensure that time strings can be parsed properly.
             datetime.datetime.strptime(start, constants.TIME_FORMAT)
@@ -311,8 +277,9 @@ class Instance(object):
 
         :param bool request_compaction: A boolean indicating whether or not to request compaction.
         """
-        self.client.instances.compaction(instance_name=self.name,
-                                         request_compaction=request_compaction)
+        response = self.client.instances.compaction(instance_name=self.name,
+                                                    request_compaction=request_compaction)
+        return response
 
     def stepdown_window(self, instance_name):
         pass
