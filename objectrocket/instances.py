@@ -116,6 +116,24 @@ class Instances(object):
             raise self.InstancesException('response.json()["data"] must be a '
                                           'dict or list of dicts.')
 
+    def shards(self, instance_name, add_shard=False):
+        """Get a list of shards belonging to the given instance.
+
+        :param str instance_name: The name of the instance to operate upon.
+        :param bool add_shard: A boolean indicating whether to add a new shard to the specified
+            instance.
+        """
+        if not isinstance(instance_name, str):
+            raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
+
+        url = self._api_instances_url + instance_name + '/shard/'
+        if add_shard:
+            response = requests.post(url, auth=(self._client.user_key, self._client.pass_key))
+        else:
+            response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
+
+        return response.json()
+
     def stepdown_window(self, instance_name):
         """Get information on the instance's stepdown window.
 

@@ -152,12 +152,6 @@ class TestInstances(conftest.BaseClientTest):
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
 
-    def test_instance_stepdown_window_convenience_call(self, requestsm):
-        pass
-
-    def test_instance_set_stepdown_window_convenience_call(self, requestsm):
-        pass
-
 
 class TestInstance(conftest.BaseInstanceTest):
     """Tests for objectrocket.instances.Instance objects with mongodb_sharded input."""
