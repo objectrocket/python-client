@@ -1,4 +1,5 @@
 """Tests for the objectrocket.instances module."""
+import json
 import pytest
 import mock
 
@@ -16,6 +17,18 @@ class TestInstances(conftest.BaseClientTest):
         mocked = mock.patch('objectrocket.instances.requests', autospec=True)
         request.addfinalizer(mocked.stop)
         return mocked.start()
+
+    @pytest.fixture
+    def create_call_data(self):
+        """Return a dict having default data for calling Instnaces.create."""
+        data = {
+            'name': 'instance0',
+            'size': 5,
+            'zone': 'US-West',
+            'service_type': 'mongodb',
+            'version': '2.4.6',
+        }
+        return data
 
     def test_instances_client(self):
         assert isinstance(self.client.instances._client, Client)
@@ -48,11 +61,56 @@ class TestInstances(conftest.BaseClientTest):
 
         assert exinfo.value.args[0] == 'Parameter "instance_name" must be an instance of str.'
 
-    # ----------------
+    # -------------------
     # CREATE METHOD TESTS
-    # ----------------
-    def test_create_calls_proper_end_point(self, requestsm):
-        pass
+    # -------------------
+    def test_create_calls_proper_end_point(self, requestsm, create_call_data):
+        requestsm.post.return_value = self._response_object()
+        self.client.instances.create(**create_call_data)
+        create_call_data.pop('service_type')
+
+        expected_endpoint = self.client.api_url + 'instance/'
+        requestsm.post.assert_called_once_with(expected_endpoint,
+                                               auth=(self.client.user_key, self.client.pass_key),
+                                               data=json.dumps(create_call_data),
+                                               headers={'Content-Type': 'application/json'})
+
+    def test_create_fails_with_bad_name_type(self, requestsm, create_call_data):
+        create_call_data['name'] = 1
+        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+            self.client.instances.create(**create_call_data)
+
+        assert exinfo.value.args[0] == 'Parameter "name" must be an instance of str.'
+
+    def test_create_fails_with_bad_size_type(self, requestsm, create_call_data):
+        create_call_data['size'] = '5'
+        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+            self.client.instances.create(**create_call_data)
+
+        assert exinfo.value.args[0] == 'Parameter "size" must be an instance of int.'
+
+    def test_create_fails_with_bad_zone_type(self, requestsm, create_call_data):
+        create_call_data['zone'] = 1
+        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+            self.client.instances.create(**create_call_data)
+
+        assert exinfo.value.args[0] == 'Parameter "zone" must be an instance of str.'
+
+    def test_create_fails_with_bad_service_type_value(self, requestsm, create_call_data):
+        create_call_data['service_type'] = 'not_a_valid_service'
+        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+            self.client.instances.create(**create_call_data)
+
+        assert exinfo.value.args[0] == ('Invalid value for "service_type". '
+                                        'Must be one of "mongodb".')
+
+    def test_create_fails_with_bad_version_value(self, requestsm, create_call_data):
+        create_call_data['version'] = 'not_a_valid_version'
+        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+            self.client.instances.create(**create_call_data)
+
+        assert exinfo.value.args[0] == ('Invalid value for "version". '
+                                        'Must be one of "2.4.6".')
 
 
 class TestInstance(conftest.BaseInstanceTest):
