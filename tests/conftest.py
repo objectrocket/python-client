@@ -9,6 +9,7 @@ response. This will also provide to harden the API interface.
 """
 import datetime
 
+import mock
 import pytest
 
 from objectrocket.client import Client
@@ -25,12 +26,24 @@ class BaseClientTest(object):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         self.client = Client(user_key, pass_key)
 
+    def _response_object(self, data=[]):
+        """Return an object with a single method ``json``.
+
+        :param data: The value of the key 'data' in the returned json.
+        """
+
+        class response(object):
+            def json(self):
+                return {'data': data}
+
+        return response()
+
 
 class BaseInstanceTest(object):
     """Base class for testing instance objects."""
 
     def pytest_generate_tests(self, metafunc):
-        """Generate tests for the different input types."""
+        """Generate tests for the different instance types."""
         if '_docs' in metafunc.fixturenames:
             metafunc.parametrize('_docs', [
                 mongo_replica_doc(),
@@ -44,9 +57,23 @@ class BaseInstanceTest(object):
             ])
 
 
+# -------------------------
+# INSTANCE RELATED FIXTURES
+# -------------------------
 @pytest.fixture
-def mocked_request(request):
-    return
+def mongo_replica_doc():
+    now = datetime.datetime.utcnow()
+    doc = {
+        "api_endpoint": constants.API_URL_MAP['testing'],
+        "connect_string": "REPLSET_60000/localhost:60000,localhost:60001,localhost:60002",
+        "created": datetime.datetime.strftime(now, constants.TIME_FORMAT),
+        "name": "testinstance",
+        "plan": 1,
+        "service": "mongodb",
+        "type": "mongodb_replica_set",
+        "version": "2.4.6",
+    }
+    return doc
 
 
 @pytest.fixture
@@ -67,26 +94,10 @@ def mongo_sharded_doc():
 
 
 @pytest.fixture
-def mongo_replica_doc():
-    now = datetime.datetime.utcnow()
-    doc = {
-        "api_endpoint": constants.API_URL_MAP['testing'],
-        "connect_string": "REPLSET_60000/localhost:60000,localhost:60001,localhost:60002",
-        "created": datetime.datetime.strftime(now, constants.TIME_FORMAT),
-        "name": "testinstance",
-        "plan": 1,
-        "service": "mongodb",
-        "type": "mongodb_replica_set",
-        "version": "2.4.6",
-    }
-    return doc
+def mongo_replica_instance(mongo_replica_doc):
+    return Instance(instance_document=mongo_replica_doc)
 
 
 @pytest.fixture
 def mongo_sharded_instance(mongo_sharded_doc):
     return Instance(instance_document=mongo_sharded_doc)
-
-
-@pytest.fixture
-def mongo_replica_instance(mongo_replica_doc):
-    return Instance(instance_document=mongo_replica_doc)

@@ -3,12 +3,50 @@ import pytest
 import mock
 
 from tests import conftest
-from objectrocket.instances import Instances, Instance
+from objectrocket.client import Client
+from objectrocket.instances import Instance
 
 
-# TODO(Anthony): Write tests for this guy.
 class TestInstances(conftest.BaseClientTest):
-    pass
+    """Tests for the objectrocket.instances.Instances operations layer."""
+
+    @pytest.fixture
+    def requestsm(self, request):
+        """Return a MagicMock which patches objectrocket.instances.requests."""
+        mocked = mock.patch('objectrocket.instances.requests', autospec=True)
+        request.addfinalizer(mocked.stop)
+        return mocked.start()
+
+    def test_instances_client(self):
+        assert isinstance(self.client.instances._client, Client)
+
+    def test_instances_api_instnaces_url(self):
+        assert self.client.instances._api_instances_url == self.client.api_url + 'instance/'
+
+    # ----------------
+    # GET METHOD TESTS
+    # ----------------
+    def test_get_with_no_args_proper_endpoint_called(self, requestsm):
+        requestsm.get.return_value = self._response_object()
+        self.client.instances.get()
+
+        expected_endpoint = self.client.api_url + 'instance/'
+        requestsm.get.assert_called_once_with(expected_endpoint,
+                                              auth=(self.client.user_key, self.client.pass_key))
+
+    def test_get_with_args_proper_endpoint_called(self, requestsm):
+        requestsm.get.return_value = self._response_object()
+        self.client.instances.get('instance0')
+
+        expected_endpoint = self.client.api_url + 'instance/instance0/'
+        requestsm.get.assert_called_once_with(expected_endpoint,
+                                              auth=(self.client.user_key, self.client.pass_key))
+
+    def test_get_fails_with_bad_arg_type(self, requestsm):
+        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+            self.client.instances.get(instance_name=[])
+
+        assert exinfo.value.args[0] == 'Parameter "instance_name" must be an instance of str.'
 
 
 class TestInstance(conftest.BaseInstanceTest):
