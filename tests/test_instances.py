@@ -26,7 +26,7 @@ class TestInstances(conftest.BaseClientTest):
     # ----------------
     # GET METHOD TESTS
     # ----------------
-    def test_get_with_no_args_proper_endpoint_called(self, requestsm):
+    def test_get_calls_proper_endpoint_with_no_args(self, requestsm):
         requestsm.get.return_value = self._response_object()
         self.client.instances.get()
 
@@ -34,7 +34,7 @@ class TestInstances(conftest.BaseClientTest):
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
 
-    def test_get_with_args_proper_endpoint_called(self, requestsm):
+    def test_get_calls_proper_endpoint_with_args(self, requestsm):
         requestsm.get.return_value = self._response_object()
         self.client.instances.get('instance0')
 
@@ -48,6 +48,12 @@ class TestInstances(conftest.BaseClientTest):
 
         assert exinfo.value.args[0] == 'Parameter "instance_name" must be an instance of str.'
 
+    # ----------------
+    # CREATE METHOD TESTS
+    # ----------------
+    def test_create_calls_proper_end_point(self, requestsm):
+        pass
+
 
 class TestInstance(conftest.BaseInstanceTest):
     """Tests for objectrocket.instances.Instance objects with mongodb_sharded input."""
@@ -56,7 +62,7 @@ class TestInstance(conftest.BaseInstanceTest):
         """Pop needed_key from doc and assert KeyError during constructor run."""
         doc.pop(needed_key)
         with pytest.raises(KeyError) as exinfo:
-            Instance(instance_document=doc)
+            Instance(instance_document=doc, client=Client('test_user_key', 'test_pass_key'))
 
         assert exinfo.value.__class__ == KeyError
         assert exinfo.value.args[0] == needed_key
@@ -65,7 +71,9 @@ class TestInstance(conftest.BaseInstanceTest):
     # CONSTRUCTOR TESTS
     # -----------------
     def test_constructor_passes_with_expected_document(self, _docs):
-        inst = Instance(instance_document=_docs)
+        user_key, pass_key = 'test_user_key', 'test_pass_key'
+        inst = Instance(instance_document=_docs,
+                        client=Client(user_key=user_key, pass_key=pass_key))
         assert isinstance(inst, Instance)
 
     def test_constructor_fails_with_missing_api_endpoint(self, _docs):
@@ -85,7 +93,7 @@ class TestInstance(conftest.BaseInstanceTest):
 
     def test_constructor_passes_without_ssl_connect_string(self, _docs):
         _docs.pop('ssl_connect_string', None)
-        inst = Instance(instance_document=_docs)
+        inst = Instance(instance_document=_docs, client=Client('test_user_key', 'test_pass_key'))
         assert isinstance(inst, Instance)
 
     def test_constructor_fails_with_missing_service(self, _docs):
@@ -103,6 +111,10 @@ class TestInstance(conftest.BaseInstanceTest):
     def test_api_endpoint_property(self, _instances_and_docs):
         instance, doc = _instances_and_docs[0], _instances_and_docs[1]
         assert instance.api_endpoint == doc['api_endpoint']
+
+    def test_client_property_with_valid_client(self, _instances_and_docs):
+        instance, doc = _instances_and_docs[0], _instances_and_docs[1]
+        assert isinstance(instance.client, Client)
 
     def test_mongo_sharded_connection_property(self, mongo_sharded_instance, mongo_sharded_doc):
         with mock.patch('pymongo.MongoClient', return_value=None) as client:

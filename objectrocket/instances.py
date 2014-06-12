@@ -1,29 +1,12 @@
 """Instances layer."""
 import datetime
 import json
+import sys
 
 import requests
 import pymongo
 
-from functools import wraps
-
 from objectrocket import constants
-
-
-def return_instance_objects(func):
-    """Translate responses into :py:class:`objectrocket.instances.Instance` objects."""
-    @wraps(func)
-    def wrapped(*args, **kwargs):
-        response = func(*args, **kwargs)
-        data = response['data']
-        if isinstance(data, dict):
-            return Instance(data)
-        elif isinstance(data, list):
-            return [Instance(doc) for doc in data]
-        else:
-            return response
-
-    return wrapped
 
 
 class Instances(object):
@@ -38,7 +21,11 @@ class Instances(object):
         self._api_instances_url = self._client.api_url + 'instance/'
 
     def compaction(self, instance_name, request_compaction=False):
-        """Compaction."""
+        """Retrieve a report on, or request compaction for the given instance.
+
+        :param str instance_name: The name of the instance to operate upon.
+        :param bool request_compaction: A boolean indicating whether or not to request compaction.
+        """
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
@@ -51,9 +38,15 @@ class Instances(object):
 
         return response.json()
 
-    @return_instance_objects
     def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
-        """Create an instance."""
+        """Create an instance.
+
+        :param str name: The name to give to the new instance.
+        :param int size: The size in gigabytes of the new instance.
+        :param str zone: The zone that the new instance is to exist in.
+        :param str service_type: The type of service that the new instance is to provide.
+        :param str version: The version of the service the new instance is to provide.
+        """
         if not isinstance(name, str):
             raise self.InstancesException('Parameter "name" must be an instance of str.')
 
@@ -89,11 +82,14 @@ class Instances(object):
                                  auth=(self._client.user_key, self._client.pass_key),
                                  data=json.dumps(data),
                                  headers={'Content-Type': 'application/json'})
-        return response.json()
+        return self._return_instance_objects(response)
 
-    @return_instance_objects
     def get(self, instance_name=None):
-        """Get details on one or all instances."""
+        """Get details on one or all instances.
+
+        :param str instance_name: The name of the instance to retrieve. If ``None``, then retrieve
+            a list of all instances which you have access to.
+        """
         if instance_name is not None and not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
@@ -102,10 +98,29 @@ class Instances(object):
             url += instance_name + '/'
 
         response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
-        return response.json()
+        return self._return_instance_objects(response)
+
+    def _return_instance_objects(self, response):
+        """Translate response data into :py:class:`objectrocket.instances.Instance` objects.
+
+        :param object response: An object having a ``json`` method which returns a dict with a key
+            'data'.
+        """
+        _json = response.json()
+        data = _json['data']
+        if isinstance(data, dict):
+            return Instance(instance_document=data, client=self._client)
+        elif isinstance(data, list):
+            return [Instance(instance_document=doc, client=self._client) for doc in data]
+        else:
+            raise self.InstancesException('response.json()["data"] must be a '
+                                          'dict or list of dicts.')
 
     def stepdown_window(self, instance_name):
-        """Get information on the instance's stepdown window."""
+        """Get information on the instance's stepdown window.
+
+        :param str instance_name: The name of the instance to operate upon.
+        """
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
 
@@ -115,7 +130,19 @@ class Instances(object):
         return response.json()
 
     def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
-        """Use UTC date times."""
+        """Set the stepdown window of the given instance.
+
+        Date times are assumed to be UTC ... so use UTC date times.
+
+        :param str instance_name: The name of the instance to operate upon.
+        :param str start: The start time in string format. Should be of the form:
+            :py:const:`objectrocket.constants.TIME_FORMAT`.
+        :param str end: The end time in string format. Should be of the form:
+            :py:const:`objectrocket.constants.TIME_FORMAT`.
+        :param bool enabled: A boolean indicating whether or not stepdown is to be enabled.
+        :param bool scheduled: A boolean indicating whether or not to schedule stepdown.
+        :param bool weekly: A boolean indicating whether or not to schedule compaction weekly.
+        """
         if not isinstance(instance_name, str):
             raise self.InstancesException('Parameter "instance_name" must be an instance of str.')
         if not isinstance(start, str):
@@ -161,9 +188,11 @@ class Instance(object):
     """The base class of an ObjectRocket service.
 
     :param dict instance_document: A dictionary representing the instance object.
+    :param object client: An instance of :py:class:`objectrocket.client.Client`.
     """
 
-    def __init__(self, instance_document):
+    def __init__(self, instance_document, client):
+        self._client = client
         self.instance_document = instance_document
 
         # Bind pseudo private attributes from instance_document.
@@ -246,3 +275,29 @@ class Instance(object):
     def version(self):
         """The version of this instance's service."""
         return self._version
+
+    # -----------------------
+    # BOUND CLIENT OPERATIONS
+    # -----------------------
+    @property
+    def client(self):
+        """An instance of the objectrocket.client.Client."""
+        if 'objectorcket.client' not in sys.modules:
+            from objectrocket import client
+        if not isinstance(self._client, client.Client):
+            return None
+        return self._client
+
+    def compaction(self, request_compaction=False):
+        """Retrieve a report on, or request compaction for this instance.
+
+        :param bool request_compaction: A boolean indicating whether or not to request compaction.
+        """
+        self.client.instances.compaction(instance_name=self.name,
+                                         request_compaction=request_compaction)
+
+    def stepdown_window(self, instance_name):
+        pass
+
+    def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
+        pass

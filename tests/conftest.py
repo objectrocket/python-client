@@ -9,7 +9,6 @@ response. This will also provide to harden the API interface.
 """
 import datetime
 
-import mock
 import pytest
 
 from objectrocket.client import Client
@@ -95,9 +94,11 @@ def mongo_sharded_doc():
 
 @pytest.fixture
 def mongo_replica_instance(mongo_replica_doc):
-    return Instance(instance_document=mongo_replica_doc)
+    return Instance(instance_document=mongo_replica_doc,
+                    client=Client('test_user_key', 'test_pass_key'))
 
 
 @pytest.fixture
 def mongo_sharded_instance(mongo_sharded_doc):
-    return Instance(instance_document=mongo_sharded_doc)
+    return Instance(instance_document=mongo_sharded_doc,
+                    client=Client('test_user_key', 'test_pass_key'))

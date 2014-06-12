@@ -55,8 +55,12 @@ Before you push your code, run ``tox`` from the top level directory. If errors
 are reported, fix them. If a PEP8 issue is reported, and you do not believe
 that it is accurate, place ``# noqa`` at the end of the line.
 
-Building a Wheel
-^^^^^^^^^^^^^^^^
+Coverage Report
+^^^^^^^^^^^^^^^
+To receive a test coverage report, run ``tox -e coverage`` from the top level directory.
+
+Building the Client
+^^^^^^^^^^^^^^^^^^^
 To build the client, invoke ``tox -e build`` from the top level directory.
 Your artifact will appear in the ``dist`` directory, and will look
 something like ``objectrocket-<version>-py27-<abi>-<platform>.whl``.

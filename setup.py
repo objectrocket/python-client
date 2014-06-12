@@ -11,15 +11,13 @@ with open("requirements.txt") as f:
     requires = f.read()
 
 setup(
-    author='ObjectRocket engineering team.',
-    author_email='Engineering@ObjectRocket.com',  # TODO(Anthony): Make this email.
-    description='ObjectRocket Python client.',
+    author='ObjectRocket Engineering Team',
+    author_email='Anthony.Dodd@ObjectRocket.com',  # TODO(Anthony): Make this email.
+    description='ObjectRocket Python Client',
     include_package_data=True,
     install_requires=requires,
     long_description=readme,
     name='objectrocket',
-    # Gather any data files.
-    # package_data={'': ['datafiles/*']},
     packages=find_packages(exclude=['tests*']),
     version=objectrocket.__version__,
     zip_safe=False,

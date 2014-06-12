@@ -1,7 +1,13 @@
+# Python ignores.
 *.egg-info
 *.pyc
+
+# Sublime ignores.
 *.sublime-project
 *.sublime-workspace
+
+# Build ignores.
 .tox
+.coverage
 build
 dist
