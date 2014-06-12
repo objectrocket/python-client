@@ -6,6 +6,7 @@ from tests import conftest
 from objectrocket.instances import Instances, Instance
 
 
+# TODO(Anthony): Write tests for this guy.
 class TestInstances(conftest.BaseClientTest):
     pass
 

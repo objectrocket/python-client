@@ -15,10 +15,11 @@ def return_instance_objects(func):
     @wraps(func)
     def wrapped(*args, **kwargs):
         response = func(*args, **kwargs)
-        if isinstance(response['data'], dict):
-            return Instance(response['data'])
-        elif isinstance(response['data'], list):
-            return [Instance(doc) for doc in response['data']]
+        data = response['data']
+        if isinstance(data, dict):
+            return Instance(data)
+        elif isinstance(data, list):
+            return [Instance(doc) for doc in data]
         else:
             return response
 
