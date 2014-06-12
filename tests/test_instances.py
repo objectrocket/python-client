@@ -112,6 +112,52 @@ class TestInstances(conftest.BaseClientTest):
         assert exinfo.value.args[0] == ('Invalid value for "version". '
                                         'Must be one of "2.4.6".')
 
+    # ----------------
+    # COMPACTION TESTS
+    # ----------------
+    def test_compaction_calls_proper_end_point_no_request_compaction(self, requestsm):
+        requestsm.get.return_value = self._response_object()
+        instance_name = 'instance0'
+        self.client.instances.compaction(instance_name=instance_name, request_compaction=False)
+
+        expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/compaction/'
+        requestsm.get.assert_called_once_with(expected_endpoint,
+                                              auth=(self.client.user_key, self.client.pass_key))
+
+    def test_compaction_calls_proper_end_point_yes_request_compaction(self, requestsm):
+        requestsm.post.return_value = self._response_object()
+        instance_name = 'instance0'
+        self.client.instances.compaction(instance_name=instance_name, request_compaction=True)
+
+        expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/compaction/'
+        requestsm.post.assert_called_once_with(expected_endpoint,
+                                               auth=(self.client.user_key, self.client.pass_key))
+
+    def test_compaction_fails_with_bad_instance_name_type(self, requestsm):
+        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+            instance_name = 1
+            self.client.instances.compaction(instance_name=instance_name)
+
+        assert exinfo.value.args[0] == 'Parameter "instance_name" must be an instance of str.'
+
+    # ------------------------
+    # CONVENIENCE METHOD TESTS
+    # ------------------------
+    def test_instance_compaction_convenience_call(self, requestsm, mongo_sharded_instance):
+        requestsm.get.return_value = self._response_object()
+        mongo_sharded_instance.compaction()
+
+        expected_endpoint = (self.client.api_url + 'instance/' +
+                             mongo_sharded_instance.name + '/compaction/')
+        requestsm.get.assert_called_once_with(expected_endpoint,
+                                              auth=(self.client.user_key, self.client.pass_key))
+
+    def test_instance_stepdown_window_convenience_call(self, requestsm):
+        pass
+
+    def test_instance_set_stepdown_window_convenience_call(self, requestsm):
+        pass
+
 
 class TestInstance(conftest.BaseInstanceTest):
     """Tests for objectrocket.instances.Instance objects with mongodb_sharded input."""

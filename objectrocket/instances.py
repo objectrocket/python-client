@@ -276,9 +276,9 @@ class Instance(object):
         """The version of this instance's service."""
         return self._version
 
-    # -----------------------
-    # BOUND CLIENT OPERATIONS
-    # -----------------------
+    # -------------------
+    # CONVENIENCE METHODS
+    # -------------------
     @property
     def client(self):
         """An instance of the objectrocket.client.Client."""
