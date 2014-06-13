@@ -1,12 +1,14 @@
 ObjectRocket Python Client
 ==========================
+Welcome to the ObjectRocket Python Client's documentation. This client is designed to interface
+with the ObjectRocket APIv2.
 
 .. toctree::
     :maxdepth: 2
 
-    objectrocket.client
-    objectrocket.constants
-    objectrocket.instances
+    Installation
+    Tutorial
+    API
 
 .. automodule:: objectrocket
     :members:
