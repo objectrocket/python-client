@@ -281,6 +281,14 @@ class Instance(object):
                                                     request_compaction=request_compaction)
         return response
 
+    def shards(self, add_shard=False):
+        """Get a list of shards belonging to this instance.
+
+        :param bool add_shard: A boolean indicating whether to add a new shard to the specified
+            instance.
+        """
+        self.client.instances.shards(instance_name=self.name, add_shard=add_shard)
+
     def stepdown_window(self, instance_name):
         pass
 

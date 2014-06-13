@@ -88,7 +88,7 @@ class TestInstances(conftest.BaseClientTest):
     # ----------------
     # COMPACTION TESTS
     # ----------------
-    def test_compaction_calls_proper_end_point_no_request_compaction(self, requestsm):
+    def test_compaction_calls_proper_end_point_request_compaction_false(self, requestsm):
         requestsm.get.return_value = self._response_object()
         instance_name = 'instance0'
         self.client.instances.compaction(instance_name=instance_name, request_compaction=False)
@@ -97,7 +97,7 @@ class TestInstances(conftest.BaseClientTest):
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
 
-    def test_compaction_calls_proper_end_point_yes_request_compaction(self, requestsm):
+    def test_compaction_calls_proper_end_point_request_compaction_true(self, requestsm):
         requestsm.post.return_value = self._response_object()
         instance_name = 'instance0'
         self.client.instances.compaction(instance_name=instance_name, request_compaction=True)
@@ -130,7 +130,8 @@ class TestInstances(conftest.BaseClientTest):
     # ------------------------
     # CONVENIENCE METHOD TESTS
     # ------------------------
-    def test_instance_compaction_convenience_call(self, requestsm, mongo_sharded_instance):
+    def test_instance_compaction_convenience_call_request_compaction_true(self, requestsm,
+                                                                          mongo_sharded_instance):
         requestsm.get.return_value = self._response_object()
         mongo_sharded_instance.compaction()
 
@@ -138,6 +139,36 @@ class TestInstances(conftest.BaseClientTest):
                              mongo_sharded_instance.name + '/compaction/')
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
+
+    def test_instance_compaction_convenience_call_request_compaction_false(self, requestsm,
+                                                                           mongo_sharded_instance):
+        requestsm.post.return_value = self._response_object()
+        mongo_sharded_instance.compaction(request_compaction=True)
+
+        expected_endpoint = (self.client.api_url + 'instance/' +
+                             mongo_sharded_instance.name + '/compaction/')
+        requestsm.post.assert_called_once_with(expected_endpoint,
+                                               auth=(self.client.user_key, self.client.pass_key))
+
+    def test_instance_shards_calls_proper_end_point_without_add_shard(self, requestsm,
+                                                                      mongo_sharded_instance):
+        requestsm.get.return_value = self._response_object()
+        mongo_sharded_instance.shards(add_shard=False)
+
+        expected_endpoint = (self.client.api_url + 'instance/' +
+                             mongo_sharded_instance.name + '/shard/')
+        requestsm.get.assert_called_once_with(expected_endpoint,
+                                              auth=(self.client.user_key, self.client.pass_key))
+
+    def test_instance_shards_calls_proper_end_point_with_add_shard(self, requestsm,
+                                                                   mongo_sharded_instance):
+        requestsm.post.return_value = self._response_object()
+        mongo_sharded_instance.shards(add_shard=True)
+
+        expected_endpoint = (self.client.api_url + 'instance/' +
+                             mongo_sharded_instance.name + '/shard/')
+        requestsm.post.assert_called_once_with(expected_endpoint,
+                                               auth=(self.client.user_key, self.client.pass_key))
 
 
 class TestInstance(conftest.BaseInstanceTest):
