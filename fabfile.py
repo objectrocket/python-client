@@ -40,7 +40,8 @@ class RollDocs(Task):
     def _deploy_docs(self):
         """Deploy the client documentation."""
         with lcd('/root/rollout/python-client/docs/build/html/'):
-            rsync_project(remote_dir='/docs/apiv2/', local_dir='./', delete=True, exclude='.git')  #FIXME
+            rsync_project(remote_dir='/docs/clients/python/', local_dir='./',
+                          delete=True, exclude='.git')
 
     def _update_repo(self):
         """Update the git repository."""
