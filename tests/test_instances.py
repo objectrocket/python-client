@@ -55,12 +55,6 @@ class TestInstances(conftest.BaseClientTest):
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
 
-    def test_get_fails_with_bad_arg_type(self, requestsm):
-        with pytest.raises(self.client.instances.InstancesException) as exinfo:
-            self.client.instances.get(instance_name=[])
-
-        assert exinfo.value.args[0] == 'Parameter "instance_name" must be an instance of str.'
-
     # -------------------
     # CREATE METHOD TESTS
     # -------------------
@@ -74,27 +68,6 @@ class TestInstances(conftest.BaseClientTest):
                                                auth=(self.client.user_key, self.client.pass_key),
                                                data=json.dumps(create_call_data),
                                                headers={'Content-Type': 'application/json'})
-
-    def test_create_fails_with_bad_name_type(self, requestsm, create_call_data):
-        create_call_data['name'] = 1
-        with pytest.raises(self.client.instances.InstancesException) as exinfo:
-            self.client.instances.create(**create_call_data)
-
-        assert exinfo.value.args[0] == 'Parameter "name" must be an instance of str.'
-
-    def test_create_fails_with_bad_size_type(self, requestsm, create_call_data):
-        create_call_data['size'] = '5'
-        with pytest.raises(self.client.instances.InstancesException) as exinfo:
-            self.client.instances.create(**create_call_data)
-
-        assert exinfo.value.args[0] == 'Parameter "size" must be an instance of int.'
-
-    def test_create_fails_with_bad_zone_type(self, requestsm, create_call_data):
-        create_call_data['zone'] = 1
-        with pytest.raises(self.client.instances.InstancesException) as exinfo:
-            self.client.instances.create(**create_call_data)
-
-        assert exinfo.value.args[0] == 'Parameter "zone" must be an instance of str.'
 
     def test_create_fails_with_bad_service_type_value(self, requestsm, create_call_data):
         create_call_data['service_type'] = 'not_a_valid_service'
@@ -133,12 +106,26 @@ class TestInstances(conftest.BaseClientTest):
         requestsm.post.assert_called_once_with(expected_endpoint,
                                                auth=(self.client.user_key, self.client.pass_key))
 
-    def test_compaction_fails_with_bad_instance_name_type(self, requestsm):
-        with pytest.raises(self.client.instances.InstancesException) as exinfo:
-            instance_name = 1
-            self.client.instances.compaction(instance_name=instance_name)
+    # ------------
+    # SHARDS TESTS
+    # ------------
+    def test_shards_calls_proper_end_point_without_add_shard(self, requestsm):
+        requestsm.get.return_value = self._response_object()
+        instance_name = 'instance0'
+        self.client.instances.shards(instance_name=instance_name, add_shard=False)
 
-        assert exinfo.value.args[0] == 'Parameter "instance_name" must be an instance of str.'
+        expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/shard/'
+        requestsm.get.assert_called_once_with(expected_endpoint,
+                                              auth=(self.client.user_key, self.client.pass_key))
+
+    def test_shards_calls_proper_end_point_with_add_shard(self, requestsm):
+        requestsm.post.return_value = self._response_object()
+        instance_name = 'instance0'
+        self.client.instances.shards(instance_name=instance_name, add_shard=True)
+
+        expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/shard/'
+        requestsm.post.assert_called_once_with(expected_endpoint,
+                                               auth=(self.client.user_key, self.client.pass_key))
 
     # ------------------------
     # CONVENIENCE METHOD TESTS
