@@ -7,6 +7,7 @@ import requests
 import pymongo
 
 from objectrocket import constants
+from objectrocket import errors
 
 
 class Instances(object):
@@ -46,13 +47,13 @@ class Instances(object):
         """
         valid_service_types = ('mongodb', )
         if service_type not in valid_service_types:
-            raise self.InstancesException('Invalid value for "service_type". Must be one of "%s".'
-                                          % valid_service_types)
+            raise errors.InstancesException('Invalid value for "service_type". Must be one of '
+                                            '"%s".' % valid_service_types)
 
         valid_versions = ('2.4.6', )
         if version not in valid_versions:
-            raise self.InstancesException('Invalid value for "version". Must be one of "%s".'
-                                          % valid_versions)
+            raise errors.InstancesException('Invalid value for "version". Must be one of "%s".'
+                                            % valid_versions)
 
         url = self._api_instances_url
         data = {
@@ -92,14 +93,15 @@ class Instances(object):
             'data'.
         """
         _json = response.json()
-        data = _json['data']
-        if isinstance(data, dict):
+        data = _json.get('data')
+        if data is None:
+            return response
+        elif isinstance(data, dict):
             return Instance(instance_document=data, client=self._client)
         elif isinstance(data, list):
             return [Instance(instance_document=doc, client=self._client) for doc in data]
         else:
-            raise self.InstancesException('response.json()["data"] must be a '
-                                          'dict or list of dicts.')
+            return response
 
     def shards(self, instance_name, add_shard=False):
         """Get a list of shards belonging to the given instance.
@@ -145,8 +147,8 @@ class Instances(object):
             datetime.datetime.strptime(start, constants.TIME_FORMAT)
             datetime.datetime.strptime(end, constants.TIME_FORMAT)
         except ValueError as ex:
-            raise self.InstancesException(str(ex) + 'Time strings should be of the following '
-                                                    'format: %s' % constants.TIME_FORMAT)
+            raise errors.InstancesException(str(ex) + 'Time strings should be of the following '
+                                                      'format: %s' % constants.TIME_FORMAT)
 
         url = self._api_instances_url + instance_name + '/stepdown/'
 
@@ -163,9 +165,6 @@ class Instances(object):
                                  data=json.dumps(data),
                                  headers={'Content-Type': 'application/json'})
         return response.json()
-
-    class InstancesException(Exception):
-        pass
 
 
 class Instance(object):
@@ -214,6 +213,20 @@ class Instance(object):
     def created(self):
         """The date this instance was created."""
         return self._created
+
+    def get_authenticated_connection(self, user, passwd, db='admin'):
+        """Establish an authenticated connection to this instance.
+
+        :param str user: The username to use for authentication.
+        :param str passwd: The password to use for authentication.
+        :param str db: The name of the database to authenticate against. Defaults to 'Admin'.
+        """
+        try:
+            self.connection[db].authenticate(user, passwd)
+        except pymongo.errors.OperationError as ex:
+            raise errors.InstancesException(str(ex))
+
+        return self.connection
 
     def _get_connection(self):
         """Establish a live connection to the instance."""

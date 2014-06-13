@@ -41,6 +41,3 @@ class Client(object):
     def user_key(self):
         """The user key currently being used by the Client."""
         return self._user_key
-
-    class ClientException(Exception):
-        pass

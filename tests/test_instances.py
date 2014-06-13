@@ -4,6 +4,7 @@ import pytest
 import mock
 
 from tests import conftest
+from objectrocket import errors
 from objectrocket.client import Client
 from objectrocket.instances import Instance
 
@@ -71,7 +72,7 @@ class TestInstances(conftest.BaseClientTest):
 
     def test_create_fails_with_bad_service_type_value(self, requestsm, create_call_data):
         create_call_data['service_type'] = 'not_a_valid_service'
-        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+        with pytest.raises(errors.InstancesException) as exinfo:
             self.client.instances.create(**create_call_data)
 
         assert exinfo.value.args[0] == ('Invalid value for "service_type". '
@@ -79,7 +80,7 @@ class TestInstances(conftest.BaseClientTest):
 
     def test_create_fails_with_bad_version_value(self, requestsm, create_call_data):
         create_call_data['version'] = 'not_a_valid_version'
-        with pytest.raises(self.client.instances.InstancesException) as exinfo:
+        with pytest.raises(errors.InstancesException) as exinfo:
             self.client.instances.create(**create_call_data)
 
         assert exinfo.value.args[0] == ('Invalid value for "version". '
