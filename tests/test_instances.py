@@ -134,42 +134,46 @@ class TestInstances(conftest.BaseClientTest):
     def test_instance_compaction_convenience_call_request_compaction_true(self, requestsm,
                                                                           mongo_sharded_instance):
         requestsm.get.return_value = self._response_object()
-        mongo_sharded_instance.compaction()
+        rv = mongo_sharded_instance.compaction()
 
         expected_endpoint = (self.client.api_url + 'instance/' +
                              mongo_sharded_instance.name + '/compaction/')
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
+        assert rv == {'data': []}
 
     def test_instance_compaction_convenience_call_request_compaction_false(self, requestsm,
                                                                            mongo_sharded_instance):
         requestsm.post.return_value = self._response_object()
-        mongo_sharded_instance.compaction(request_compaction=True)
+        rv = mongo_sharded_instance.compaction(request_compaction=True)
 
         expected_endpoint = (self.client.api_url + 'instance/' +
                              mongo_sharded_instance.name + '/compaction/')
         requestsm.post.assert_called_once_with(expected_endpoint,
                                                auth=(self.client.user_key, self.client.pass_key))
+        assert rv == {'data': []}
 
     def test_instance_shards_calls_proper_end_point_without_add_shard(self, requestsm,
                                                                       mongo_sharded_instance):
         requestsm.get.return_value = self._response_object()
-        mongo_sharded_instance.shards(add_shard=False)
+        rv = mongo_sharded_instance.shards(add_shard=False)
 
         expected_endpoint = (self.client.api_url + 'instance/' +
                              mongo_sharded_instance.name + '/shard/')
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
+        assert rv == {'data': []}
 
     def test_instance_shards_calls_proper_end_point_with_add_shard(self, requestsm,
                                                                    mongo_sharded_instance):
         requestsm.post.return_value = self._response_object()
-        mongo_sharded_instance.shards(add_shard=True)
+        rv = mongo_sharded_instance.shards(add_shard=True)
 
         expected_endpoint = (self.client.api_url + 'instance/' +
                              mongo_sharded_instance.name + '/shard/')
         requestsm.post.assert_called_once_with(expected_endpoint,
                                                auth=(self.client.user_key, self.client.pass_key))
+        assert rv == {'data': []}
 
 
 class TestInstance(conftest.BaseInstanceTest):

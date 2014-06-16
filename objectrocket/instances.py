@@ -300,7 +300,8 @@ class Instance(object):
         :param bool add_shard: A boolean indicating whether to add a new shard to the specified
             instance.
         """
-        self.client.instances.shards(instance_name=self.name, add_shard=add_shard)
+        response = self.client.instances.shards(instance_name=self.name, add_shard=add_shard)
+        return response
 
     def stepdown_window(self, instance_name):
         pass
