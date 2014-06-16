@@ -42,26 +42,28 @@ class TestInstances(conftest.BaseClientTest):
     # ----------------
     def test_get_calls_proper_endpoint_with_no_args(self, requestsm):
         requestsm.get.return_value = self._response_object()
-        self.client.instances.get()
+        rv = self.client.instances.get()
 
         expected_endpoint = self.client.api_url + 'instance/'
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
+        assert rv == []
 
     def test_get_calls_proper_endpoint_with_args(self, requestsm):
         requestsm.get.return_value = self._response_object()
-        self.client.instances.get('instance0')
+        rv = self.client.instances.get('instance0')
 
         expected_endpoint = self.client.api_url + 'instance/instance0/'
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
+        assert rv == []
 
     # -------------------
     # CREATE METHOD TESTS
     # -------------------
     def test_create_calls_proper_end_point(self, requestsm, create_call_data):
         requestsm.post.return_value = self._response_object()
-        self.client.instances.create(**create_call_data)
+        rv = self.client.instances.create(**create_call_data)
         create_call_data.pop('service_type')
 
         expected_endpoint = self.client.api_url + 'instance/'
@@ -69,6 +71,7 @@ class TestInstances(conftest.BaseClientTest):
                                                auth=(self.client.user_key, self.client.pass_key),
                                                data=json.dumps(create_call_data),
                                                headers={'Content-Type': 'application/json'})
+        assert rv == []
 
     def test_create_fails_with_bad_service_type_value(self, requestsm, create_call_data):
         create_call_data['service_type'] = 'not_a_valid_service'
@@ -92,20 +95,23 @@ class TestInstances(conftest.BaseClientTest):
     def test_compaction_calls_proper_end_point_request_compaction_false(self, requestsm):
         requestsm.get.return_value = self._response_object()
         instance_name = 'instance0'
-        self.client.instances.compaction(instance_name=instance_name, request_compaction=False)
+        rv = self.client.instances.compaction(instance_name=instance_name,
+                                              request_compaction=False)
 
         expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/compaction/'
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
+        assert rv == {'data': []}
 
     def test_compaction_calls_proper_end_point_request_compaction_true(self, requestsm):
         requestsm.post.return_value = self._response_object()
         instance_name = 'instance0'
-        self.client.instances.compaction(instance_name=instance_name, request_compaction=True)
+        rv = self.client.instances.compaction(instance_name=instance_name, request_compaction=True)
 
         expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/compaction/'
         requestsm.post.assert_called_once_with(expected_endpoint,
                                                auth=(self.client.user_key, self.client.pass_key))
+        assert rv == {'data': []}
 
     # ------------
     # SHARDS TESTS
@@ -113,20 +119,22 @@ class TestInstances(conftest.BaseClientTest):
     def test_shards_calls_proper_end_point_without_add_shard(self, requestsm):
         requestsm.get.return_value = self._response_object()
         instance_name = 'instance0'
-        self.client.instances.shards(instance_name=instance_name, add_shard=False)
+        rv = self.client.instances.shards(instance_name=instance_name, add_shard=False)
 
         expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/shard/'
         requestsm.get.assert_called_once_with(expected_endpoint,
                                               auth=(self.client.user_key, self.client.pass_key))
+        assert rv == {'data': []}
 
     def test_shards_calls_proper_end_point_with_add_shard(self, requestsm):
         requestsm.post.return_value = self._response_object()
         instance_name = 'instance0'
-        self.client.instances.shards(instance_name=instance_name, add_shard=True)
+        rv = self.client.instances.shards(instance_name=instance_name, add_shard=True)
 
         expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/shard/'
         requestsm.post.assert_called_once_with(expected_endpoint,
                                                auth=(self.client.user_key, self.client.pass_key))
+        assert rv == {'data': []}
 
     # ------------------------
     # CONVENIENCE METHOD TESTS
