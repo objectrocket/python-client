@@ -192,6 +192,15 @@ class Instance(object):
         # Lazily-created properties.
         self._connection = None
 
+    # -----------------------
+    # DUNDER METHOD OVERLOADS
+    # -----------------------
+    def __repr__(self):
+        _id = hex(id(self))
+        rep = ('<objectrocket.instances.Instance %r at %s>'
+               % (self.instance_document, _id))
+        return rep
+
     @property
     def api_endpoint(self):
         """The optimal API endpoint for this instance."""
