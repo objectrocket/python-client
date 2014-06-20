@@ -9,3 +9,8 @@ class ObjectRocketException(Exception):
 class InstancesException(ObjectRocketException):
     """Exception for instances layer operations."""
     pass
+
+
+class AuthFailure(ObjectRocketException):
+    """Raised when a requst's response code is 401."""
+    pass
