@@ -227,6 +227,15 @@ class Instance(object):
         return self._api_endpoint
 
     @property
+    def client(self):
+        """An instance of the objectrocket.client.Client."""
+        if 'objectorcket.client' not in sys.modules:
+            from objectrocket import client
+        if not isinstance(self._client, client.Client):
+            return None
+        return self._client
+
+    @property
     def connection(self):
         """A live connection to this instance."""
         if self._connection is None:
@@ -305,15 +314,6 @@ class Instance(object):
     # -------------------
     # CONVENIENCE METHODS
     # -------------------
-    @property
-    def client(self):
-        """An instance of the objectrocket.client.Client."""
-        if 'objectorcket.client' not in sys.modules:
-            from objectrocket import client
-        if not isinstance(self._client, client.Client):
-            return None
-        return self._client
-
     def compaction(self, request_compaction=False):
         """Retrieve a report on, or request compaction for this instance.
 

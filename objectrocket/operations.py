@@ -1,4 +1,6 @@
 """Base operations logic for interfacing with various API resources."""
+import sys
+
 from objectrocket import errors
 
 
@@ -10,7 +12,11 @@ class BaseOperationsLayer(object):
 
     @property
     def _client(self):
-        """This layer's :py:class:`objectrocket.client.Client` instance."""
+        """An instance of the objectrocket.client.Client."""
+        if 'objectorcket.client' not in sys.modules:
+            from objectrocket import client
+        if not isinstance(self.__client, client.Client):
+            return None
         return self.__client
 
     def _verify_auth(self, resp, *args, **kwargs):
