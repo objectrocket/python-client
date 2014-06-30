@@ -8,9 +8,10 @@ import pymongo
 
 from objectrocket import constants
 from objectrocket import errors
+from objectrocket import operations
 
 
-class Instances(object):
+class Instances(operations.BaseOperationsLayer):
     """Instance operations.
 
     :param objectrocket.client.Client client_instance: An instance of
@@ -18,7 +19,7 @@ class Instances(object):
     """
 
     def __init__(self, client_instance):
-        self._client = client_instance
+        super(Instances, self).__init__(client_instance=client_instance)
         self._api_instances_url = self._client.api_url + 'instance/'
 
     def compaction(self, instance_name, request_compaction=False):
@@ -30,9 +31,13 @@ class Instances(object):
         url = self._api_instances_url + instance_name + '/compaction/'
 
         if request_compaction:
-            response = requests.post(url, auth=(self._client.user_key, self._client.pass_key))
+            response = requests.post(url,
+                                     auth=(self._client.user_key, self._client.pass_key),
+                                     hooks=dict(response=self._verify_auth))
         else:
-            response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
+            response = requests.get(url,
+                                    auth=(self._client.user_key, self._client.pass_key),
+                                    hooks=dict(response=self._verify_auth))
 
         return response.json()
 
@@ -70,7 +75,8 @@ class Instances(object):
         response = requests.post(url,
                                  auth=(self._client.user_key, self._client.pass_key),
                                  data=json.dumps(data),
-                                 headers={'Content-Type': 'application/json'})
+                                 headers={'Content-Type': 'application/json'},
+                                 hooks=dict(response=self._verify_auth))
         return self._return_instance_objects(response)
 
     def get(self, instance_name=None):
@@ -83,7 +89,9 @@ class Instances(object):
         if instance_name is not None:
             url += instance_name + '/'
 
-        response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
+        response = requests.get(url,
+                                auth=(self._client.user_key, self._client.pass_key),
+                                hooks=dict(response=self._verify_auth))
         return self._return_instance_objects(response)
 
     def _return_instance_objects(self, response):
@@ -92,7 +100,12 @@ class Instances(object):
         :param object response: An object having a ``json`` method which returns a dict with a key
             'data'.
         """
-        _json = response.json()
+        # If no JSON object could be decoded, simply return the response.
+        try:
+            _json = response.json()
+        except ValueError:
+            return response
+
         data = _json.get('data')
         if data is None:
             return response
@@ -112,9 +125,13 @@ class Instances(object):
         """
         url = self._api_instances_url + instance_name + '/shard/'
         if add_shard:
-            response = requests.post(url, auth=(self._client.user_key, self._client.pass_key))
+            response = requests.post(url,
+                                     auth=(self._client.user_key, self._client.pass_key),
+                                     hooks=dict(response=self._verify_auth))
         else:
-            response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
+            response = requests.get(url,
+                                    auth=(self._client.user_key, self._client.pass_key),
+                                    hooks=dict(response=self._verify_auth))
 
         return response.json()
 
@@ -125,7 +142,9 @@ class Instances(object):
         """
         url = self._api_instances_url + instance_name + '/stepdown/'
 
-        response = requests.get(url, auth=(self._client.user_key, self._client.pass_key))
+        response = requests.get(url,
+                                auth=(self._client.user_key, self._client.pass_key),
+                                hooks=dict(response=self._verify_auth))
         return response.json()
 
     def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
@@ -163,7 +182,8 @@ class Instances(object):
         response = requests.post(url,
                                  auth=(self._client.user_key, self._client.pass_key),
                                  data=json.dumps(data),
-                                 headers={'Content-Type': 'application/json'})
+                                 headers={'Content-Type': 'application/json'},
+                                 hooks=dict(response=self._verify_auth))
         return response.json()
 
 
@@ -205,6 +225,15 @@ class Instance(object):
     def api_endpoint(self):
         """The optimal API endpoint for this instance."""
         return self._api_endpoint
+
+    @property
+    def client(self):
+        """An instance of the objectrocket.client.Client."""
+        if 'objectorcket.client' not in sys.modules:
+            from objectrocket import client
+        if not isinstance(self._client, client.Client):
+            return None
+        return self._client
 
     @property
     def connection(self):
@@ -285,15 +314,6 @@ class Instance(object):
     # -------------------
     # CONVENIENCE METHODS
     # -------------------
-    @property
-    def client(self):
-        """An instance of the objectrocket.client.Client."""
-        if 'objectorcket.client' not in sys.modules:
-            from objectrocket import client
-        if not isinstance(self._client, client.Client):
-            return None
-        return self._client
-
     def compaction(self, request_compaction=False):
         """Retrieve a report on, or request compaction for this instance.
 

@@ -31,6 +31,14 @@ class TestInstances(conftest.BaseClientTest):
         }
         return data
 
+    @property
+    def request_defaults(self):
+        """Return a dict of the default request kwargs."""
+        return {
+            'auth': (self.client.user_key, self.client.pass_key),
+            'hooks': {'response': self.client.instances._verify_auth},
+        }
+
     def test_instances_client(self):
         assert isinstance(self.client.instances._client, Client)
 
@@ -45,8 +53,7 @@ class TestInstances(conftest.BaseClientTest):
         rv = self.client.instances.get()
 
         expected_endpoint = self.client.api_url + 'instance/'
-        requestsm.get.assert_called_once_with(expected_endpoint,
-                                              auth=(self.client.user_key, self.client.pass_key))
+        requestsm.get.assert_called_once_with(expected_endpoint, **self.request_defaults)
         assert rv == []
 
     def test_get_calls_proper_endpoint_with_args(self, requestsm):
@@ -54,8 +61,7 @@ class TestInstances(conftest.BaseClientTest):
         rv = self.client.instances.get('instance0')
 
         expected_endpoint = self.client.api_url + 'instance/instance0/'
-        requestsm.get.assert_called_once_with(expected_endpoint,
-                                              auth=(self.client.user_key, self.client.pass_key))
+        requestsm.get.assert_called_once_with(expected_endpoint, **self.request_defaults)
         assert rv == []
 
     # -------------------
@@ -68,9 +74,9 @@ class TestInstances(conftest.BaseClientTest):
 
         expected_endpoint = self.client.api_url + 'instance/'
         requestsm.post.assert_called_once_with(expected_endpoint,
-                                               auth=(self.client.user_key, self.client.pass_key),
                                                data=json.dumps(create_call_data),
-                                               headers={'Content-Type': 'application/json'})
+                                               headers={'Content-Type': 'application/json'},
+                                               **self.request_defaults)
         assert rv == []
 
     def test_create_fails_with_bad_service_type_value(self, requestsm, create_call_data):
@@ -99,8 +105,7 @@ class TestInstances(conftest.BaseClientTest):
                                               request_compaction=False)
 
         expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/compaction/'
-        requestsm.get.assert_called_once_with(expected_endpoint,
-                                              auth=(self.client.user_key, self.client.pass_key))
+        requestsm.get.assert_called_once_with(expected_endpoint, **self.request_defaults)
         assert rv == {'data': []}
 
     def test_compaction_calls_proper_end_point_request_compaction_true(self, requestsm):
@@ -109,8 +114,7 @@ class TestInstances(conftest.BaseClientTest):
         rv = self.client.instances.compaction(instance_name=instance_name, request_compaction=True)
 
         expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/compaction/'
-        requestsm.post.assert_called_once_with(expected_endpoint,
-                                               auth=(self.client.user_key, self.client.pass_key))
+        requestsm.post.assert_called_once_with(expected_endpoint, **self.request_defaults)
         assert rv == {'data': []}
 
     # ------------
@@ -122,8 +126,7 @@ class TestInstances(conftest.BaseClientTest):
         rv = self.client.instances.shards(instance_name=instance_name, add_shard=False)
 
         expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/shard/'
-        requestsm.get.assert_called_once_with(expected_endpoint,
-                                              auth=(self.client.user_key, self.client.pass_key))
+        requestsm.get.assert_called_once_with(expected_endpoint, **self.request_defaults)
         assert rv == {'data': []}
 
     def test_shards_calls_proper_end_point_with_add_shard(self, requestsm):
@@ -132,8 +135,7 @@ class TestInstances(conftest.BaseClientTest):
         rv = self.client.instances.shards(instance_name=instance_name, add_shard=True)
 
         expected_endpoint = self.client.api_url + 'instance/' + instance_name + '/shard/'
-        requestsm.post.assert_called_once_with(expected_endpoint,
-                                               auth=(self.client.user_key, self.client.pass_key))
+        requestsm.post.assert_called_once_with(expected_endpoint,  **self.request_defaults)
         assert rv == {'data': []}
 
     # ------------------------
@@ -146,8 +148,10 @@ class TestInstances(conftest.BaseClientTest):
 
         expected_endpoint = (self.client.api_url + 'instance/' +
                              mongo_sharded_instance.name + '/compaction/')
-        requestsm.get.assert_called_once_with(expected_endpoint,
-                                              auth=(self.client.user_key, self.client.pass_key))
+        defaults = self.request_defaults
+        defaults.update({'hooks':
+                        {'response': mongo_sharded_instance.client.instances._verify_auth}})
+        requestsm.get.assert_called_once_with(expected_endpoint, **defaults)
         assert rv == {'data': []}
 
     def test_instance_compaction_convenience_call_request_compaction_false(self, requestsm,
@@ -157,8 +161,10 @@ class TestInstances(conftest.BaseClientTest):
 
         expected_endpoint = (self.client.api_url + 'instance/' +
                              mongo_sharded_instance.name + '/compaction/')
-        requestsm.post.assert_called_once_with(expected_endpoint,
-                                               auth=(self.client.user_key, self.client.pass_key))
+        defaults = self.request_defaults
+        defaults.update({'hooks':
+                        {'response': mongo_sharded_instance.client.instances._verify_auth}})
+        requestsm.post.assert_called_once_with(expected_endpoint, **defaults)
         assert rv == {'data': []}
 
     def test_instance_shards_calls_proper_end_point_without_add_shard(self, requestsm,
@@ -168,8 +174,10 @@ class TestInstances(conftest.BaseClientTest):
 
         expected_endpoint = (self.client.api_url + 'instance/' +
                              mongo_sharded_instance.name + '/shard/')
-        requestsm.get.assert_called_once_with(expected_endpoint,
-                                              auth=(self.client.user_key, self.client.pass_key))
+        defaults = self.request_defaults
+        defaults.update({'hooks':
+                        {'response': mongo_sharded_instance.client.instances._verify_auth}})
+        requestsm.get.assert_called_once_with(expected_endpoint, **defaults)
         assert rv == {'data': []}
 
     def test_instance_shards_calls_proper_end_point_with_add_shard(self, requestsm,
@@ -179,8 +187,10 @@ class TestInstances(conftest.BaseClientTest):
 
         expected_endpoint = (self.client.api_url + 'instance/' +
                              mongo_sharded_instance.name + '/shard/')
-        requestsm.post.assert_called_once_with(expected_endpoint,
-                                               auth=(self.client.user_key, self.client.pass_key))
+        defaults = self.request_defaults
+        defaults.update({'hooks':
+                        {'response': mongo_sharded_instance.client.instances._verify_auth}})
+        requestsm.post.assert_called_once_with(expected_endpoint, **defaults)
         assert rv == {'data': []}
 
 
