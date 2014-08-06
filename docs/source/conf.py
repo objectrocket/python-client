@@ -61,8 +61,8 @@ copyright = u'2014, ObjectRocket Engineering'
 # built documents.
 #
 # The short X.Y version.
-_version_list = __version__.split('.')
-version = '.'.join((_version_list[0], _version_list[1]))
+version = '.'.join(__version__.split('.')[:2])
+
 # The full version, including alpha/beta/rc tags.
 release = __version__
 

@@ -147,7 +147,8 @@ class Instances(operations.BaseOperationsLayer):
                                 hooks=dict(response=self._verify_auth))
         return response.json()
 
-    def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
+    def set_stepdown_window(self, instance_name, start, end,
+                            enabled=True, scheduled=True, weekly=True):
         """Set the stepdown window of the given instance.
 
         Date times are assumed to be UTC ... so use UTC date times.

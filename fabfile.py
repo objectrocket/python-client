@@ -6,7 +6,7 @@ This is intended to be run from mon1.
 """
 import logging
 
-from fabric.api import env, execute, lcd, local, roles
+from fabric.api import env, execute, lcd, local, roles, run
 from fabric.contrib.project import rsync_project
 from fabric.tasks import Task
 
@@ -35,17 +35,20 @@ class RollDocs(Task):
         """Clean the repo after the tox runs."""
         with lcd('/root/rollout/python-client/'):
             local('git clean -fdx')
+            local('git reset HEAD --hard')
 
     @roles('app_servers')
     def _deploy_docs(self):
         """Deploy the client documentation."""
         with lcd('/root/rollout/python-client/docs/build/html/'):
+            run('mkdir -p /docs/clients/python')
             rsync_project(remote_dir='/docs/clients/python/', local_dir='./',
                           delete=True, exclude='.git')
 
     def _update_repo(self):
         """Update the git repository."""
         with lcd('/root/rollout/python-client/'):
+            local('git checkout master')
             local('git pull')
 
     def run(self):
