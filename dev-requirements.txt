@@ -7,3 +7,4 @@ setuptools>=2.1
 sphinx_rtd_theme
 tox>=1.7.1
 wheel>=0.22.0
+git+https://github.com/mverteuil/pytest-ipdb.git

@@ -6,10 +6,10 @@ import mock
 from tests import conftest
 from objectrocket import errors
 from objectrocket.client import Client
-from objectrocket.instances import Instance
+from objectrocket import instances
 
 
-class TestInstances(conftest.BaseClientTest):
+class TestInstances(conftest.ClientHarness):
     """Tests for the objectrocket.instances.Instances operations layer."""
 
     @pytest.fixture
@@ -45,9 +45,9 @@ class TestInstances(conftest.BaseClientTest):
     def test_instances_api_instnaces_url(self):
         assert self.client.instances._api_instances_url == self.client.api_url + 'instance/'
 
-    # ----------------
-    # GET METHOD TESTS
-    # ----------------
+    ####################
+    # GET METHOD TESTS #
+    ####################
     def test_get_calls_proper_endpoint_with_no_args(self, requestsm):
         requestsm.get.return_value = self._response_object()
         rv = self.client.instances.get()
@@ -64,9 +64,9 @@ class TestInstances(conftest.BaseClientTest):
         requestsm.get.assert_called_once_with(expected_endpoint, **self.request_defaults)
         assert rv == []
 
-    # -------------------
-    # CREATE METHOD TESTS
-    # -------------------
+    #######################
+    # CREATE METHOD TESTS #
+    #######################
     def test_create_calls_proper_end_point(self, requestsm, create_call_data):
         requestsm.post.return_value = self._response_object()
         rv = self.client.instances.create(**create_call_data)
@@ -95,9 +95,9 @@ class TestInstances(conftest.BaseClientTest):
         assert exinfo.value.args[0] == ('Invalid value for "version". '
                                         'Must be one of "2.4.6".')
 
-    # ----------------
-    # COMPACTION TESTS
-    # ----------------
+    ####################
+    # COMPACTION TESTS #
+    ####################
     def test_compaction_calls_proper_end_point_request_compaction_false(self, requestsm):
         requestsm.get.return_value = self._response_object()
         instance_name = 'instance0'
@@ -117,8 +117,8 @@ class TestInstances(conftest.BaseClientTest):
         requestsm.post.assert_called_once_with(expected_endpoint, **self.request_defaults)
         assert rv == {'data': []}
 
-    # ------------
-    # SHARDS TESTS
+    ################
+    # SHARDS TESTS #
     # ------------
     def test_shards_calls_proper_end_point_without_add_shard(self, requestsm):
         requestsm.get.return_value = self._response_object()
@@ -138,9 +138,9 @@ class TestInstances(conftest.BaseClientTest):
         requestsm.post.assert_called_once_with(expected_endpoint,  **self.request_defaults)
         assert rv == {'data': []}
 
-    # ------------------------
-    # CONVENIENCE METHOD TESTS
-    # ------------------------
+    ############################
+    # CONVENIENCE METHOD TESTS #
+    ############################
     def test_instance_compaction_convenience_call_request_compaction_true(self, requestsm,
                                                                           mongo_sharded_instance):
         requestsm.get.return_value = self._response_object()
@@ -201,19 +201,20 @@ class TestInstance(conftest.BaseInstanceTest):
         """Pop needed_key from doc and assert KeyError during constructor run."""
         doc.pop(needed_key)
         with pytest.raises(KeyError) as exinfo:
-            Instance(instance_document=doc, client=Client('test_user_key', 'test_pass_key'))
+            instances.BaseInstance(instance_document=doc, client=Client('test_user_key',
+                                                                        'test_pass_key'))
 
         assert exinfo.value.__class__ == KeyError
         assert exinfo.value.args[0] == needed_key
 
-    # -----------------
-    # CONSTRUCTOR TESTS
-    # -----------------
+    #####################
+    # CONSTRUCTOR TESTS #
+    #####################
     def test_constructor_passes_with_expected_document(self, _docs):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
-        inst = Instance(instance_document=_docs,
-                        client=Client(user_key=user_key, pass_key=pass_key))
-        assert isinstance(inst, Instance)
+        inst = instances.BaseInstance(instance_document=_docs,
+                                      client=Client(user_key=user_key, pass_key=pass_key))
+        assert isinstance(inst, instances.BaseInstance)
 
     def test_constructor_fails_with_missing_api_endpoint(self, _docs):
         self._pop_needed_key_and_assert(_docs, 'api_endpoint')
@@ -232,8 +233,9 @@ class TestInstance(conftest.BaseInstanceTest):
 
     def test_constructor_passes_without_ssl_connect_string(self, _docs):
         _docs.pop('ssl_connect_string', None)
-        inst = Instance(instance_document=_docs, client=Client('test_user_key', 'test_pass_key'))
-        assert isinstance(inst, Instance)
+        inst = instances.BaseInstance(instance_document=_docs, client=Client('test_user_key',
+                                                                             'test_pass_key'))
+        assert isinstance(inst, instances.BaseInstance)
 
     def test_constructor_fails_with_missing_service(self, _docs):
         self._pop_needed_key_and_assert(_docs, 'service')
@@ -244,9 +246,9 @@ class TestInstance(conftest.BaseInstanceTest):
     def test_constructor_fails_with_missing_version(self, _docs):
         self._pop_needed_key_and_assert(_docs, 'version')
 
-    # -----------------------
-    # INSTANCE PROPERTY TESTS
-    # -----------------------
+    ###########################
+    # INSTANCE PROPERTY TESTS #
+    ###########################
     def test_api_endpoint_property(self, _instances_and_docs):
         instance, doc = _instances_and_docs[0], _instances_and_docs[1]
         assert instance.api_endpoint == doc['api_endpoint']
@@ -303,9 +305,9 @@ class TestInstance(conftest.BaseInstanceTest):
         instance, doc = _instances_and_docs[0], _instances_and_docs[1]
         assert instance.version == doc['version']
 
-    # ---------------------
-    # INSTANCE METHOD TESTS
-    # ---------------------
+    #########################
+    # INSTANCE METHOD TESTS #
+    #########################
     def test_to_dict_method(self, _instances_and_docs):
         instance, doc = _instances_and_docs[0], _instances_and_docs[1]
         assert instance.to_dict() == doc

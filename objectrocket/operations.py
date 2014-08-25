@@ -12,6 +12,6 @@ class BaseOperationsLayer(object):
         """An instance of the objectrocket.client.Client."""
         return self._client
 
-    def _verify_auth(self, *args, **kwargs):
+    def _verify_auth(self, resp, *args, **kwargs):
         """A wrapper around :py:meth:`objectrocket.client.Client._verify_auth`."""
-        self.client._verify_auth(*args, **kwargs)
+        self.client._verify_auth(resp, *args, **kwargs)

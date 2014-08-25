@@ -2,47 +2,36 @@
 import pytest
 
 from objectrocket import errors
-from objectrocket.client import Client
+from objectrocket import client
 from objectrocket.operations import BaseOperationsLayer
 from tests import conftest
 
 
-class TestBaseOperationsLayer(conftest.BaseClientTest):
-    """Tests for objectrocket.operations.BaseOperationsLayer object."""
+class TestBaseOperationsLayer(conftest.OperationsHarness, conftest.GenericFixtures):
+    """Tests for objectrocket.operations.BaseOperationsLayer."""
 
-    @pytest.fixture
-    def obj(self):
-        class Obj(object):
-            pass
+    def test_class_instantiation(self, client_token_auth, obj):
+        assert BaseOperationsLayer(client_instance=client_token_auth)
 
-        return Obj()
+    def test_client_is_properly_embedded(self, client_token_auth):
+        inst = BaseOperationsLayer(client_instance=client_token_auth)
+        assert isinstance(inst.client, client.Client)
 
-    def test_instantiation(self, obj):
-        assert BaseOperationsLayer(self.client)
-
-    def test_client_is_given_client(self):
-        inst = BaseOperationsLayer(self.client)
-        assert isinstance(inst._client, Client)
-
-    def test_client_returns_none_when_client_is_invalid(self):
-        inst = BaseOperationsLayer('not_a_valid_client')
-        assert inst._client is None
-
-    def test_verify_auth_returns_none(self, obj):
+    def test_verify_auth_returns_none(self, client_token_auth, obj):
         obj.status_code = 200
-        inst = BaseOperationsLayer(self.client)
+        inst = BaseOperationsLayer(client_instance=client_token_auth)
         assert inst._verify_auth(obj) is None
 
-    def test_verify_auth_raises_if_401_status_code(self, obj):
+    def test_verify_auth_raises_if_401_status_code(self, client_token_auth, obj):
         obj.status_code = 401
         obj.request = self.obj()
         obj.request.method = 'TEST'
         obj.request.path_url = '/TEST/PATH/'
-        inst = BaseOperationsLayer(self.client)
+        inst = BaseOperationsLayer(client_token_auth)
 
         with pytest.raises(errors.AuthFailure) as exinfo:
             inst._verify_auth(obj) is obj
 
         assert exinfo.value.args[0] == ('Received response code 401 from TEST /TEST/PATH/. '
-                                        'Keypair used: {}:{}'
-                                        ''.format(self.client.user_key, self.client.pass_key))
+                                        'Keypair used: {}:{}'.format(client_token_auth.user_key,
+                                                                     client_token_auth.pass_key))
