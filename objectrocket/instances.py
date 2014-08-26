@@ -1,6 +1,7 @@
 """Instance operations and instances."""
 import datetime
 import json
+import logging
 import pymongo
 import requests
 
@@ -9,43 +10,57 @@ from objectrocket import constants
 from objectrocket import errors
 from objectrocket import operations
 
+logger = logging.getLogger(__name__)
+
 
 class Instances(operations.BaseOperationsLayer):
     """Instance operations.
 
-    :param objectrocket.client.Client client_instance: An instance of
-        objectrocket.client.Client.
+    :param objectrocket.client.Client client_instance: An instance of objectrocket.client.Client.
     """
 
     def __init__(self, client_instance):
         super(Instances, self).__init__(client_instance=client_instance)
 
-    @auth._token_auto_auth
-    def compaction(self, instance_name, request_compaction=False):
-        """Retrieve a report on, or request compaction for the given instance.
+    def _concrete_instance(self, instance_doc):
+        """Concretize an instance document.
 
-        :param str instance_name: The name of the instance to operate upon.
-        :param bool request_compaction: A boolean indicating whether or not to request compaction.
+        :param dict instance_doc: A document describing an instance. Should come from the API.
+        :returns: A subclass of :py:class:`BaseInstance`, or None.
+        :rtype: :py:class:`BaseInstance`
         """
-        url = self.url + instance_name + '/compaction/'
+        if not isinstance(instance_doc, dict):
+            return None
 
-        if request_compaction:
-            response = requests.post(url, **self.client.default_request_kwargs)
-        else:
-            response = requests.get(url, **self.client.default_request_kwargs)
-
-        return response.json()
-
-    def _concretize_instance_doc(self, instance_doc):
-        """Concretize and instance document into a :py:class:`BaseInstance` subclass."""
         service = instance_doc.setdefault('service', 'unknown')
-        cls = BaseInstance
+        inst = None
 
         # If service key is a recognized service type, instantiate its respective instance.
         if service in self._service_class_map:
             cls = self._service_class_map[service]
+            inst = cls(instance_document=instance_doc, client=self.client)
 
-        return cls(instance_document=instance_doc, client=self.client)
+        # If service is not recognized, log a warning and return None.
+        else:
+            logger.warning(
+                'Could not determine instance service. You probably need to upgrade to a more '
+                'recent version of the client. Instance document which generated this '
+                'warning: {}'.format(instance_doc)
+            )
+
+        return inst
+
+    def _concrete_instance_list(self, instance_docs):
+        """Concretize a list of instance documents.
+
+        :param list instance_docs: A list of instance documents. Should come from the API.
+        :returns: A list of :py:class:`BaseInstance`s.
+        :rtype: list
+        """
+        if not isinstance(instance_docs, list):
+            return []
+
+        return filter(None, [self._concrete_instance(instance_doc=doc) for doc in instance_docs])
 
     @auth._token_auto_auth
     def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
@@ -57,66 +72,79 @@ class Instances(operations.BaseOperationsLayer):
         :param str service_type: The type of service that the new instance is to provide.
         :param str version: The version of the service the new instance is to provide.
         """
+        # TODO(TheDodd): we can probably have the API return a list of available services if the
+        # specified service is not supported.
         valid_service_types = ('mongodb', )
         if service_type not in valid_service_types:
             raise errors.InstancesException('Invalid value for "service_type". Must be one of '
                                             '"%s".' % valid_service_types)
 
+        # TODO(TheDodd): we can probably have the API return a list of available versions for the
+        # specified service if the given version is not supported.
         valid_versions = ('2.4.6', )
         if version not in valid_versions:
             raise errors.InstancesException('Invalid value for "version". Must be one of "%s".'
                                             % valid_versions)
 
+        # Build up request data.
         url = self.url
-        data = {
+        request_data = {
             'name': name,
             'size': size,
             'zone': zone,
             'type': service_type,
             'version': version,
         }
+        request_data.pop('type')  # Not passing service type ATM. Probably will soon though.
 
-        # Not passing service type ATM. Probably will soon though.
-        data.pop('type')
+        # Call to create an instance.
+        response = requests.post(url, data=json.dumps(request_data),
+                                 **self.client.default_request_kwargs)
 
-        response = requests.post(url, data=json.dumps(data), **self.client.default_request_kwargs)
-        return self._return_instance_objects(response)
+        # Log outcome of instance creation request.
+        if response.status_code == 200:
+            logger.info('Successfully created a new instance with: {}'.format(request_data))
+        else:
+            logger.info('Failed to create instance with: {}'.format(request_data))
+
+        data = self._get_response_data(response)
+        return self._concrete_instance_list(data)
 
     @auth._token_auto_auth
-    def get(self, instance_name=None):
-        """Get details on one or all instances.
+    def get(self, instance_name):
+        """Get an ObjectRocket instance.
 
-        :param str instance_name: The name of the instance to retrieve. If ``None``, then retrieve
-            a list of all instances which you have access to.
+        :param str instance_name: The name of the instance to retrieve.
+        :returns: A subclass of :py:class:`BaseInstance`, or None.
+        :rtype: :py:class:`BaseInstance`
         """
-        url = self.url
-        if instance_name is not None:
-            url += instance_name + '/'
-
+        url = self.url + instance_name + '/'
         response = requests.get(url, **self.client.default_request_kwargs)
-        return self._return_instance_objects(response)
+        data = self._get_response_data(response)
+        return self._concrete_instance(data)
 
-    def _return_instance_objects(self, response):
-        """Translate response data into the appropriate :py:class:`BaseInstance` subclass.
+    @auth._token_auto_auth
+    def get_all(self):
+        """Get all authorized ObjectRocket instances.
 
-        :param object response: a response object from which JSON data might be extracted.
+        :returns: A list of :py:class:`BaseInstance` instances.
+        :rtype: list
         """
-        # If no JSON object could be decoded, simply return the response.
+        response = requests.get(self.url, **self.client.default_request_kwargs)
+        data = self._get_response_data(response)
+        return self._concrete_instance_list(data)
+
+    def _get_response_data(self, response):
+        """Return the data from a ``requests.Response`` object.
+
+        :param requests.Response response: The ``Response`` object from which to get the data.
+        """
         try:
             _json = response.json()
             data = _json.get('data')
-            if data is None:
-                return response
+            return data
         except ValueError:
-            return response
-
-        # Translate instance documents to instance objects corresponding to their service.
-        if isinstance(data, dict):
-            return self._concretize_instance_doc(instance_doc=data)
-        elif isinstance(data, list):
-            return [self._concretize_instance_doc(instance_doc=doc) for doc in data]
-        else:
-            return response
+            return None
 
     @property
     def _service_class_map(self):
@@ -127,70 +155,6 @@ class Instances(operations.BaseOperationsLayer):
             'tokumx': TokumxInstance,
         }
         return service_map
-
-    @auth._token_auto_auth
-    def shards(self, instance_name, add_shard=False):
-        """Get a list of shards belonging to the given instance.
-
-        :param str instance_name: The name of the instance to operate upon.
-        :param bool add_shard: A boolean indicating whether to add a new shard to the specified
-            instance.
-        """
-        url = self.url + instance_name + '/shard/'
-        if add_shard:
-            response = requests.post(url, **self.client.default_request_kwargs)
-        else:
-            response = requests.get(url, **self.client.default_request_kwargs)
-
-        return response.json()
-
-    @auth._token_auto_auth
-    def stepdown_window(self, instance_name):
-        """Get information on the instance's stepdown window.
-
-        :param str instance_name: The name of the instance to operate upon.
-        """
-        url = self.url + instance_name + '/stepdown/'
-
-        response = requests.get(url, **self.client.default_request_kwargs)
-        return response.json()
-
-    @auth._token_auto_auth
-    def set_stepdown_window(self, instance_name, start, end,
-                            enabled=True, scheduled=True, weekly=True):
-        """Set the stepdown window of the given instance.
-
-        Date times are assumed to be UTC ... so use UTC date times.
-
-        :param str instance_name: The name of the instance to operate upon.
-        :param str start: The start time in string format. Should be of the form:
-            :py:const:`objectrocket.constants.TIME_FORMAT`.
-        :param str end: The end time in string format. Should be of the form:
-            :py:const:`objectrocket.constants.TIME_FORMAT`.
-        :param bool enabled: A boolean indicating whether or not stepdown is to be enabled.
-        :param bool scheduled: A boolean indicating whether or not to schedule stepdown.
-        :param bool weekly: A boolean indicating whether or not to schedule compaction weekly.
-        """
-        try:
-            # Ensure that time strings can be parsed properly.
-            datetime.datetime.strptime(start, constants.TIME_FORMAT)
-            datetime.datetime.strptime(end, constants.TIME_FORMAT)
-        except ValueError as ex:
-            raise errors.InstancesException(str(ex) + 'Time strings should be of the following '
-                                                      'format: %s' % constants.TIME_FORMAT)
-
-        url = self.url + instance_name + '/stepdown/'
-
-        data = {
-            'start': start,
-            'end': end,
-            'enabled': enabled,
-            'scheduled': scheduled,
-            'weekly': weekly,
-        }
-
-        response = requests.post(url, data=json.dumps(data), **self.client.default_request_kwargs)
-        return response.json()
 
     @property
     def url(self):
@@ -294,6 +258,21 @@ class MongodbInstance(BaseInstance):
         # Lazily-created properties.
         self._connection = None
 
+    @auth._token_auto_auth
+    def compaction(self, request_compaction=False):
+        """Retrieve a report on, or request compaction for this instance.
+
+        :param bool request_compaction: A boolean indicating whether or not to request compaction.
+        """
+        url = self.url + self.name + '/compaction/'
+
+        if request_compaction:
+            response = requests.post(url, **self.client.default_request_kwargs)
+        else:
+            response = requests.get(url, **self.client.default_request_kwargs)
+
+        return response.json()
+
     @property
     def connection(self):
         """A live connection to this instance."""
@@ -331,37 +310,68 @@ class MongodbInstance(BaseInstance):
         """The base plan size of this instance."""
         return self._plan
 
-    @property
-    def ssl_connect_string(self):
-        """This instance's SSL connection string."""
-        return self._ssl_connect_string
-
-    #######################
-    # CONVENIENCE METHODS #
-    #######################
-    def compaction(self, request_compaction=False):
-        """Retrieve a report on, or request compaction for this instance.
-
-        :param bool request_compaction: A boolean indicating whether or not to request compaction.
-        """
-        response = self.client.instances.compaction(instance_name=self.name,
-                                                    request_compaction=request_compaction)
-        return response
-
+    @auth._token_auto_auth
     def shards(self, add_shard=False):
         """Get a list of shards belonging to this instance.
 
         :param bool add_shard: A boolean indicating whether to add a new shard to the specified
             instance.
         """
-        response = self.client.instances.shards(instance_name=self.name, add_shard=add_shard)
-        return response
+        url = self.url + self.name + '/shard/'
+        if add_shard:
+            response = requests.post(url, **self.client.default_request_kwargs)
+        else:
+            response = requests.get(url, **self.client.default_request_kwargs)
 
-    def stepdown_window(self, instance_name):
-        pass
+        return response.json()
 
-    def set_stepdown_window(self, instance_name, start, end, enabled, scheduled, weekly):
-        pass
+    @property
+    def ssl_connect_string(self):
+        """This instance's SSL connection string."""
+        return self._ssl_connect_string
+
+    @auth._token_auto_auth
+    def stepdown_window(self):
+        """Get information on this instance's stepdown window."""
+        url = self.url + self.name + '/stepdown/'
+
+        response = requests.get(url, **self.client.default_request_kwargs)
+        return response.json()
+
+    @auth._token_auto_auth
+    def set_stepdown_window(self, start, end, enabled=True, scheduled=True, weekly=True):
+        """Set the stepdown window for this instance.
+
+        Date times are assumed to be UTC, so use UTC date times.
+
+        :param str start: The start time in string format. Should be of the form:
+            :py:const:`objectrocket.constants.TIME_FORMAT`.
+        :param str end: The end time in string format. Should be of the form:
+            :py:const:`objectrocket.constants.TIME_FORMAT`.
+        :param bool enabled: A boolean indicating whether or not stepdown is to be enabled.
+        :param bool scheduled: A boolean indicating whether or not to schedule stepdown.
+        :param bool weekly: A boolean indicating whether or not to schedule compaction weekly.
+        """
+        try:
+            # Ensure that time strings can be parsed properly.
+            datetime.datetime.strptime(start, constants.TIME_FORMAT)
+            datetime.datetime.strptime(end, constants.TIME_FORMAT)
+        except ValueError as ex:
+            raise errors.InstancesException(str(ex) + 'Time strings should be of the following '
+                                                      'format: %s' % constants.TIME_FORMAT)
+
+        url = self.url + self.name + '/stepdown/'
+
+        data = {
+            'start': start,
+            'end': end,
+            'enabled': enabled,
+            'scheduled': scheduled,
+            'weekly': weekly,
+        }
+
+        response = requests.post(url, data=json.dumps(data), **self.client.default_request_kwargs)
+        return response.json()
 
 
 class TokumxInstance(MongodbInstance):

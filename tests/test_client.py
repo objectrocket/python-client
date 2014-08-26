@@ -9,52 +9,54 @@ from objectrocket.client import Client
 from tests import conftest
 
 
-class TestClient(conftest.AuthenticationHarness, conftest.GenericFixtures):
+class TestClient(conftest.ClientHarness, conftest.GenericFixtures):
     """Tests for objectrocket.client.Client object."""
 
-    def test_client_has_correct_default_url(self, auth_requests):
+    def test_client_has_correct_default_url(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key)
         assert client.url == constants.DEFAULT_API_URL
 
-    def test_client_assigns_alternative_url_properly(self, auth_requests):
+    def test_client_assigns_alternative_url_properly(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key, alternative_url='testing')
         assert client.url == 'testing'
 
-    def test_client_has_proper_user_and_pass_key_properties(self, auth_requests):
+    def test_client_has_proper_user_and_pass_key_properties(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key)
         assert client.user_key == user_key
         assert client.pass_key == pass_key
 
-    def test_client_binds_proper_value_for_is_using_tokens_when_true(self, auth_requests):
+    def test_client_binds_proper_value_for_is_using_tokens_when_true(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key, use_tokens=True)
         assert client.is_using_tokens is True
 
-    def test_client_binds_proper_value_for_is_using_tokens_when_false(self, auth_requests):
+    def test_client_binds_proper_value_for_is_using_tokens_when_false(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key, use_tokens=False)
         assert client.is_using_tokens is False
 
-    def test_client_makes_auth_request_upon_instantiation(self, auth_requests):
+    def test_client_makes_auth_request_upon_instantiation(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key, alternative_url='testing')
-        auth_requests.get.assert_called_once_with(client.auth.url + 'token/',
-                                                  auth=(user_key, pass_key),
-                                                  hooks=dict(response=client._verify_auth))
+        requests_patches['auth'].get.assert_called_once_with(
+            client.auth.url + 'token/',
+            auth=(user_key, pass_key),
+            hooks=dict(response=client._verify_auth)
+        )
 
-    def test_client_binds_auth_token_properly(self, auth_requests, obj):
+    def test_client_binds_auth_token_properly(self, requests_patches, obj):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
 
         obj.json = lambda: {'data': 'testing_token'}
-        auth_requests.get.return_value = obj
+        requests_patches['auth'].get.return_value = obj
 
         client = Client(user_key, pass_key)
         assert client.token == 'testing_token'
 
-    def test_client_default_request_kwargs_with_tokens_enables(self, auth_requests):
+    def test_client_default_request_kwargs_with_tokens_enables(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key, use_tokens=True)
         assert client.default_request_kwargs == {
@@ -67,7 +69,7 @@ class TestClient(conftest.AuthenticationHarness, conftest.GenericFixtures):
             },
         }
 
-    def test_client_default_request_kwargs_with_tokens_disabled(self, auth_requests):
+    def test_client_default_request_kwargs_with_tokens_disabled(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key, use_tokens=False)
         assert client.default_request_kwargs == {
@@ -80,7 +82,7 @@ class TestClient(conftest.AuthenticationHarness, conftest.GenericFixtures):
             },
         }
 
-    def test_client_verify_auth_hook_raises_with_code_401(self, auth_requests):
+    def test_client_verify_auth_hook_raises_with_code_401(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key)
 
@@ -96,7 +98,7 @@ class TestClient(conftest.AuthenticationHarness, conftest.GenericFixtures):
                                                                      resp.request.path_url,
                                                                      user_key, pass_key))
 
-    def test_client_verify_auth_hook_does_not_raise_with_code_200(self, auth_requests):
+    def test_client_verify_auth_hook_does_not_raise_with_code_200(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key)
 
@@ -106,12 +108,12 @@ class TestClient(conftest.AuthenticationHarness, conftest.GenericFixtures):
     #########################
     # TEST EMBEDDED CLASSES #
     #########################
-    def test_client_has_embedded_auth_class(self, auth_requests):
+    def test_client_has_embedded_auth_class(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key)
         assert isinstance(client.auth, auth.Auth)
 
-    def test_client_has_embedded_instances_class(self, auth_requests):
+    def test_client_has_embedded_instances_class(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'
         client = Client(user_key, pass_key)
         assert isinstance(client.instances, instances.Instances)

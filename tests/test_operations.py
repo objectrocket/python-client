@@ -17,12 +17,12 @@ class TestBaseOperationsLayer(conftest.OperationsHarness, conftest.GenericFixtur
         inst = BaseOperationsLayer(client_instance=client_token_auth)
         assert isinstance(inst.client, client.Client)
 
-    def test_verify_auth_returns_none(self, client_token_auth, obj):
+    def test_verify_auth_returns_none_with_status_code_200(self, client_token_auth, obj):
         obj.status_code = 200
         inst = BaseOperationsLayer(client_instance=client_token_auth)
         assert inst._verify_auth(obj) is None
 
-    def test_verify_auth_raises_if_401_status_code(self, client_token_auth, obj):
+    def test_verify_auth_raises_with_status_code_401(self, client_token_auth, obj):
         obj.status_code = 401
         obj.request = self.obj()
         obj.request.method = 'TEST'
@@ -30,7 +30,7 @@ class TestBaseOperationsLayer(conftest.OperationsHarness, conftest.GenericFixtur
         inst = BaseOperationsLayer(client_token_auth)
 
         with pytest.raises(errors.AuthFailure) as exinfo:
-            inst._verify_auth(obj) is obj
+            inst._verify_auth(obj)
 
         assert exinfo.value.args[0] == ('Received response code 401 from TEST /TEST/PATH/. '
                                         'Keypair used: {}:{}'.format(client_token_auth.user_key,
