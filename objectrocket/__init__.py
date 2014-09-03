@@ -2,4 +2,5 @@
 # Import this object for ease of access.
 from objectrocket.client import Client  # noqa
 
-__version__ = '0.2.0b'
+VERSION = ('0', '3', '0-beta')
+__version__ = '.'.join(VERSION)
