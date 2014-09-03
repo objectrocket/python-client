@@ -106,20 +106,20 @@ class GenericFixtures(object):
 
 
 #############################
-# INSTANCE RELATED FIXTURES #
+# instance related fixtures #
 #############################
 @pytest.fixture
 def mongo_replica_doc():
     now = datetime.datetime.utcnow()
     doc = {
-        "api_endpoint": 'not_a_real_endpoint',
-        "connect_string": "REPLSET_60000/localhost:60000,localhost:60001,localhost:60002",
-        "created": datetime.datetime.strftime(now, constants.TIME_FORMAT),
-        "name": "testinstance",
-        "plan": 1,
-        "service": "mongodb",
-        "type": "mongodb_replica_set",
-        "version": "2.4.6",
+        'api_endpoint': 'not_a_real_endpoint',
+        'connect_string': 'REPLSET_60000/localhost:60000,localhost:60001,localhost:60002',
+        'created': datetime.datetime.strftime(now, constants.TIME_FORMAT),
+        'name': 'testinstance',
+        'plan': 1,
+        'service': 'mongodb',
+        'type': 'mongodb_replica_set',
+        'version': '2.4.6',
     }
     return doc
 
@@ -128,14 +128,14 @@ def mongo_replica_doc():
 def mongo_sharded_doc():
     now = datetime.datetime.utcnow()
     doc = {
-        "api_endpoint": 'not_a_real_endpoint',
-        "connect_string": "localhost:50002",
-        "created": datetime.datetime.strftime(now, constants.TIME_FORMAT),
-        "name": "testinstance",
-        "plan": 5,
-        "service": "mongodb",
-        "ssl_connect_string": "localhost:60002",
-        "type": "mongodb_sharded",
-        "version": "2.4.6",
+        'api_endpoint': 'not_a_real_endpoint',
+        'connect_string': 'localhost:50002',
+        'created': datetime.datetime.strftime(now, constants.TIME_FORMAT),
+        'name': 'testinstance',
+        'plan': 5,
+        'service': 'mongodb',
+        'ssl_connect_string': 'localhost:60002',
+        'type': 'mongodb_sharded',
+        'version': '2.4.6',
     }
     return doc

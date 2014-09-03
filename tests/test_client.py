@@ -106,7 +106,7 @@ class TestClient(conftest.ClientHarness, conftest.GenericFixtures):
         client._verify_auth(resp)
 
     #########################
-    # TEST EMBEDDED CLASSES #
+    # test embedded classes #
     #########################
     def test_client_has_embedded_auth_class(self, requests_patches):
         user_key, pass_key = 'test_user_key', 'test_pass_key'

@@ -23,129 +23,160 @@ class TestInstances(conftest.InstancesHarness, conftest.GenericFixtures):
 
         return response()
 
+    ###################
+    # test properties #
+    ###################
     def test_instances_client(self, client_token_auth):
         assert isinstance(client_token_auth.instances._client, Client)
 
-    def test_instances_api_instnaces_url(self, client_token_auth):
+    def test_instances_url(self, client_token_auth):
         assert client_token_auth.instances.url == client_token_auth.url + 'instance/'
 
-    ####################
-    # GET METHOD TESTS #
-    ####################
-    def test_get_calls_proper_endpoint_with_no_args(self, requests_patches, client_token_auth, obj):
-        requests_patches['instances'].get.return_value = self._response_object()
-        rv = client_token_auth.instances.get()
+    def test_instances_service_class_map(self, client_token_auth):
+        expected_map = {
+            'mongodb': instances.MongodbInstance,
+            'redis': instances.RedisInstance,
+            'tokumx': instances.TokumxInstance,
+        }
+        assert client_token_auth.instances._service_class_map == expected_map
 
-        expected_endpoint = client_token_auth.url + 'instance/'
+    ######################
+    # test instances.get #
+    ######################
+    def test_get_calls_proper_endpoint(self, requests_patches, client_token_auth, obj):
+        requests_patches['instances'].get.return_value = self._response_object(data={})
+        fake_instance_name = 'test_instance'
+        rv = client_token_auth.instances.get(instance_name=fake_instance_name)
+
+        expected_endpoint = client_token_auth.instances.url + fake_instance_name + '/'
         requests_patches['instances'].get.assert_called_once_with(
             expected_endpoint,
-            **client_token_auth.default_request_kwargs)
-        assert rv == []
+            **client_token_auth.default_request_kwargs
+        )
+        assert rv == {}
 
-    def test_get_calls_proper_endpoint_with_args(self, requests_patches, client_token_auth):
-        requests_patches['instances'].get.return_value = self._response_object()
-        rv = client_token_auth.instances.get('instance0')
+    ##########################
+    # test instances.get_all #
+    ##########################
+    def test_get_all_calls_proper_endpoint(self, requests_patches, client_token_auth):
+        requests_patches['instances'].get.return_value = self._response_object(data=[])
+        rv = client_token_auth.instances.get_all()
 
-        expected_endpoint = client_token_auth.url + 'instance/instance0/'
+        expected_endpoint = client_token_auth.instances.url
         requests_patches['instances'].get.assert_called_once_with(
             expected_endpoint,
-            **client_token_auth.default_request_kwargs)
-        assert rv == []
-
-    #######################
-    # CREATE METHOD TESTS #
-    #######################
-    def test_create_calls_proper_end_point(self, requests_patches, client_token_auth,
-                                           default_create_instance_kwargs):
-        requests_patches['instances'].post.return_value = self._response_object()
-        rv = client_token_auth.instances.create(**default_create_instance_kwargs)
-        default_create_instance_kwargs.pop('service_type')
-
-        expected_endpoint = client_token_auth.url + 'instance/'
-        requests_patches['instances'].post.assert_called_once_with(
-            expected_endpoint,
-            data=json.dumps(default_create_instance_kwargs),
             **client_token_auth.default_request_kwargs
         )
         assert rv == []
 
-    def test_create_fails_with_bad_service_type_value(self, client_token_auth,
-                                                      default_create_instance_kwargs):
-        default_create_instance_kwargs['service_type'] = 'not_a_valid_service'
-        with pytest.raises(errors.InstancesException) as exinfo:
-            client_token_auth.instances.create(**default_create_instance_kwargs)
+    # #########################
+    # # test instances.create #
+    # #########################
+    # def test_create_calls_proper_end_point(self, requests_patches, client_token_auth,
+    #                                        default_create_instance_kwargs):
+    #     requests_patches['instances'].post.return_value = self._response_object()
+    #     rv = client_token_auth.instances.create(**default_create_instance_kwargs)
+    #     default_create_instance_kwargs.pop('service_type')
 
-        assert exinfo.value.args[0] == ('Invalid value for "service_type". '
-                                        'Must be one of "mongodb".')
+    #     expected_endpoint = client_token_auth.url + 'instance/'
+    #     requests_patches['instances'].post.assert_called_once_with(
+    #         expected_endpoint,
+    #         data=json.dumps(default_create_instance_kwargs),
+    #         **client_token_auth.default_request_kwargs
+    #     )
+    #     assert rv == []
 
-    def test_create_fails_with_bad_version_value(self, client_token_auth,
-                                                 default_create_instance_kwargs):
-        default_create_instance_kwargs['version'] = 'not_a_valid_version'
-        with pytest.raises(errors.InstancesException) as exinfo:
-            client_token_auth.instances.create(**default_create_instance_kwargs)
+    # def test_create_fails_with_bad_service_type_value(self, client_token_auth,
+    #                                                   default_create_instance_kwargs):
+    #     default_create_instance_kwargs['service_type'] = 'not_a_valid_service'
+    #     with pytest.raises(errors.InstancesException) as exinfo:
+    #         client_token_auth.instances.create(**default_create_instance_kwargs)
 
-        assert exinfo.value.args[0] == ('Invalid value for "version". '
-                                        'Must be one of "2.4.6".')
+    #     assert exinfo.value.args[0] == ('Invalid value for "service_type". '
+    #                                     'Must be one of "mongodb".')
 
-    ####################
-    # COMPACTION TESTS #
-    ####################
-    def test_compaction_calls_proper_end_point_request_compaction_false(self,
-                                                                        requests_patches,
-                                                                        client_token_auth):
-        requests_patches['instances'].get.return_value = self._response_object()
-        instance_name = 'instance0'
-        rv = client_token_auth.instances.compaction(instance_name=instance_name,
-                                                    request_compaction=False)
+    # def test_create_fails_with_bad_version_value(self, client_token_auth,
+    #                                              default_create_instance_kwargs):
+    #     default_create_instance_kwargs['version'] = 'not_a_valid_version'
+    #     with pytest.raises(errors.InstancesException) as exinfo:
+    #         client_token_auth.instances.create(**default_create_instance_kwargs)
 
-        expected_endpoint = client_token_auth.url + 'instance/' + instance_name + '/compaction/'
-        requests_patches['instances'].get.assert_called_once_with(
-            expected_endpoint,
-            **client_token_auth.default_request_kwargs)
-        assert rv == {'data': []}
+    #     assert exinfo.value.args[0] == ('Invalid value for "version". '
+    #                                     'Must be one of "2.4.6".')
 
-    def test_compaction_calls_proper_end_point_request_compaction_true(self,
-                                                                       requests_patches,
-                                                                       client_token_auth):
-        requests_patches['instances'].post.return_value = self._response_object()
-        instance_name = 'instance0'
-        rv = client_token_auth.instances.compaction(instance_name=instance_name,
-                                                    request_compaction=True)
 
-        expected_endpoint = client_token_auth.url + 'instance/' + instance_name + '/compaction/'
-        requests_patches['instances'].post.assert_called_once_with(
-            expected_endpoint,
-            **client_token_auth.default_request_kwargs)
-        assert rv == {'data': []}
 
-    ################
-    # SHARDS TESTS #
-    ################
-    def test_shards_calls_proper_end_point_without_add_shard(self,
-                                                             requests_patches,
-                                                             client_token_auth):
-        requests_patches['instances'].get.return_value = self._response_object()
-        instance_name = 'instance0'
-        rv = client_token_auth.instances.shards(instance_name=instance_name, add_shard=False)
 
-        expected_endpoint = client_token_auth.url + 'instance/' + instance_name + '/shard/'
-        requests_patches['instances'].get.assert_called_once_with(
-            expected_endpoint,
-            **client_token_auth.default_request_kwargs)
-        assert rv == {'data': []}
 
-    def test_shards_calls_proper_end_point_with_add_shard(self,
-                                                          requests_patches,
-                                                          client_token_auth):
-        requests_patches['instances'].post.return_value = self._response_object()
-        instance_name = 'instance0'
-        rv = client_token_auth.instances.shards(instance_name=instance_name, add_shard=True)
 
-        expected_endpoint = client_token_auth.url + 'instance/' + instance_name + '/shard/'
-        requests_patches['instances'].post.assert_called_once_with(
-            expected_endpoint,
-            **client_token_auth.default_request_kwargs)
-        assert rv == {'data': []}
+
+
+
+
+
+
+
+
+
+    # ####################
+    # # COMPACTION TESTS #
+    # ####################
+    # def test_compaction_calls_proper_end_point_request_compaction_false(self,
+    #                                                                     requests_patches,
+    #                                                                     client_token_auth):
+    #     requests_patches['instances'].get.return_value = self._response_object()
+    #     instance_name = 'instance0'
+    #     rv = client_token_auth.instances.compaction(instance_name=instance_name,
+    #                                                 request_compaction=False)
+
+    #     expected_endpoint = client_token_auth.url + 'instance/' + instance_name + '/compaction/'
+    #     requests_patches['instances'].get.assert_called_once_with(
+    #         expected_endpoint,
+    #         **client_token_auth.default_request_kwargs)
+    #     assert rv == {'data': []}
+
+    # def test_compaction_calls_proper_end_point_request_compaction_true(self,
+    #                                                                    requests_patches,
+    #                                                                    client_token_auth):
+    #     requests_patches['instances'].post.return_value = self._response_object()
+    #     instance_name = 'instance0'
+    #     rv = client_token_auth.instances.compaction(instance_name=instance_name,
+    #                                                 request_compaction=True)
+
+    #     expected_endpoint = client_token_auth.url + 'instance/' + instance_name + '/compaction/'
+    #     requests_patches['instances'].post.assert_called_once_with(
+    #         expected_endpoint,
+    #         **client_token_auth.default_request_kwargs)
+    #     assert rv == {'data': []}
+
+    # ################
+    # # SHARDS TESTS #
+    # ################
+    # def test_shards_calls_proper_end_point_without_add_shard(self,
+    #                                                          requests_patches,
+    #                                                          client_token_auth):
+    #     requests_patches['instances'].get.return_value = self._response_object()
+    #     instance_name = 'instance0'
+    #     rv = client_token_auth.instances.shards(instance_name=instance_name, add_shard=False)
+
+    #     expected_endpoint = client_token_auth.url + 'instance/' + instance_name + '/shard/'
+    #     requests_patches['instances'].get.assert_called_once_with(
+    #         expected_endpoint,
+    #         **client_token_auth.default_request_kwargs)
+    #     assert rv == {'data': []}
+
+    # def test_shards_calls_proper_end_point_with_add_shard(self,
+    #                                                       requests_patches,
+    #                                                       client_token_auth):
+    #     requests_patches['instances'].post.return_value = self._response_object()
+    #     instance_name = 'instance0'
+    #     rv = client_token_auth.instances.shards(instance_name=instance_name, add_shard=True)
+
+    #     expected_endpoint = client_token_auth.url + 'instance/' + instance_name + '/shard/'
+    #     requests_patches['instances'].post.assert_called_once_with(
+    #         expected_endpoint,
+    #         **client_token_auth.default_request_kwargs)
+    #     assert rv == {'data': []}
 
     ############################
     # CONVENIENCE METHOD TESTS #
