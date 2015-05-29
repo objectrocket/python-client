@@ -2,16 +2,15 @@
 import functools
 import requests
 
-from objectrocket import operations
+from objectrocket import bases
 from objectrocket import errors
 
 
-def _token_auto_auth(func):
+def token_auto_auth(func):
     """Wrap class methods with automatic token re-authentication.
 
     This wrapper will detect authentication failures coming from its wrapped method. When one is
-    caught, it will request a new token, and simply replay the original request. If the client
-    object is not using token authentication, then this wrapper effectively does nothing.
+    caught, it will request a new token, and simply replay the original request.
 
     The one constraint that this wrapper has is that the wrapped method's class must have the
     :py:class:`objectrocket.client.Client` object embedded in it as the property ``client``. Such
@@ -28,35 +27,38 @@ def _token_auto_auth(func):
                 raise
 
             # Request a new token using the keypair originally given to the client.
-            self.client._token = self.client.auth.authenticate(self.client.user_key,
-                                                               self.client.pass_key)
+            self.client._token = self.client.auth.authenticate(self.client.username,
+                                                               self.client.password)
             response = func(self, *args, **kwargs)
         return response
 
     return wrapper
 
 
-class Auth(operations.BaseOperationsLayer):
+class Auth(bases.BaseOperationsLayer):
     """Authentication operations.
 
-    :param objectrocket.client.Client client_instance: An objectrocket.client.Client instance.
+    :param objectrocket.client.Client base_client: An objectrocket.client.Client instance.
     """
 
-    def __init__(self, client_instance):
-        super(Auth, self).__init__(client_instance=client_instance)
+    def __init__(self, base_client):
+        super(Auth, self).__init__(base_client=base_client)
 
-    def authenticate(self, user_key, pass_key):
+    def authenticate(self, username, password):
         """Authenticate against the ObjectRocket API.
 
-        :param str user_key: The username key used for basic auth.
-        :param str pass_key: The password key used for basic auth.
+        :param str username: The username to perform basic authentication against the API with.
+        :param str password: The password to perform basic authentication against the API with.
 
         :returns: A token used for authentication against token protected resources.
         :rtype: str
         """
-        url = self.url + 'token/'
-        resp = requests.get(url, auth=(user_key, pass_key),
-                            hooks=dict(response=self.client._verify_auth))
+        resp = requests.get(
+            self.url,
+            auth=(username, password),
+            # TODO(TheDodd): maybe break client.default_request_kwargs.hooks into client prop.
+            hooks=dict(response=self.client._verify_auth)
+        )
 
         try:
             data = resp.json()
@@ -68,4 +70,4 @@ class Auth(operations.BaseOperationsLayer):
     @property
     def url(self):
         """The base URL for authentication operations."""
-        return self.client.url + 'auth/'
+        return self.client.url + 'tokens/'
