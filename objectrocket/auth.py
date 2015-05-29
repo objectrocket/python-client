@@ -62,7 +62,7 @@ class Auth(bases.BaseOperationsLayer):
 
         try:
             data = resp.json()
-            token = data['data']
+            token = data['data']['token']
             return token
         except (ValueError, KeyError) as ex:
             raise errors.AuthFailure(str(ex))

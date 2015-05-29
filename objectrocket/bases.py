@@ -39,9 +39,11 @@ class BaseInstance(object):
         self._type = instance_document.pop('type', None)
         self._version = instance_document.pop('version', None)
 
-        # Bind any additional items as properties.
-        for key, val in instance_document.items():
-            setattr(self, key, val)
+        # TODO(TheDodd): not too sure about this approach here.
+        # # Bind any additional items as properties.
+        # for key, val in instance_document.items():
+        #     if key not in self.__dict__:
+        #         setattr(self, key, val)
 
     def __repr__(self):
         """Represent this object as a string."""
