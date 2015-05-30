@@ -1,6 +1,7 @@
-"""MongoDB instance classes."""
+"""MongoDB instance classes and logic."""
 import datetime
 import json
+import logging
 
 import pymongo
 import requests
@@ -10,11 +11,14 @@ from objectrocket import bases
 from objectrocket import constants
 from objectrocket import errors
 
+logger = logging.getLogger(__name__)
+
 
 class MongodbInstance(bases.BaseInstance):
     """An ObjectRocket MongoDB service instance.
 
-    :param dict instance_document: A dictionary representing the instance object.
+    :param dict instance_document: A dictionary representing the instance object, most likey coming
+        from the ObjectRocket API.
     :param object client: An instance of :py:class:`objectrocket.client.Client`, most likely coming
         from the :py:class:`objectrocket.instance.Instances` service layer.
     """
@@ -22,20 +26,20 @@ class MongodbInstance(bases.BaseInstance):
     def __init__(self, instance_document, client):
         super(MongodbInstance, self).__init__(instance_document=instance_document, client=client)
 
-        # Bind pseudo private attributes from instance_document.
-        self._plan = instance_document['plan']
+        # Bind required pseudo private attributes from API response document.
+        # Smallest plans may not have an SSL/TLS connection string.
         self._ssl_connect_string = instance_document.get('ssl_connect_string')
 
-        # Lazily-created properties.
-        self._connection = None
-
+    #####################
+    # Public interface. #
+    #####################
     @auth.token_auto_auth
     def compaction(self, request_compaction=False):
         """Retrieve a report on, or request compaction for this instance.
 
         :param bool request_compaction: A boolean indicating whether or not to request compaction.
         """
-        url = self.url + self.name + '/compaction/'
+        url = self._url + self.name + '/compaction/'
 
         if request_compaction:
             response = requests.post(url, **self.client.default_request_kwargs)
@@ -44,42 +48,32 @@ class MongodbInstance(bases.BaseInstance):
 
         return response.json()
 
-    @property
-    def connection(self):
-        """A live connection to this instance."""
-        if self._connection is None:
-            self._connection = self._get_connection()
-        return self._connection
-
-    def get_authenticated_connection(self, user, passwd, db='admin'):
-        """Establish an authenticated connection to this instance.
+    def get_authenticated_connection(self, user, passwd, db='admin', ssl=True):
+        """Get an authenticated connection to this instance.
 
         :param str user: The username to use for authentication.
         :param str passwd: The password to use for authentication.
-        :param str db: The name of the database to authenticate against. Defaults to 'Admin'.
+        :param str db: The name of the database to authenticate against. Defaults to ``'Admin'``.
+        :param bool ssl: Use SSL/TLS if available for this instance. Defaults to ``True``.
+        :raises: :py:class:`pymongo.errors.OperationError` if authentication fails.
         """
+        # Attempt to establish an authenticated connection.
         try:
-            self.connection[db].authenticate(user, passwd)
+            connection = self.get_connection(ssl=ssl)
+            connection[db].authenticate(user, passwd)
+            return connection
+
+        # Catch exception here for logging, then just re-raise.
         except pymongo.errors.OperationError as ex:
-            raise errors.InstancesException(str(ex))
+            logger.exception(ex)
+            raise
 
-        return self.connection
+    def get_connection(self, ssl=True):
+        """Get a live connection to this instance.
 
-    def _get_connection(self):
-        """Establish a live connection to the instance."""
-        if self.type == constants.MONGODB_SHARDED_INSTANCE:
-            host, port = self.connect_string.split(':')
-            port = int(port)
-            return pymongo.MongoClient(host=host, port=port)
-        elif self.type == constants.MONGODB_REPLICA_SET_INSTANCE:
-            replica_set_name, member_list = self.connect_string.split('/')
-            member_list = member_list.strip().strip(',')
-            return pymongo.MongoReplicaSetClient(hosts_or_uri=member_list)
-
-    @property
-    def plan(self):
-        """The base plan size of this instance."""
-        return self._plan
+        :param bool ssl: Use SSL/TLS if available for this instance.
+        """
+        return self._get_connection(ssl=ssl)
 
     @auth.token_auto_auth
     def shards(self, add_shard=False):
@@ -88,7 +82,7 @@ class MongodbInstance(bases.BaseInstance):
         :param bool add_shard: A boolean indicating whether to add a new shard to the specified
             instance.
         """
-        url = self.url + self.name + '/shard/'
+        url = self._url + self.name + '/shards/'
         if add_shard:
             response = requests.post(url, **self.client.default_request_kwargs)
         else:
@@ -104,8 +98,7 @@ class MongodbInstance(bases.BaseInstance):
     @auth.token_auto_auth
     def stepdown_window(self):
         """Get information on this instance's stepdown window."""
-        url = self.url + self.name + '/stepdown/'
-
+        url = self._url + self.name + '/stepdown/'
         response = requests.get(url, **self.client.default_request_kwargs)
         return response.json()
 
@@ -131,7 +124,7 @@ class MongodbInstance(bases.BaseInstance):
             raise errors.InstancesException(str(ex) + 'Time strings should be of the following '
                                                       'format: %s' % constants.TIME_FORMAT)
 
-        url = self.url + self.name + '/stepdown/'
+        url = self._url + self.name + '/stepdown/'
 
         data = {
             'start': start,
@@ -144,11 +137,30 @@ class MongodbInstance(bases.BaseInstance):
         response = requests.post(url, data=json.dumps(data), **self.client.default_request_kwargs)
         return response.json()
 
+    ######################
+    # Private interface. #
+    ######################
+    def _get_connection(self, ssl):
+        """Get a live connection to this instance."""
+
+        # Use SSL/TLS if requested and available.
+        connect_string = self.connect_string
+        if ssl and self.ssl_connect_string:
+            connect_string = self.ssl_connect_string
+
+        # Use replica set client if needed.
+        if self.type == [constants.MONGODB_REPLICA_SET_INSTANCE, constants.TOKUMX_REPLICA_SET_INSTANCE]:
+            return pymongo.MongoReplicaSetClient(connect_string)
+
+        # Else, use standard client.
+        return pymongo.MongoClient(connect_string)
+
 
 class TokumxInstance(MongodbInstance):
     """An ObjectRocket TokuMX service instance.
 
-    :param dict instance_document: A dictionary representing the instance object.
+    :param dict instance_document: A dictionary representing the instance object, most likey coming
+        from the ObjectRocket API.
     :param object client: An instance of :py:class:`objectrocket.client.Client`, most likely coming
         from the :py:class:`objectrocket.instance.Instances` service layer.
     """

@@ -2,7 +2,6 @@
 from objectrocket import auth
 from objectrocket import instances
 from objectrocket import constants
-from objectrocket import errors
 
 
 class Client(object):
@@ -19,68 +18,62 @@ class Client(object):
 
     def __init__(self, username, password, **kwargs):
         # Client properties.
-        self._url = kwargs.get('alternative_url') or constants.DEFAULT_API_URL
-        self._username = username
-        self._password = password
+        self._base_url = kwargs.get('alternative_url') or constants.DEFAULT_API_URL
+        self.__username = username
+        self.__password = password
 
         # Lazily-created properties.
+        self._auth = None
         self._instances = None
+        self.__token = None
 
-        # Authenticate.
-        self._auth = auth.Auth(base_client=self)
-        self._token = self._auth.authenticate(username=self.username, password=self.password)
+        # Perform authentication as part of initialization phase for now.
+        self._token  # Accessing this attribute will trigger authentication.
 
+    #####################
+    # Public interface. #
+    #####################
     @property
     def auth(self):
         """The authentication operations layer."""
+        if self._auth is None:
+            self._auth = auth.Auth(base_client=self)
         return self._auth
-
-    # TODO(TheDodd): move this to respective base classes.
-    @property
-    def default_request_kwargs(self):
-        """The default request keyword arguments to be passed to the request library."""
-        default_kwargs = {
-            'headers': {
-                'Content-Type': 'application/json',
-                'X-Auth-Token': self.token
-            },
-            'hooks': {
-                'response': self._verify_auth
-            }
-        }
-        return default_kwargs
 
     @property
     def instances(self):
-        """The instance operations layer."""
+        """The instances operations layer."""
         if self._instances is None:
             self._instances = instances.Instances(base_client=self)
         return self._instances
 
+    ######################
+    # Private interface. #
+    ######################
     @property
-    def password(self):
+    def _password(self):
         """The password currently being used by this client."""
-        return self._password
+        return self.__password
 
     @property
-    def token(self):
+    def _token(self):
         """The API token this client is currently using."""
-        return self._token
+        if self.__token is None:
+            self.__token = self.auth.authenticate(username=self._username, password=self._password)
+        return self.__token
+
+    @_token.setter
+    def _token(self, new_token):
+        """Set the value of this client's API token."""
+        self.__token = new_token
+        return self.__token
 
     @property
-    def url(self):
+    def _url(self):
         """The base URL this client is using."""
-        return self._url
+        return self._base_url
 
     @property
-    def username(self):
+    def _username(self):
         """The username currently being used by this client."""
-        return self._username
-
-    def _verify_auth(self, resp, *args, **kwargs):
-        """A callback handler to verify that the given response object did not receive a 401."""
-        if resp.status_code == 401:
-            raise errors.AuthFailure(
-                'Received response code 401 from {} {}. Token used: {}.'
-                .format(resp.request.method, resp.request.path_url, self.token)
-            )
+        return self.__username

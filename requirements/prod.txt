@@ -1,2 +1,4 @@
-requests>=2.3.0
-pymongo
+pymongo>=2.7
+redis>=2.0
+requests>=2.0.0
+six<2.0
