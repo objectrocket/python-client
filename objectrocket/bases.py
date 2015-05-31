@@ -78,7 +78,7 @@ class BaseInstance(object):
         """Represent this object as a string."""
         _id = hex(id(self))
         rep = (
-            '<objectrocket.instances.{!s} {!r} at {!s}>'
+            '<{!s} {!r} at {!s}>'
             .format(self.__class__.__name__, self.instance_document, _id)
         )
         return rep

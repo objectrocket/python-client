@@ -1,5 +1,5 @@
-Constants
-=========
+objectrocket.constants
+======================
 
 .. automodule:: objectrocket.constants
     :members:
