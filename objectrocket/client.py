@@ -2,7 +2,6 @@
 from objectrocket import auth
 from objectrocket import instances
 from objectrocket import constants
-from objectrocket import errors
 
 
 class Client(object):
@@ -11,91 +10,70 @@ class Client(object):
     Instantiation of the client will perform API authentication. If API authentication fails,
     client instantiation will also fail.
 
-    The client will use API tokens by default. If you don't want to use API  tokens, and would
-    rather have the client perform basic authentication using your keypair for each request, set
-    the ``use_tokens`` parameter to ``False``.
-
-    :param str user_key: This is the user key to be used for API authentication.
-    :param str pass_key: This is the password key to be used for API authentication.
-    :param bool use_tokens: Instruct the client to use tokens or not.
+    :param str username: This is the username to perform basic authentication against the API with.
+    :param str password: This is the password to perform basic authentication against the API with.
     :param str alternative_url: (optional) An alternative base URL for the client to use. You
         shouldn't have to worry about this at all.
     """
 
-    def __init__(self, user_key, pass_key, use_tokens=True, **kwargs):
+    def __init__(self, username, password, **kwargs):
         # Client properties.
-        self._url = kwargs.get('alternative_url') or constants.DEFAULT_API_URL
-        self._user_key = user_key
-        self._pass_key = pass_key
-        self._is_using_tokens = use_tokens
+        self._base_url = kwargs.get('alternative_url') or constants.DEFAULT_API_URL
+        self.__username = username
+        self.__password = password
 
         # Lazily-created properties.
+        self._auth = None
         self._instances = None
+        self.__token = None
 
-        # Authenticate.
-        self._auth = auth.Auth(client_instance=self)
-        self._token = self._auth.authenticate(user_key=self.user_key, pass_key=self.pass_key)
+        # Perform authentication as part of initialization phase for now.
+        self._token  # Accessing this attribute will trigger authentication.
 
+    #####################
+    # Public interface. #
+    #####################
     @property
     def auth(self):
         """The authentication operations layer."""
+        if self._auth is None:
+            self._auth = auth.Auth(base_client=self)
         return self._auth
 
     @property
-    def default_request_kwargs(self):
-        """The default request keyword arguments to be passed to the request library."""
-        default_kwargs = {
-            'headers': {
-                'Content-Type': 'application/json',
-            },
-            'hooks': {
-                'response': self._verify_auth,
-            },
-        }
-
-        # Configue default authentication method based on clients configuration.
-        if self.is_using_tokens:
-            default_kwargs['headers']['X-Auth-Token'] = self.token
-        else:
-            default_kwargs['auth'] = (self.user_key, self.pass_key)
-
-        return default_kwargs
-
-    @property
     def instances(self):
-        """The instance operations layer."""
+        """The instances operations layer."""
         if self._instances is None:
-            self._instances = instances.Instances(client_instance=self)
+            self._instances = instances.Instances(base_client=self)
         return self._instances
 
+    ######################
+    # Private interface. #
+    ######################
     @property
-    def is_using_tokens(self):
-        """A boolean value indicating whether the client is using token authentication or not."""
-        return self._is_using_tokens
+    def _password(self):
+        """The password currently being used by this client."""
+        return self.__password
 
     @property
-    def pass_key(self):
-        """The password key currently being used by this client."""
-        return self._pass_key
-
-    @property
-    def token(self):
+    def _token(self):
         """The API token this client is currently using."""
-        return self._token
+        if self.__token is None:
+            self.__token = self.auth.authenticate(username=self._username, password=self._password)
+        return self.__token
+
+    @_token.setter
+    def _token(self, new_token):
+        """Set the value of this client's API token."""
+        self.__token = new_token
+        return self.__token
 
     @property
-    def url(self):
+    def _url(self):
         """The base URL this client is using."""
-        return self._url
+        return self._base_url
 
     @property
-    def user_key(self):
-        """The user key currently being used by this client."""
-        return self._user_key
-
-    def _verify_auth(self, resp, *args, **kwargs):
-        """A callback handler to verify that the given response object did not receive a 401."""
-        if resp.status_code == 401:
-            raise errors.AuthFailure('Received response code 401 from {} {}. Keypair used: {}:{}'
-                                     ''.format(resp.request.method, resp.request.path_url,
-                                               self.user_key, self.pass_key))
+    def _username(self):
+        """The username currently being used by this client."""
+        return self.__username
