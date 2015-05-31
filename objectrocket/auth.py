@@ -38,7 +38,7 @@ def token_auto_auth(func):
 
         return response
 
-    # TODO(TheDodd): figure out a way to match func call signature and docs.
+    # TODO(TheDodd): match func call signature and docs.
     return wrapper
 
 
@@ -73,8 +73,9 @@ class Auth(bases.BaseOperationsLayer):
             data = resp.json()
             token = data['data']['token']
             return token
-        except (ValueError, KeyError) as ex:
-            raise errors.AuthFailure(str(ex))
+        except Exception as ex:
+            logging.exception(ex)
+            raise errors.AuthFailure(ex)
 
     ######################
     # Private interface. #

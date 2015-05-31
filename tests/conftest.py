@@ -3,6 +3,7 @@ import datetime
 
 import mock
 import pytest
+import requests
 
 from objectrocket.client import Client
 from objectrocket import instances
@@ -30,7 +31,7 @@ constants.DEFAULT_API_URL = '/v2/'
 # Generic fixtures. #
 #####################
 @pytest.fixture
-def client(requests_patches):
+def client(patched_requests_map):
     """Build a client for use in testing."""
     username, password = 'tester', 'testpass'
     return Client(username, password)
@@ -109,6 +110,12 @@ def mongo_sharded_doc():
 ######################
 # Patches and mocks. #
 ######################
+@pytest.fixture
+def mocked_response(request):
+    """Mock a request's response object."""
+    return mock.create_autospec(requests.Response, spec_set=True)
+
+
 @pytest.fixture
 def patched_requests_map(request):
     """Return a dict of ``MagicMock``s which patch the requests library in various places.

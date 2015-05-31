@@ -39,11 +39,11 @@ def test_client_makes_auth_request_upon_instantiation(patched_requests_map):
 
 def test_client_binds_auth_token_properly(patched_requests_map, obj):
     username, password = 'tester', 'testpass'
-
     obj.json = lambda: {'data': {'token': 'testing_token'}}
     patched_requests_map['auth'].get.return_value = obj
 
     client = Client(username, password)
+
     assert client._token == 'testing_token'
 
 
@@ -96,5 +96,7 @@ def test_client_token_setter_binds_new_token(patched_requests_map):
     username, password = 'tester', 'testpass'
     client = Client(username, password)
     new_token = 'new_test_token'
+
     client._token = new_token
+
     assert client._token == new_token
