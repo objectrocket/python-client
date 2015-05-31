@@ -11,103 +11,68 @@ from objectrocket import constants
 constants.DEFAULT_API_URL = '/v2/'
 
 
-class ClientHarness(object):
-    """A harness for testing client based logic."""
+# def pytest_generate_tests(metafunc):
+#     """Generate tests for the different instance types."""
+#     if '_docs' in metafunc.fixturenames:
+#         metafunc.parametrize('_docs', [
+#             mongo_replica_doc(),
+#             mongo_sharded_doc(),
+#         ])
 
-    @pytest.fixture
-    def requests_patches(self, request):
-        """Return a dict of ``MagicMock``s which patch the requests library in various places.
-
-        :returns: A dict where each key is the name of a module, and its value is the ``MagicMock``
-            which is patching the requests library in its respective module.
-        """
-        patches = {}
-
-        mocked = mock.patch('objectrocket.auth.requests', autospec=True)
-        request.addfinalizer(mocked.stop)
-        patches['auth'] = mocked.start()
-
-        mocked = mock.patch('objectrocket.instances.requests', autospec=True)
-        request.addfinalizer(mocked.stop)
-        patches['instances'] = mocked.start()
-
-        return patches
-
-    @pytest.fixture
-    def client_basic_auth(self, requests_patches):
-        """Build a client configured to use basic auth."""
-        user_key, pass_key = 'test_user_key', 'test_pass_key'
-        return Client(user_key, pass_key, use_tokens=False)
-
-    @pytest.fixture
-    def client_token_auth(self, requests_patches):
-        """Build a client configured to use token auth."""
-        user_key, pass_key = 'test_user_key', 'test_pass_key'
-        return Client(user_key, pass_key, use_tokens=True)
+#     if '_instances_and_docs' in metafunc.fixturenames:
+#         metafunc.parametrize('_instances_and_docs', [
+#             (self.mongo_replica_instance(mongo_replica_doc()), mongo_replica_doc()),
+#             (self.mongo_sharded_instance(mongo_sharded_doc()), mongo_sharded_doc()),
+#         ])
 
 
-class InstancesHarness(ClientHarness):
-    """A harness for testing operations logic."""
-
-    def pytest_generate_tests(self, metafunc):
-        """Generate tests for the different instance types."""
-        if '_docs' in metafunc.fixturenames:
-            metafunc.parametrize('_docs', [
-                mongo_replica_doc(),
-                mongo_sharded_doc(),
-            ])
-
-        if '_instances_and_docs' in metafunc.fixturenames:
-            metafunc.parametrize('_instances_and_docs', [
-                (self.mongo_replica_instance(mongo_replica_doc()), mongo_replica_doc()),
-                (self.mongo_sharded_instance(mongo_sharded_doc()), mongo_sharded_doc()),
-            ])
-
-    @pytest.fixture
-    def default_create_instance_kwargs(self):
-        """Return a dict having default data for calling Instances.create."""
-        data = {
-            'name': 'instance0',
-            'size': 5,
-            'zone': 'US-West',
-            'service_type': 'mongodb',
-            'version': '2.4.6',
-        }
-        return data
-
-    @pytest.fixture
-    def mongo_replica_instance(client_token_auth, mongo_replica_doc):
-        return instances.MongodbInstance(instance_document=mongo_replica_doc,
-                                         client=client_token_auth)
-
-    @pytest.fixture
-    def mongo_sharded_instance(client_token_auth, mongo_sharded_doc):
-        return instances.MongodbInstance(instance_document=mongo_sharded_doc,
-                                         client=client_token_auth)
+#####################
+# Generic fixtures. #
+#####################
+@pytest.fixture
+def client(requests_patches):
+    """Build a client for use in testing."""
+    username, password = 'tester', 'testpass'
+    return Client(username, password)
 
 
-class OperationsHarness(ClientHarness):
-    """A harness for testing operations logic."""
-
-    # Add operations specific fixtures and such here.
-    pass
-
-
-class GenericFixtures(object):
-    """Generic fixtures."""
-
-    @pytest.fixture
-    def obj(self):
-        """A generic object for testing purposes."""
-        class Obj(object):
-            pass
-
-        return Obj()
+@pytest.fixture
+def default_create_instance_kwargs():
+    """Return a dict having default data for instance creation."""
+    data = {
+        'name': 'instance0',
+        'size': 5,
+        'zone': 'US-West',
+        'service_type': 'mongodb',
+        'version': '2.4.6',
+    }
+    return data
 
 
-#############################
-# instance related fixtures #
-#############################
+@pytest.fixture
+def obj():
+    """A generic object for testing purposes."""
+    class Obj(object):
+        pass
+
+    return Obj()
+
+
+##############################
+# Instance related fixtures. #
+##############################
+@pytest.fixture
+def mongodb_replicaset_instance(client_token_auth, mongo_replica_doc):
+    return instances.MongodbInstance(instance_document=mongo_replica_doc,
+                                     client=client_token_auth)
+
+
+@pytest.fixture
+def mongodb_sharded_instance(client_token_auth, mongo_sharded_doc):
+    return instances.MongodbInstance(instance_document=mongo_sharded_doc,
+                                     client=client_token_auth)
+
+
 @pytest.fixture
 def mongo_replica_doc():
     now = datetime.datetime.utcnow()
@@ -139,3 +104,30 @@ def mongo_sharded_doc():
         'version': '2.4.6',
     }
     return doc
+
+
+######################
+# Patches and mocks. #
+######################
+@pytest.fixture
+def patched_requests_map(request):
+    """Return a dict of ``MagicMock``s which patch the requests library in various places.
+
+    :returns: A dict where each key is the name of a module, and its value is the ``MagicMock``
+        which is patching the requests library in its respective module.
+    """
+    patches = {}
+
+    mocked = mock.patch('objectrocket.auth.requests', autospec=True)
+    request.addfinalizer(mocked.stop)
+    patches['auth'] = mocked.start()
+
+    mocked = mock.patch('objectrocket.instances.requests', autospec=True)
+    request.addfinalizer(mocked.stop)
+    patches['instances'] = mocked.start()
+
+    mocked = mock.patch('objectrocket.instances.mongodb.requests', autospec=True)
+    request.addfinalizer(mocked.stop)
+    patches['instances.mongodb'] = mocked.start()
+
+    return patches
