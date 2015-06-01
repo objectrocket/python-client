@@ -113,7 +113,7 @@ def mongo_sharded_doc():
 @pytest.fixture
 def mocked_response(request):
     """Mock a request's response object."""
-    return mock.create_autospec(requests.Response, spec_set=True)
+    return mock.create_autospec(requests.Response)
 
 
 @pytest.fixture
