@@ -121,7 +121,7 @@ class Instances(bases.BaseOperationsLayer):
         # If service key is a recognized service type, instantiate its respective instance.
         if service in self._service_class_map:
             cls = self._service_class_map[service]
-            inst = cls(instance_document=instance_doc, client=self.client)
+            inst = cls(instance_document=instance_doc, base_client=self.client)
 
         # If service is not recognized, log a warning and return None.
         else:

@@ -63,19 +63,7 @@ def obj():
 # Instance related fixtures. #
 ##############################
 @pytest.fixture
-def mongodb_replicaset_instance(client_token_auth, mongo_replica_doc):
-    return instances.MongodbInstance(instance_document=mongo_replica_doc,
-                                     client=client_token_auth)
-
-
-@pytest.fixture
-def mongodb_sharded_instance(client_token_auth, mongo_sharded_doc):
-    return instances.MongodbInstance(instance_document=mongo_sharded_doc,
-                                     client=client_token_auth)
-
-
-@pytest.fixture
-def mongo_replica_doc():
+def mongodb_replica_doc():
     now = datetime.datetime.utcnow()
     doc = {
         'api_endpoint': 'not_a_real_endpoint',
@@ -91,7 +79,7 @@ def mongo_replica_doc():
 
 
 @pytest.fixture
-def mongo_sharded_doc():
+def mongodb_sharded_doc():
     now = datetime.datetime.utcnow()
     doc = {
         'api_endpoint': 'not_a_real_endpoint',
@@ -105,6 +93,18 @@ def mongo_sharded_doc():
         'version': '2.4.6',
     }
     return doc
+
+
+@pytest.fixture
+def mongodb_replicaset_instance(client_token_auth, mongodb_replica_doc):
+    return instances.MongodbInstance(instance_document=mongodb_replica_doc,
+                                     client=client_token_auth)
+
+
+@pytest.fixture
+def mongodb_sharded_instance(client_token_auth, mongodb_sharded_doc):
+    return instances.MongodbInstance(instance_document=mongodb_sharded_doc,
+                                     client=client_token_auth)
 
 
 ######################
