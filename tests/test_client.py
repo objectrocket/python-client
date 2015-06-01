@@ -47,33 +47,6 @@ def test_client_binds_auth_token_properly(patched_requests_map, obj):
     assert client._token == 'testing_token'
 
 
-# TODO(TheDodd): move to base operations layer.
-# def test_client_verify_auth_hook_raises_with_code_401(patched_requests_map):
-#     username, password = 'tester', 'testpass'
-#     client = Client(username, password)
-
-#     resp = type('response', (object,), {'status_code': 401})
-#     resp.request = type('request', (object,), {'method': 'GET', 'path_url': 'testing'})
-
-#     with pytest.raises(errors.AuthFailure) as exinfo:
-#         client._verify_auth(resp)
-
-#     assert len(exinfo.value.args) == 1
-#     assert exinfo.value.args[0] == ('Received response code 401 from {} {}. '
-#                                     'Keypair used: {}:{}'.format(resp.request.method,
-#                                                                  resp.request.path_url,
-#                                                                  username, password))
-
-
-# TODO(TheDodd): move to base operations layer.
-# def test_client_verify_auth_hook_does_not_raise_with_code_200(patched_requests_map):
-#     username, password = 'tester', 'testpass'
-#     client = Client(username, password)
-
-#     resp = type('response', (object,), {'status_code': 200})
-#     client._verify_auth(resp)
-
-
 ######################################
 # Tests for Client public interface. #
 ######################################
