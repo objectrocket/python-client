@@ -73,6 +73,51 @@ def test_instance_repr_is_as_expected(client, mongodb_sharded_doc):
     assert repr(inst) == expected_repr
 
 
+def test_inst_connect_string_attribute_is_as_expected(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst._connect_string == mongodb_sharded_doc['connect_string']
+
+
+def test_inst_created_attribute_is_as_expected(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst._created == mongodb_sharded_doc['created']
+
+
+def test_inst_instance_document_attribute_is_as_expected(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst._instance_document is mongodb_sharded_doc
+
+
+def test_inst_name_attribute_is_as_expected(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst._name == mongodb_sharded_doc['name']
+
+
+def test_inst_plan_attribute_is_as_expected(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst._plan == mongodb_sharded_doc['plan']
+
+
+def test_inst_service_attribute_is_as_expected(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst._service == mongodb_sharded_doc['service']
+
+
+def test_inst_type_attribute_is_as_expected(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst._type == mongodb_sharded_doc['type']
+
+
+def test_inst_version_attribute_is_as_expected(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst._version == mongodb_sharded_doc['version']
+
+
+def test_inst_to_dict_returns_expected_output(client, mongodb_sharded_doc):
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    assert inst.to_dict() == mongodb_sharded_doc
+
+
 ##################################
 # Tests for BaseOperationsLayer. #
 ##################################
