@@ -1,5 +1,5 @@
-Client
-======
+objectrocket.client
+===================
 
 .. automodule:: objectrocket.client
     :members:

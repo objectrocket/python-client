@@ -61,8 +61,8 @@ class BaseInstance(object):
         from the :py:class:`objectrocket.instance.Instances` service layer.
     """
 
-    def __init__(self, instance_document, client):
-        self._client = client
+    def __init__(self, instance_document, base_client):
+        self._client = base_client
         self._instance_document = instance_document
 
         # Bind required pseudo private attributes from API response document.
@@ -78,7 +78,7 @@ class BaseInstance(object):
         """Represent this object as a string."""
         _id = hex(id(self))
         rep = (
-            '<objectrocket.instances.{!s} {!r} at {!s}>'
+            '<{!s} {!r} at {!s}>'
             .format(self.__class__.__name__, self.instance_document, _id)
         )
         return rep

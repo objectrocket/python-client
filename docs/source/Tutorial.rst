@@ -1,37 +1,36 @@
 Tutorial
 ========
-And now for a super fun tutorial. Provided that you've already performed an
-:ref:`installation-label`, here is an example of how you might want to use the client:
+And now for a super awesome tutorial. Provided that you've already performed an :ref:`installation-label`, here is an example of how you might want to use the client:
 
 .. code-block:: python
 
     import objectrocket
     >>>
 
-    client = objectrocket.Client('<user_key>', '<pass_key>')
+    client = objectrocket.Client('<username>', '<password>')
     >>>
 
-    # To create a new instance.
-    client.instances.create(name='instance0', size=5, zone='US-West', service_type='mongodb', version='2.4.6')
-    >>> <objectrocket.instances.Instance {...} at 0x10afeacd0>
+    # To create a new instance:
+    client.instances.create(name='instance0', size=5, zone='US-West', service_type='mongodb', version='3.0.3')
+    >>> <objectrocket.instances.MongodbInstance {...} at 0x10afeacd0>
 
-    # To get all of your instances in a list.
-    client.instances.get()
-    >>> [<objectrocket.instances.Instance {...} at 0x1091f9990>]
+    # To get all of your instances in a list:
+    client.instances.all()
+    >>> [<objectrocket.instances.MongodbInstance {...} at 0x1091f9990>]
 
-    # To get one of your instances as an Instance object.
+    # To get one of your instances by name:
     inst = client.instances.get('instance0')
     inst
-    >>> <objectrocket.instances.Instance {...} at 0x1097a8390>
+    >>> <objectrocket.instances.MongodbInstance {...} at 0x1097a8390>
 
-    # To add a shard to your instance.
+    # To add a shard to your instance:
     inst.shards(add_shard=True)
-    >>> {u'data': [{u'name': u'REPLSET_60001', u'plan': 5, ...}, {...}]}
+    >>> {'data': [{'name': '7a0d6366f80f4a42995fabe01cbaea74', 'plan': 5, ...}, {...}]}
 
-    # To request compaction for your instance.
+    # To request compaction for your instance:
     inst.compaction(request_compaction=True)
-    >>> {u'data': u'Success'}
+    >>> {'data': 'Success'}
 
-    # To check the compaction state of your instance.
+    # To check the compaction state of your instance:
     inst.compaction()
-    >>> {u'data': {u'state': u'requested', u'updated': u'2025-01-01 00:00:00.000000'}}
+    >>> {'data': {'state': 'requested', 'updated': '2015-01-01 00:00:00.000000'}}

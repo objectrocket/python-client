@@ -1,5 +1,5 @@
-Errors
-======
+objectrocket.errors
+===================
 
 .. automodule:: objectrocket.errors
     :members:
