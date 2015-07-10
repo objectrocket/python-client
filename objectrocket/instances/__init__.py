@@ -37,9 +37,9 @@ class Instances(bases.BaseOperationsLayer):
         data = self._get_response_data(response)
         return self._concrete_instance_list(data)
 
-    # TODO(TheDodd): need to add instance_type.
     @auth.token_auto_auth
-    def create(self, name, size, zone, service_type='mongodb', version='2.4.6'):
+    def create(self, name, size, zone,
+               service_type='mongodb', instance_type='mongodb_sharded', version='2.4.6'):
         """Create an ObjectRocket instance.
 
         :param str name: The name to give to the new instance.
@@ -48,30 +48,16 @@ class Instances(bases.BaseOperationsLayer):
         :param str service_type: The type of service that the new instance is to provide.
         :param str version: The version of the service the new instance is to provide.
         """
-        # TODO(TheDodd): we can probably have the API return a list of available services if the
-        # specified service is not supported.
-        valid_service_types = ('mongodb', )
-        if service_type not in valid_service_types:
-            raise errors.InstancesException('Invalid value for "service_type". Must be one of '
-                                            '"%s".' % valid_service_types)
-
-        # TODO(TheDodd): we can probably have the API return a list of available versions for the
-        # specified service if the given version is not supported.
-        valid_versions = ('2.4.6', )
-        if version not in valid_versions:
-            raise errors.InstancesException('Invalid value for "version". Must be one of "%s".'
-                                            % valid_versions)
-
         # Build up request data.
         url = self._url
         request_data = {
             'name': name,
+            'service': service_type,
             'size': size,
-            'zone': zone,
-            'type': service_type,
+            'type': instance_type,
             'version': version,
+            'zone': zone
         }
-        request_data.pop('type')  # Not passing service type ATM. Probably will soon though.
 
         # Call to create an instance.
         response = requests.post(
@@ -140,7 +126,7 @@ class Instances(bases.BaseOperationsLayer):
         :returns: A list of :py:class:`bases.BaseInstance`s.
         :rtype: list
         """
-        if not isinstance(instance_docs, list):
+        if not instance_docs:
             return []
 
         return filter(None, [self._concrete_instance(instance_doc=doc) for doc in instance_docs])
