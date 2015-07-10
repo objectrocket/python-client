@@ -121,7 +121,7 @@ class Instances(bases.BaseOperationsLayer):
         # If service key is a recognized service type, instantiate its respective instance.
         if service in self._service_class_map:
             cls = self._service_class_map[service]
-            inst = cls(instance_document=instance_doc, base_client=self.client)
+            inst = cls(instance_document=instance_doc, base_client=self._client)
 
         # If service is not recognized, log a warning and return None.
         else:
@@ -162,7 +162,7 @@ class Instances(bases.BaseOperationsLayer):
         """The default request keyword arguments to be passed to the requests library."""
         default_kwargs = super(Instances, self)._default_request_kwargs
         default_kwargs.setdefault('headers', {}).update({
-            'X-Auth-Token': self.client._token
+            'X-Auth-Token': self._client._token
         })
         return default_kwargs
 
@@ -179,4 +179,4 @@ class Instances(bases.BaseOperationsLayer):
     @property
     def _url(self):
         """The base URL for instance operations."""
-        return self.client._url + 'instances/'
+        return self._client._url + 'instances/'

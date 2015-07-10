@@ -11,15 +11,15 @@ class BaseOperationsLayer(object):
     """A base class for operations layer classes."""
 
     def __init__(self, base_client):
-        self._client = base_client
+        self.__client = base_client
 
     #####################
     # Public interface. #
     #####################
     @property
-    def client(self):
+    def _client(self):
         """An instance of the objectrocket.client.Client."""
-        return self._client
+        return self.__client
 
     ######################
     # Private interface. #
@@ -47,7 +47,7 @@ class BaseOperationsLayer(object):
         if resp.status_code == 401:
             raise errors.AuthFailure(
                 'Received response code 401 from {} {}. Token used: {}.'
-                .format(resp.request.method, resp.request.path_url, self.client._token)
+                .format(resp.request.method, resp.request.path_url, self._client._token)
             )
 
 
@@ -57,13 +57,13 @@ class BaseInstance(object):
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming
         from the ObjectRocket API.
-    :param object client: An instance of :py:class:`objectrocket.client.Client`, most likely coming
-        from the :py:class:`objectrocket.instance.Instances` service layer.
+    :param object base_client: An instance of :py:class:`objectrocket.client.Client`, most likely
+        coming from the :py:class:`objectrocket.instance.Instances` service layer.
     """
 
     def __init__(self, instance_document, base_client):
-        self._client = base_client
-        self._instance_document = instance_document
+        self.__client = base_client
+        self.__instance_document = instance_document
 
         # Bind required pseudo private attributes from API response document.
         self._connect_string = instance_document['connect_string']
@@ -79,14 +79,9 @@ class BaseInstance(object):
         _id = hex(id(self))
         rep = (
             '<{!s} {!r} at {!s}>'
-            .format(self.__class__.__name__, self.instance_document, _id)
+            .format(self.__class__.__name__, self._instance_document, _id)
         )
         return rep
-
-    @property
-    def client(self):
-        """An instance of the objectrocket.client.Client."""
-        return self._client
 
     @property
     def connect_string(self):
@@ -102,11 +97,6 @@ class BaseInstance(object):
     def get_connection(self):
         """Get a live connection to this instance."""
         pass
-
-    @property
-    def instance_document(self):
-        """The document used to construct this Instance object."""
-        return self._instance_document
 
     @property
     def name(self):
@@ -135,4 +125,17 @@ class BaseInstance(object):
 
     def to_dict(self):
         """Render this object as a dictionary."""
-        return self.instance_document
+        return self._instance_document
+
+    ######################
+    # Private interface. #
+    ######################
+    @property
+    def _client(self):
+        """An instance of the objectrocket.client.Client."""
+        return self.__client
+
+    @property
+    def _instance_document(self):
+        """The document used to construct this Instance object."""
+        return self.__instance_document

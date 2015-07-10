@@ -16,7 +16,7 @@ def token_auto_auth(func):
     caught, it will request a new token, and simply replay the original request.
 
     The one constraint that this wrapper has is that the wrapped method's class must have the
-    :py:class:`objectrocket.client.Client` object embedded in it as the property ``client``. Such
+    :py:class:`objectrocket.client.Client` object embedded in it as the property ``_client``. Such
     is the design of all current client operations layers.
     """
 
@@ -29,8 +29,11 @@ def token_auto_auth(func):
         except errors.AuthFailure:
 
             # Request and set a new API token.
-            new_token = self.client.auth.authenticate(self.client._username, self.client._password)
-            self.client._token = new_token
+            new_token = self._client.auth.authenticate(
+                self._client._username,
+                self._client._password
+            )
+            self._client._token = new_token
             logger.info('New API token bound to client: "{}".'.format(new_token))
 
             # Replay original request.
@@ -88,4 +91,4 @@ class Auth(bases.BaseOperationsLayer):
     @property
     def _url(self):
         """The base URL for authentication operations."""
-        return self.client._url + 'tokens/'
+        return self._client._url + 'tokens/'

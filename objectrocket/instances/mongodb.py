@@ -19,12 +19,15 @@ class MongodbInstance(bases.BaseInstance):
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming
         from the ObjectRocket API.
-    :param object client: An instance of :py:class:`objectrocket.client.Client`, most likely coming
-        from the :py:class:`objectrocket.instance.Instances` service layer.
+    :param object base_client: An instance of :py:class:`objectrocket.client.Client`, most likely
+        coming from the :py:class:`objectrocket.instance.Instances` service layer.
     """
 
-    def __init__(self, instance_document, client):
-        super(MongodbInstance, self).__init__(instance_document=instance_document, client=client)
+    def __init__(self, instance_document, base_client):
+        super(MongodbInstance, self).__init__(
+            instance_document=instance_document,
+            base_client=base_client
+        )
 
         # Bind required pseudo private attributes from API response document.
         # Smallest plans may not have an SSL/TLS connection string.
@@ -42,9 +45,9 @@ class MongodbInstance(bases.BaseInstance):
         url = self._url + self.name + '/compaction/'
 
         if request_compaction:
-            response = requests.post(url, **self.client.default_request_kwargs)
+            response = requests.post(url, **self._client.default_request_kwargs)
         else:
-            response = requests.get(url, **self.client.default_request_kwargs)
+            response = requests.get(url, **self._client.default_request_kwargs)
 
         return response.json()
 
@@ -84,9 +87,9 @@ class MongodbInstance(bases.BaseInstance):
         """
         url = self._url + self.name + '/shards/'
         if add_shard:
-            response = requests.post(url, **self.client.default_request_kwargs)
+            response = requests.post(url, **self._client.default_request_kwargs)
         else:
-            response = requests.get(url, **self.client.default_request_kwargs)
+            response = requests.get(url, **self._client.default_request_kwargs)
 
         return response.json()
 
@@ -99,7 +102,7 @@ class MongodbInstance(bases.BaseInstance):
     def stepdown_window(self):
         """Get information on this instance's stepdown window."""
         url = self._url + self.name + '/stepdown/'
-        response = requests.get(url, **self.client.default_request_kwargs)
+        response = requests.get(url, **self._client.default_request_kwargs)
         return response.json()
 
     @auth.token_auto_auth
@@ -134,7 +137,7 @@ class MongodbInstance(bases.BaseInstance):
             'weekly': weekly,
         }
 
-        response = requests.post(url, data=json.dumps(data), **self.client.default_request_kwargs)
+        response = requests.post(url, data=json.dumps(data), **self._client.default_request_kwargs)
         return response.json()
 
     ######################
@@ -161,9 +164,12 @@ class TokumxInstance(MongodbInstance):
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming
         from the ObjectRocket API.
-    :param object client: An instance of :py:class:`objectrocket.client.Client`, most likely coming
-        from the :py:class:`objectrocket.instance.Instances` service layer.
+    :param object base_client: An instance of :py:class:`objectrocket.client.Client`, most likely
+        coming from the :py:class:`objectrocket.instance.Instances` service layer.
     """
 
-    def __init__(self, instance_document, client):
-        super(TokumxInstance, self).__init__(instance_document=instance_document, client=client)
+    def __init__(self, instance_document, base_client):
+        super(TokumxInstance, self).__init__(
+            instance_document=instance_document,
+            base_client=base_client
+        )

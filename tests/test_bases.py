@@ -44,12 +44,12 @@ class InstancePrototype(BaseInstance):
 ###########################
 def test_client_is_properly_embedded_in_base_instance(client, mongodb_sharded_doc):
     inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
-    assert inst.client is client
+    assert inst._client is client
 
 
 def test_instance_doc_is_properly_embedded_in_base_instance(client, mongodb_sharded_doc):
     inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
-    assert inst.instance_document is mongodb_sharded_doc
+    assert inst._instance_document is mongodb_sharded_doc
 
 
 @pytest.mark.parametrize('needed_field', REQUIRED_INSTANCE_FIELDS)
@@ -67,7 +67,7 @@ def test_instance_repr_is_as_expected(client, mongodb_sharded_doc):
     inst_id = hex(id(inst))
     expected_repr = (
         '<{!s} {!r} at {!s}>'
-        .format(inst.__class__.__name__, inst.instance_document, inst_id)
+        .format(inst.__class__.__name__, inst._instance_document, inst_id)
     )
 
     assert repr(inst) == expected_repr
@@ -123,7 +123,7 @@ def test_inst_to_dict_returns_expected_output(client, mongodb_sharded_doc):
 ##################################
 def test_client_is_properly_embedded_in_base_ops(client):
     inst = OpsLayerPrototype(base_client=client)
-    assert client is inst.client
+    assert client is inst._client
 
 
 def test_default_request_kwargs(client):
