@@ -12,8 +12,11 @@ class RedisInstance(bases.BaseInstance):
         coming from the :py:class:`objectrocket.instance.Instances` service layer.
     """
 
-    def __init__(self, instance_document, bsae_client):
-        super(RedisInstance, self).__init__(instance_document=instance_document, bsae_client=bsae_client)
+    def __init__(self, instance_document, base_client):
+        super(RedisInstance, self).__init__(
+            instance_document=instance_document,
+            base_client=base_client
+        )
 
         # Bind required pseudo private attributes from API response document.
         self.__password = instance_document['password']
