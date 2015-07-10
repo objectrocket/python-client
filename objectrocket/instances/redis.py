@@ -1,4 +1,6 @@
 """Redis instance classes and logic."""
+from __future__ import absolute_import  # Force absolute imports if running under py2.
+
 import redis
 
 from objectrocket import bases
@@ -34,29 +36,21 @@ class RedisInstance(bases.BaseInstance):
     def get_connection(self, internal=False):
         """Get a live connection to this instance.
 
-        :param bool servicenet: Whether or not to use a DC internal network connection.
+        :param bool internal: Whether or not to use a DC internal network connection.
 
         :rtype: :py:class:`redis.client.StrictRedis`
         """
-        # Keyword arguments to feed to the redis client.
-        kwargs = {'password': self._password}
-
         # Determine the connection string to use.
         connect_string = self.connect_string
         if internal:
             connect_string = self.internal_connect_string
 
-        # Determine if port kwarg also needs to be supplied.
-        if ':' in connect_string:
-            host, port = connect_string.split(':')
-            kwargs.update({'host': host, 'port': port})
-
-        # Else, just supply host.
-        else:
-            kwargs.update({'host': connect_string})
+        # Stripe Redis protocol prefix coming from the API.
+        connect_string = connect_string.strip('redis://')
+        host, port = connect_string.split(':')
 
         # Build and return the redis client.
-        return redis.StrictRedis(host=host, port=port, password=self.password)
+        return redis.StrictRedis(host=host, port=port, password=self._password)
 
     ######################
     # Private interface. #
