@@ -5,6 +5,6 @@ pytest>=2.5.2
 pytest-cov>=1.7.0
 setuptools>=2.1
 sphinx_rtd_theme
-tox>=1.7.1
+tox>=2.0
 wheel>=0.22.0
 git+https://github.com/mverteuil/pytest-ipdb.git

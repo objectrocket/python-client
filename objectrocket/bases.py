@@ -13,17 +13,14 @@ class BaseOperationsLayer(object):
     def __init__(self, base_client):
         self.__client = base_client
 
-    #####################
-    # Public interface. #
-    #####################
+    ######################
+    # Private interface. #
+    ######################
     @property
     def _client(self):
         """An instance of the objectrocket.client.Client."""
         return self.__client
 
-    ######################
-    # Private interface. #
-    ######################
     @abc.abstractproperty
     def _default_request_kwargs(self):
         """The default request keyword arguments to be passed to the requests library."""
@@ -46,8 +43,8 @@ class BaseOperationsLayer(object):
         """A callback handler to verify that the given response object did not receive a 401."""
         if resp.status_code == 401:
             raise errors.AuthFailure(
-                'Received response code 401 from {} {}. Token used: {}.'
-                .format(resp.request.method, resp.request.path_url, self._client._token)
+                'Received response code 401 from {} {}.'
+                .format(resp.request.method, resp.request.path_url)
             )
 
 

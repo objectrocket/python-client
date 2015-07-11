@@ -162,6 +162,4 @@ def test_verify_auth_raises_with_status_code_401(client, mocked_response, obj):
     with pytest.raises(errors.AuthFailure) as exinfo:
         inst._verify_auth(mocked_response)
 
-    assert exinfo.value.args[0] == (
-        'Received response code 401 from TEST /TEST/PATH/. Token used: {}.'
-        .format(client._token))
+    assert exinfo.value.args[0] == 'Received response code 401 from TEST /TEST/PATH/.'
