@@ -6,7 +6,6 @@ import requests
 
 from objectrocket import auth
 from objectrocket import bases
-from objectrocket import errors
 from objectrocket.instances.mongodb import MongodbInstance
 from objectrocket.instances.mongodb import TokumxInstance
 from objectrocket.instances.redis import RedisInstance
@@ -107,7 +106,7 @@ class Instances(bases.BaseOperationsLayer):
         # If service key is a recognized service type, instantiate its respective instance.
         if service in self._service_class_map:
             cls = self._service_class_map[service]
-            inst = cls(instance_document=instance_doc, base_client=self._client)
+            inst = cls(instance_document=instance_doc, instances=self)
 
         # If service is not recognized, log a warning and return None.
         else:

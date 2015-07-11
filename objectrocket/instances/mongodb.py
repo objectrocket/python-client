@@ -42,12 +42,12 @@ class MongodbInstance(bases.BaseInstance):
 
         :param bool request_compaction: A boolean indicating whether or not to request compaction.
         """
-        url = self._url + self.name + '/compaction/'
+        url = self._service_url + '/compaction/'
 
         if request_compaction:
-            response = requests.post(url, **self._client.default_request_kwargs)
+            response = requests.post(url, **self._instances._default_request_kwargs)
         else:
-            response = requests.get(url, **self._client.default_request_kwargs)
+            response = requests.get(url, **self._instances._default_request_kwargs)
 
         return response.json()
 
@@ -85,11 +85,11 @@ class MongodbInstance(bases.BaseInstance):
         :param bool add_shard: A boolean indicating whether to add a new shard to the specified
             instance.
         """
-        url = self._url + self.name + '/shards/'
+        url = self._service_url + '/shards/'
         if add_shard:
-            response = requests.post(url, **self._client.default_request_kwargs)
+            response = requests.post(url, **self._instances._default_request_kwargs)
         else:
-            response = requests.get(url, **self._client.default_request_kwargs)
+            response = requests.get(url, **self._instances._default_request_kwargs)
 
         return response.json()
 
@@ -101,8 +101,8 @@ class MongodbInstance(bases.BaseInstance):
     @auth.token_auto_auth
     def stepdown_window(self):
         """Get information on this instance's stepdown window."""
-        url = self._url + self.name + '/stepdown/'
-        response = requests.get(url, **self._client.default_request_kwargs)
+        url = self._service_url + '/stepdown/'
+        response = requests.get(url, **self._instances._default_request_kwargs)
         return response.json()
 
     @auth.token_auto_auth
@@ -127,7 +127,7 @@ class MongodbInstance(bases.BaseInstance):
             raise errors.InstancesException(str(ex) + 'Time strings should be of the following '
                                                       'format: %s' % constants.TIME_FORMAT)
 
-        url = self._url + self.name + '/stepdown/'
+        url = self._service_url + '/stepdown/'
 
         data = {
             'start': start,
@@ -137,7 +137,7 @@ class MongodbInstance(bases.BaseInstance):
             'weekly': weekly,
         }
 
-        response = requests.post(url, data=json.dumps(data), **self._client.default_request_kwargs)
+        response = requests.post(url, data=json.dumps(data), **self._instances._default_request_kwargs)
         return response.json()
 
     ######################

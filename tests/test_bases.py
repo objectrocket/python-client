@@ -43,12 +43,12 @@ class InstancePrototype(BaseInstance):
 # Tests for BaseInstance. #
 ###########################
 def test_client_is_properly_embedded_in_base_instance(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._client is client
 
 
 def test_instance_doc_is_properly_embedded_in_base_instance(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._instance_document is mongodb_sharded_doc
 
 
@@ -57,13 +57,13 @@ def test_instance_creation_fails_with_missing_field(client, mongodb_sharded_doc,
     mongodb_sharded_doc.pop(needed_field, None)
 
     with pytest.raises(KeyError) as exinfo:
-        InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+        InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
 
     assert exinfo.value.args == (needed_field,)
 
 
 def test_instance_repr_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     inst_id = hex(id(inst))
     expected_repr = (
         '<{!s} {!r} at {!s}>'
@@ -74,47 +74,47 @@ def test_instance_repr_is_as_expected(client, mongodb_sharded_doc):
 
 
 def test_inst_connect_string_attribute_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._connect_string == mongodb_sharded_doc['connect_string']
 
 
 def test_inst_created_attribute_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._created == mongodb_sharded_doc['created']
 
 
 def test_inst_instance_document_attribute_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._instance_document is mongodb_sharded_doc
 
 
 def test_inst_name_attribute_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._name == mongodb_sharded_doc['name']
 
 
 def test_inst_plan_attribute_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._plan == mongodb_sharded_doc['plan']
 
 
 def test_inst_service_attribute_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._service == mongodb_sharded_doc['service']
 
 
 def test_inst_type_attribute_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._type == mongodb_sharded_doc['type']
 
 
 def test_inst_version_attribute_is_as_expected(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst._version == mongodb_sharded_doc['version']
 
 
 def test_inst_to_dict_returns_expected_output(client, mongodb_sharded_doc):
-    inst = InstancePrototype(instance_document=mongodb_sharded_doc, base_client=client)
+    inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     assert inst.to_dict() == mongodb_sharded_doc
 
 

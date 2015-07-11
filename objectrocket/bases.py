@@ -54,12 +54,13 @@ class BaseInstance(object):
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming
         from the ObjectRocket API.
-    :param object base_client: An instance of :py:class:`objectrocket.client.Client`, most likely
-        coming from the :py:class:`objectrocket.instance.Instances` service layer.
+    :param objectrocket.instances.Instances instances: An instance of
+        :py:class:`objectrocket.instances.Instances`.
     """
 
-    def __init__(self, instance_document, base_client):
-        self.__client = base_client
+    def __init__(self, instance_document, instances):
+        self.__client = instances._client
+        self.__instances = instances
         self.__instance_document = instance_document
 
         # Bind required pseudo private attributes from API response document.
@@ -133,6 +134,21 @@ class BaseInstance(object):
         return self.__client
 
     @property
+    def _instances(self):
+        """An instance of the objectrocket.instances.Instances."""
+        return self.__instances
+
+    @property
     def _instance_document(self):
         """The document used to construct this Instance object."""
         return self.__instance_document
+
+    @property
+    def _url(self):
+        """The URL of this instance object."""
+        return self._instances._url + '{}/'.format(self.name)
+
+    @property
+    def _service_url(self):
+        """The service specific URL of this instance object."""
+        return self._url + '{}/{}/'.format(self.service, self.name)
