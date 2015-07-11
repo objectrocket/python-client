@@ -10,14 +10,14 @@ class RedisInstance(bases.BaseInstance):
     """An ObjectRocket Reids service instance.
 
     :param dict instance_document: A dictionary representing the instance object.
-    :param object base_client: An instance of :py:class:`objectrocket.client.Client`, most likely
-        coming from the :py:class:`objectrocket.instance.Instances` service layer.
+    :param objectrocket.instances.Instances instances: An instance of
+        :py:class:`objectrocket.instances.Instances`.
     """
 
-    def __init__(self, instance_document, base_client):
+    def __init__(self, instance_document, instances):
         super(RedisInstance, self).__init__(
             instance_document=instance_document,
-            base_client=base_client
+            instances=instances
         )
 
         # Bind required pseudo private attributes from API response document.

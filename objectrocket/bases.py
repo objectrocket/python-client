@@ -151,4 +151,4 @@ class BaseInstance(object):
     @property
     def _service_url(self):
         """The service specific URL of this instance object."""
-        return self._url + '{}/{}/'.format(self.service, self.name)
+        return self._client._url + '{}/{}/'.format(self.service, self.name)

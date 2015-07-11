@@ -19,14 +19,14 @@ class MongodbInstance(bases.BaseInstance):
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming
         from the ObjectRocket API.
-    :param object base_client: An instance of :py:class:`objectrocket.client.Client`, most likely
-        coming from the :py:class:`objectrocket.instance.Instances` service layer.
+    :param objectrocket.instances.Instances instances: An instance of
+        :py:class:`objectrocket.instances.Instances`.
     """
 
-    def __init__(self, instance_document, base_client):
+    def __init__(self, instance_document, instances):
         super(MongodbInstance, self).__init__(
             instance_document=instance_document,
-            base_client=base_client
+            instances=instances
         )
 
         # Bind required pseudo private attributes from API response document.
@@ -42,7 +42,7 @@ class MongodbInstance(bases.BaseInstance):
 
         :param bool request_compaction: A boolean indicating whether or not to request compaction.
         """
-        url = self._service_url + '/compaction/'
+        url = self._service_url + 'compaction/'
 
         if request_compaction:
             response = requests.post(url, **self._instances._default_request_kwargs)
@@ -85,7 +85,7 @@ class MongodbInstance(bases.BaseInstance):
         :param bool add_shard: A boolean indicating whether to add a new shard to the specified
             instance.
         """
-        url = self._service_url + '/shards/'
+        url = self._service_url + 'shards/'
         if add_shard:
             response = requests.post(url, **self._instances._default_request_kwargs)
         else:
@@ -99,9 +99,9 @@ class MongodbInstance(bases.BaseInstance):
         return self._ssl_connect_string
 
     @auth.token_auto_auth
-    def stepdown_window(self):
+    def get_stepdown_window(self):
         """Get information on this instance's stepdown window."""
-        url = self._service_url + '/stepdown/'
+        url = self._service_url + 'stepdown/'
         response = requests.get(url, **self._instances._default_request_kwargs)
         return response.json()
 
@@ -111,27 +111,25 @@ class MongodbInstance(bases.BaseInstance):
 
         Date times are assumed to be UTC, so use UTC date times.
 
-        :param str start: The start time in string format. Should be of the form:
-            :py:const:`objectrocket.constants.TIME_FORMAT`.
-        :param str end: The end time in string format. Should be of the form:
-            :py:const:`objectrocket.constants.TIME_FORMAT`.
+        :param datetime.datetime start: The datetime which the stepdown window is to open.
+        :param datetime.datetime end: The datetime which the stepdown window is to close.
         :param bool enabled: A boolean indicating whether or not stepdown is to be enabled.
         :param bool scheduled: A boolean indicating whether or not to schedule stepdown.
         :param bool weekly: A boolean indicating whether or not to schedule compaction weekly.
         """
-        try:
-            # Ensure that time strings can be parsed properly.
-            datetime.datetime.strptime(start, constants.TIME_FORMAT)
-            datetime.datetime.strptime(end, constants.TIME_FORMAT)
-        except ValueError as ex:
-            raise errors.InstancesException(str(ex) + 'Time strings should be of the following '
-                                                      'format: %s' % constants.TIME_FORMAT)
+        # Ensure a logical start and endtime is requested.
+        if not start < end:
+            raise TypeError('Parameter "start" must occur earlier in time than "end".')
 
-        url = self._service_url + '/stepdown/'
+        # Ensure specified window is less than a week in length.
+        week_delta = datetime.timedelta(days=7)
+        if not ((end - start) <= week_delta):
+            raise TypeError('Stepdown windows can not be longer than 1 week in length.')
 
+        url = self._service_url + 'stepdown/'
         data = {
-            'start': start,
-            'end': end,
+            'start': int(start.strftime('%s')),
+            'end': int(end.strftime('%s')),
             'enabled': enabled,
             'scheduled': scheduled,
             'weekly': weekly,
@@ -164,12 +162,12 @@ class TokumxInstance(MongodbInstance):
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming
         from the ObjectRocket API.
-    :param object base_client: An instance of :py:class:`objectrocket.client.Client`, most likely
-        coming from the :py:class:`objectrocket.instance.Instances` service layer.
+    :param objectrocket.instances.Instances instances: An instance of
+        :py:class:`objectrocket.instances.Instances`.
     """
 
-    def __init__(self, instance_document, base_client):
+    def __init__(self, instance_document, instances):
         super(TokumxInstance, self).__init__(
             instance_document=instance_document,
-            base_client=base_client
+            instances=instances
         )
