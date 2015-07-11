@@ -8,8 +8,6 @@ import requests
 
 from objectrocket import auth
 from objectrocket import bases
-from objectrocket import constants
-from objectrocket import errors
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +56,7 @@ class MongodbInstance(bases.BaseInstance):
         :param str passwd: The password to use for authentication.
         :param str db: The name of the database to authenticate against. Defaults to ``'Admin'``.
         :param bool ssl: Use SSL/TLS if available for this instance. Defaults to ``True``.
-        :raises: :py:class:`pymongo.errors.OperationError` if authentication fails.
+        :raises: :py:class:`pymongo.errors.OperationFailure` if authentication fails.
         """
         # Attempt to establish an authenticated connection.
         try:
@@ -67,7 +65,7 @@ class MongodbInstance(bases.BaseInstance):
             return connection
 
         # Catch exception here for logging, then just re-raise.
-        except pymongo.errors.OperationError as ex:
+        except pymongo.errors.OperationFailure as ex:
             logger.exception(ex)
             raise
 
@@ -149,11 +147,6 @@ class MongodbInstance(bases.BaseInstance):
         if ssl and self.ssl_connect_string:
             connect_string = self.ssl_connect_string
 
-        # Use replica set client if needed.
-        if self.type == [constants.MONGODB_REPLICA_SET_INSTANCE, constants.TOKUMX_REPLICA_SET_INSTANCE]:
-            return pymongo.MongoReplicaSetClient(connect_string)
-
-        # Else, use standard client.
         return pymongo.MongoClient(connect_string)
 
 
