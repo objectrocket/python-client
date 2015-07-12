@@ -19,10 +19,11 @@ setup(
     long_description=readme,
     name='objectrocket',
     packages=find_packages(exclude=['tests*']),
+    url='https://github.com/objectrocket/python-client/',
     version=objectrocket.__version__,
     zip_safe=False,
     classifiers=(
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Operating System :: OS Independent',
