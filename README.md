@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/objectrocket/python-client.svg)](https://travis-ci.org/objectrocket/python-client)
+
 ObjectRocket Python Client
 ==========================
 ObjectRocket API bindings for Python.
