@@ -2,4 +2,4 @@ language: python
 python:
   - "2.7"
 install: "pip install tox>=2.0"
-script: "tox -e lint,py27,py33,py34,pypy,pypy3"
+script: "tox -e lint,py27,py33,py34"
