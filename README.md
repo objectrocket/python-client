@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/objectrocket/python-client.svg)](https://travis-ci.org/objectrocket/python-client)
+[![codecov.io](http://codecov.io/github/objectrocket/python-client/coverage.svg?branch=master)](http://codecov.io/github/objectrocket/python-client?branch=master)
+[![Coverage Status](https://coveralls.io/repos/objectrocket/python-client/badge.svg?branch=master&service=github)](https://coveralls.io/github/objectrocket/python-client?branch=master)
 
 ObjectRocket Python Client
 ==========================
