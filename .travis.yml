@@ -2,8 +2,9 @@ language: python
 python:
   - "2.7"
 before_install:
-  pip install codecov
+  pip install coveralls codecov
 install: "pip install tox>=2.0"
 script: "tox -e lint,py27,py33,py34,coverage,docs,build"
 after_success:
   codecov
+  coveralls
