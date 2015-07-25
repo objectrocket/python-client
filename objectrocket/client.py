@@ -1,7 +1,8 @@
 """ObjectRocket Python client."""
 from objectrocket import auth
-from objectrocket import instances
 from objectrocket import constants
+from objectrocket import instances
+from objectrocket import util
 
 from stevedore.extension import ExtensionManager
 
@@ -32,10 +33,13 @@ class Client(object):
         # Perform authentication as part of initialization phase for now.
         self._token  # Accessing this attribute will trigger authentication.
 
-        # Register any additional operations layer extensions.
-        extmanager = ExtensionManager('objectrocket', propagate_map_exceptions=True)
+        # Register any extensions classes for this class.
+        extmanager = ExtensionManager(
+            'extensions.classes.objectrocket.client.Client',
+            propagate_map_exceptions=True
+        )
         if extmanager.extensions:
-            extmanager.map(self._register_operations_extensions)
+            extmanager.map(util.register_extension_class, base=self)
 
     #####################
     # Public interface. #
@@ -61,12 +65,6 @@ class Client(object):
     def _password(self):
         """The password currently being used by this client."""
         return self.__password
-
-    def _register_operations_extensions(self, extension):
-        """Register any operations layer extensions which may be installed."""
-        # Bind extension as a public attribute.
-        extension_instance = extension.plugin(self)  # Pass self as standard registry process.
-        setattr(self, extension.name.lstrip('_'), extension_instance)
 
     @property
     def _token(self):

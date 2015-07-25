@@ -8,6 +8,9 @@ import requests
 
 from objectrocket import auth
 from objectrocket import bases
+from objectrocket import util
+
+from stevedore.extension import ExtensionManager
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +33,14 @@ class MongodbInstance(bases.BaseInstance):
         # Bind required pseudo private attributes from API response document.
         # Smallest plans may not have an SSL/TLS connection string.
         self._ssl_connect_string = instance_document.get('ssl_connect_string')
+
+        # Register any extension methods for this class.
+        extmanager = ExtensionManager(
+            'extensions.methods.objectrocket.instances.mongodb.MongodbInstance',
+            propagate_map_exceptions=True
+        )
+        if extmanager.extensions:
+            extmanager.map(util.register_extension_method, base=self)
 
     #####################
     # Public interface. #
