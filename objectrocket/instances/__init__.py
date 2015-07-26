@@ -4,8 +4,8 @@ import logging
 
 import requests
 
-from objectrocket import auth
 from objectrocket import bases
+from objectrocket import util
 from objectrocket.instances.mongodb import MongodbInstance
 from objectrocket.instances.mongodb import TokumxInstance
 from objectrocket.instances.redis import RedisInstance
@@ -25,7 +25,7 @@ class Instances(bases.BaseOperationsLayer):
     #####################
     # Public interface. #
     #####################
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def all(self):
         """Get all ObjectRocket instances the current client has access to.
 
@@ -36,7 +36,7 @@ class Instances(bases.BaseOperationsLayer):
         data = self._get_response_data(response)
         return self._concrete_instance_list(data)
 
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def create(self, name, size, zone,
                service_type='mongodb', instance_type='mongodb_sharded', version='2.4.6'):
         """Create an ObjectRocket instance.
@@ -74,7 +74,7 @@ class Instances(bases.BaseOperationsLayer):
         data = self._get_response_data(response)
         return self._concrete_instance(data)
 
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def get(self, instance_name):
         """Get an ObjectRocket instance by name.
 

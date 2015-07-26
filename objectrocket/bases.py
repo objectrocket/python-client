@@ -4,6 +4,9 @@ import abc
 import six
 
 from objectrocket import errors
+from objectrocket import util
+
+from stevedore.extension import ExtensionManager
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -62,6 +65,7 @@ class BaseAuthLayer(BaseOperationsLayer):
     ######################
     # Private interface. #
     ######################
+    @property
     def _default_request_kwargs(self):
         """The default request keyword arguments to be passed to the requests library."""
         default_kwargs = {
@@ -187,3 +191,29 @@ class BaseInstance(object):
     def _service_url(self):
         """The service specific URL of this instance object."""
         return self._client._url + '{}/{}/'.format(self.service, self.name)
+
+
+###########
+# Mixins. #
+###########
+class Extensible(object):
+    """A mixin to implement support for class extensibility."""
+
+    def _register_extensions(self, namespace):
+        """Register any extensions under the given namespace."""
+
+        # Register any extension classes for this class.
+        extmanager = ExtensionManager(
+            'extensions.classes::{}'.format(namespace),
+            propagate_map_exceptions=True
+        )
+        if extmanager.extensions:
+            extmanager.map(util.register_extension_class, base=self)
+
+        # Register any extension methods for this class.
+        extmanager = ExtensionManager(
+            'extensions.methods::{}'.format(namespace),
+            propagate_map_exceptions=True
+        )
+        if extmanager.extensions:
+            extmanager.map(util.register_extension_method, base=self)
