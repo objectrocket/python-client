@@ -36,7 +36,7 @@ class MongodbInstance(bases.BaseInstance):
 
         # Register any extension methods for this class.
         extmanager = ExtensionManager(
-            'extensions.methods.objectrocket.instances.mongodb.MongodbInstance',
+            'extensions.methods::objectrocket.instances.mongodb.MongodbInstance',
             propagate_map_exceptions=True
         )
         if extmanager.extensions:

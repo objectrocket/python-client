@@ -10,32 +10,20 @@ from stevedore.extension import ExtensionManager
 class Client(object):
     """The base client for ObjectRocket's Python interface.
 
-    Instantiation of the client will perform API authentication. If API authentication fails,
-    client instantiation will also fail.
-
-    :param str username: This is the username to perform basic authentication against the API with.
-    :param str password: This is the password to perform basic authentication against the API with.
-    :param str alternative_url: (optional) An alternative base URL for the client to use. You
-        shouldn't have to worry about this at all.
+    :param str base_url: The base APIv2 URL to interface with.
     """
 
-    def __init__(self, username, password, **kwargs):
-        # Client properties.
-        self._base_url = kwargs.get('alternative_url') or constants.DEFAULT_API_URL
-        self.__username = username
-        self.__password = password
+    def __init__(self, base_url=constants.DEFAULT_API_URL):
+        # Private interface attributes.
+        self._base_url = base_url
 
-        # Lazily-created properties.
-        self._auth = None
-        self._instances = None
-        self.__token = None
-
-        # Perform authentication as part of initialization phase for now.
-        self._token  # Accessing this attribute will trigger authentication.
+        # Public interface attributes.
+        self.auth = auth.Auth(base_client=self)
+        self.instances = instances.Instances(base_client=self)
 
         # Register any extensions classes for this class.
         extmanager = ExtensionManager(
-            'extensions.classes.objectrocket.client.Client',
+            'extensions.classes::objectrocket.client.Client',
             propagate_map_exceptions=True
         )
         if extmanager.extensions:
@@ -44,47 +32,20 @@ class Client(object):
     #####################
     # Public interface. #
     #####################
-    @property
-    def auth(self):
-        """The authentication operations layer."""
-        if self._auth is None:
-            self._auth = auth.Auth(base_client=self)
-        return self._auth
+    def authenticate(self, username, password):
+        """Authenticate with the API and get a token back for client use.
 
-    @property
-    def instances(self):
-        """The instances operations layer."""
-        if self._instances is None:
-            self._instances = instances.Instances(base_client=self)
-        return self._instances
+        :param str username: This is the username to perform basic authentication
+            against the API with.
+        :param str password: This is the password to perform basic authentication
+            against the API with.
+        """
+        self.auth.authenticate(username=username, password=password)
 
     ######################
     # Private interface. #
     ######################
     @property
-    def _password(self):
-        """The password currently being used by this client."""
-        return self.__password
-
-    @property
-    def _token(self):
-        """The API token this client is currently using."""
-        if self.__token is None:
-            self.__token = self.auth.authenticate(username=self._username, password=self._password)
-        return self.__token
-
-    @_token.setter
-    def _token(self, new_token):
-        """Set the value of this client's API token."""
-        self.__token = new_token
-        return self.__token
-
-    @property
     def _url(self):
         """The base URL this client is using."""
         return self._base_url
-
-    @property
-    def _username(self):
-        """The username currently being used by this client."""
-        return self.__username

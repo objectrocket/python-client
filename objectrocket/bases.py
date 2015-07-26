@@ -48,6 +48,41 @@ class BaseOperationsLayer(object):
             )
 
 
+class BaseAuthLayer(BaseOperationsLayer):
+    """A base class for authentication layer classes."""
+
+    #####################
+    # Public interface. #
+    #####################
+    @abc.abstractmethod
+    def authenticate(self):
+        """An implementation of this layer's authentication protocol."""
+        pass
+
+    ######################
+    # Private interface. #
+    ######################
+    def _default_request_kwargs(self):
+        """The default request keyword arguments to be passed to the requests library."""
+        default_kwargs = {
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'hooks': {}
+        }
+        return default_kwargs
+
+    @abc.abstractmethod
+    def _refresh(self):
+        """An implementation of this layer's authentication refresh protocol."""
+        pass
+
+    @abc.abstractproperty
+    def _url(self):
+        """The URL this operations layer is to interface with."""
+        pass
+
+
 @six.add_metaclass(abc.ABCMeta)
 class BaseInstance(object):
     """The base class for ObjectRocket service instances.

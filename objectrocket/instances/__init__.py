@@ -147,7 +147,7 @@ class Instances(bases.BaseOperationsLayer):
         """The default request keyword arguments to be passed to the requests library."""
         default_kwargs = super(Instances, self)._default_request_kwargs
         default_kwargs.setdefault('headers', {}).update({
-            'X-Auth-Token': self._client._token
+            'X-Auth-Token': self._client.auth._token
         })
         return default_kwargs
 
