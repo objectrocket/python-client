@@ -204,7 +204,7 @@ class Extensible(object):
 
         # Register any extension classes for this class.
         extmanager = ExtensionManager(
-            'extensions.classes::{}'.format(namespace),
+            'extensions.classes.{}'.format(namespace),
             propagate_map_exceptions=True
         )
         if extmanager.extensions:
@@ -212,7 +212,7 @@ class Extensible(object):
 
         # Register any extension methods for this class.
         extmanager = ExtensionManager(
-            'extensions.methods::{}'.format(namespace),
+            'extensions.methods.{}'.format(namespace),
             propagate_map_exceptions=True
         )
         if extmanager.extensions:
