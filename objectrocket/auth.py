@@ -1,4 +1,5 @@
 """Authentication operations."""
+import copy
 import logging
 import requests
 
@@ -62,7 +63,7 @@ class Auth(bases.BaseAuthLayer):
     @property
     def _default_request_kwargs(self):
         """The default request keyword arguments to be passed to the requests library."""
-        return super(Auth, self)._default_request_kwargs
+        return copy.deepcopy(super(Auth, self)._default_request_kwargs)
 
     @property
     def _password(self):

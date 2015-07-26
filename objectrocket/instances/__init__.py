@@ -1,4 +1,5 @@
 """Instance operations and instances."""
+import copy
 import json
 import logging
 
@@ -145,7 +146,7 @@ class Instances(bases.BaseOperationsLayer):
     @property
     def _default_request_kwargs(self):
         """The default request keyword arguments to be passed to the requests library."""
-        default_kwargs = super(Instances, self)._default_request_kwargs
+        default_kwargs = copy.deepcopy(super(Instances, self)._default_request_kwargs)
         default_kwargs.setdefault('headers', {}).update({
             'X-Auth-Token': self._client.auth._token
         })
