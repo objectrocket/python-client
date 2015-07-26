@@ -146,11 +146,11 @@ class Instances(bases.BaseOperationsLayer):
     @property
     def _default_request_kwargs(self):
         """The default request keyword arguments to be passed to the requests library."""
-        default_kwargs = copy.deepcopy(super(Instances, self)._default_request_kwargs)
-        default_kwargs.setdefault('headers', {}).update({
+        defaults = copy.deepcopy(super(Instances, self)._default_request_kwargs)
+        defaults.setdefault('headers', {}).update({
             'X-Auth-Token': self._client.auth._token
         })
-        return default_kwargs
+        return defaults
 
     @property
     def _service_class_map(self):
