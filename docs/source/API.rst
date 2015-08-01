@@ -9,3 +9,4 @@ API Documentation
     objectrocket.constants
     objectrocket.errors
     objectrocket.instances
+    objectrocket.util

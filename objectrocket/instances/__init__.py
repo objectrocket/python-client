@@ -46,6 +46,7 @@ class Instances(bases.BaseOperationsLayer):
         :param int size: The size in gigabytes of the new instance.
         :param str zone: The zone that the new instance is to exist in.
         :param str service_type: The type of service that the new instance is to provide.
+        :param str instance_type: The instance type to create.
         :param str version: The version of the service the new instance is to provide.
         """
         # Build up request data.

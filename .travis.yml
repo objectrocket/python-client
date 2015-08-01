@@ -3,7 +3,7 @@ python:
   - "2.7"
 before_install:
   pip install coveralls codecov
-install: "pip install tox>=2.0"
-script: "tox -e lint,py27,py33,py34,coverage,docs,build"
+install: "pip install tox>=2.1"
+script: "tox -e ALL,py33"
 after_success:
   "codecov && coveralls"

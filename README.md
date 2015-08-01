@@ -4,31 +4,30 @@
 
 ObjectRocket Python Client
 ==========================
-ObjectRocket API bindings for Python.
+ObjectRocket API interface library for Python.
 
 
 ### examples
-To use the bindings, simply do the following:
+To use the library, simply do the following:
 
 
 ```python
-import objectrocket
->>>
+>>> import objectrocket
 
-client = objectrocket.Client('<username>', '<password>')
->>>
+>>> client = objectrocket.Client()
+>>> client.authenticate('<username>', '<password>')
 
-# create a new instance
-client.instances.create(name='instance0', size=5, zone='US-West'
->>> <MongodbInstance {...} at 0x10aedb990>
+# Create a new instance.
+>>> client.instances.create(name='instance0', size=5, zone='US-West'
+<MongodbInstance {...} at 0x10aedb990>
 
-# get an instances object
-client.instances.get('instance0')
->>> <MongodbInstance {...} at 0x10aedb980>
+# Get an instances object.
+>>> client.instances.get('instance0')
+<MongodbInstance {...} at 0x10aedb980>
 
-# get all instances
-client.instances.all()
->>> [<MongodbInstance {...} at 0x10aedb980>]
+# Get all instances.
+>>> client.instances.all()
+[<MongodbInstance {...} at 0x10aedb980>]
 ```
 
 
