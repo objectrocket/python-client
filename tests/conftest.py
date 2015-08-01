@@ -9,8 +9,6 @@ from objectrocket.client import Client
 from objectrocket import instances
 from objectrocket import constants
 
-constants.DEFAULT_API_URL = '/v2/'
-
 
 # def pytest_generate_tests(metafunc):
 #     """Generate tests for the different instance types."""
@@ -33,8 +31,7 @@ constants.DEFAULT_API_URL = '/v2/'
 @pytest.fixture
 def client(patched_requests_map):
     """Build a client for use in testing."""
-    username, password = 'tester', 'testpass'
-    return Client(username, password)
+    return Client()
 
 
 @pytest.fixture

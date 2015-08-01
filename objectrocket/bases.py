@@ -4,6 +4,9 @@ import abc
 import six
 
 from objectrocket import errors
+from objectrocket import util
+
+from stevedore.extension import ExtensionManager
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -46,6 +49,42 @@ class BaseOperationsLayer(object):
                 'Received response code 401 from {} {}.'
                 .format(resp.request.method, resp.request.path_url)
             )
+
+
+class BaseAuthLayer(BaseOperationsLayer):
+    """A base class for authentication layer classes."""
+
+    #####################
+    # Public interface. #
+    #####################
+    @abc.abstractmethod
+    def authenticate(self):
+        """An implementation of this layer's authentication protocol."""
+        pass
+
+    ######################
+    # Private interface. #
+    ######################
+    @property
+    def _default_request_kwargs(self):
+        """The default request keyword arguments to be passed to the requests library."""
+        default_kwargs = {
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'hooks': {}
+        }
+        return default_kwargs
+
+    @abc.abstractmethod
+    def _refresh(self):
+        """An implementation of this layer's authentication refresh protocol."""
+        pass
+
+    @abc.abstractproperty
+    def _url(self):
+        """The URL this operations layer is to interface with."""
+        pass
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -152,3 +191,29 @@ class BaseInstance(object):
     def _service_url(self):
         """The service specific URL of this instance object."""
         return self._client._url + '{}/{}/'.format(self.service, self.name)
+
+
+###########
+# Mixins. #
+###########
+class Extensible(object):
+    """A mixin to implement support for class extensibility."""
+
+    def _register_extensions(self, namespace):
+        """Register any extensions under the given namespace."""
+
+        # Register any extension classes for this class.
+        extmanager = ExtensionManager(
+            'extensions.classes.{}'.format(namespace),
+            propagate_map_exceptions=True
+        )
+        if extmanager.extensions:
+            extmanager.map(util.register_extension_class, base=self)
+
+        # Register any extension methods for this class.
+        extmanager = ExtensionManager(
+            'extensions.methods.{}'.format(namespace),
+            propagate_map_exceptions=True
+        )
+        if extmanager.extensions:
+            extmanager.map(util.register_extension_method, base=self)

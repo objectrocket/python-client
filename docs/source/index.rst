@@ -1,7 +1,6 @@
 ObjectRocket Python Client
 ==========================
-Welcome to the ObjectRocket Python Client's documentation. This client is designed to interface
-with the ObjectRocket APIv2.
+Welcome to the ObjectRocket Python Client. This client is designed to interface with the ObjectRocket APIv2.
 
 Release |release|.
 

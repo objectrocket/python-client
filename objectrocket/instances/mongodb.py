@@ -6,16 +6,13 @@ import logging
 import pymongo
 import requests
 
-from objectrocket import auth
 from objectrocket import bases
 from objectrocket import util
-
-from stevedore.extension import ExtensionManager
 
 logger = logging.getLogger(__name__)
 
 
-class MongodbInstance(bases.BaseInstance):
+class MongodbInstance(bases.BaseInstance, bases.Extensible):
     """An ObjectRocket MongoDB service instance.
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming
@@ -34,18 +31,13 @@ class MongodbInstance(bases.BaseInstance):
         # Smallest plans may not have an SSL/TLS connection string.
         self._ssl_connect_string = instance_document.get('ssl_connect_string')
 
-        # Register any extension methods for this class.
-        extmanager = ExtensionManager(
-            'extensions.methods.objectrocket.instances.mongodb.MongodbInstance',
-            propagate_map_exceptions=True
-        )
-        if extmanager.extensions:
-            extmanager.map(util.register_extension_method, base=self)
+        # Register any extensions for this class.
+        self._register_extensions('objectrocket.instances.mongodb.MongodbInstance')
 
     #####################
     # Public interface. #
     #####################
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def compaction(self, request_compaction=False):
         """Retrieve a report on, or request compaction for this instance.
 
@@ -87,7 +79,7 @@ class MongodbInstance(bases.BaseInstance):
         """
         return self._get_connection(ssl=ssl)
 
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def shards(self, add_shard=False):
         """Get a list of shards belonging to this instance.
 
@@ -107,14 +99,14 @@ class MongodbInstance(bases.BaseInstance):
         """This instance's SSL connection string."""
         return self._ssl_connect_string
 
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def get_stepdown_window(self):
         """Get information on this instance's stepdown window."""
         url = self._service_url + 'stepdown/'
         response = requests.get(url, **self._instances._default_request_kwargs)
         return response.json()
 
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def set_stepdown_window(self, start, end, enabled=True, scheduled=True, weekly=True):
         """Set the stepdown window for this instance.
 

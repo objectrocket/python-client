@@ -1,11 +1,12 @@
 """Instance operations and instances."""
+import copy
 import json
 import logging
 
 import requests
 
-from objectrocket import auth
 from objectrocket import bases
+from objectrocket import util
 from objectrocket.instances.mongodb import MongodbInstance
 from objectrocket.instances.mongodb import TokumxInstance
 from objectrocket.instances.redis import RedisInstance
@@ -25,7 +26,7 @@ class Instances(bases.BaseOperationsLayer):
     #####################
     # Public interface. #
     #####################
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def all(self):
         """Get all ObjectRocket instances the current client has access to.
 
@@ -36,7 +37,7 @@ class Instances(bases.BaseOperationsLayer):
         data = self._get_response_data(response)
         return self._concrete_instance_list(data)
 
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def create(self, name, size, zone,
                service_type='mongodb', instance_type='mongodb_sharded', version='2.4.6'):
         """Create an ObjectRocket instance.
@@ -45,6 +46,7 @@ class Instances(bases.BaseOperationsLayer):
         :param int size: The size in gigabytes of the new instance.
         :param str zone: The zone that the new instance is to exist in.
         :param str service_type: The type of service that the new instance is to provide.
+        :param str instance_type: The instance type to create.
         :param str version: The version of the service the new instance is to provide.
         """
         # Build up request data.
@@ -74,7 +76,7 @@ class Instances(bases.BaseOperationsLayer):
         data = self._get_response_data(response)
         return self._concrete_instance(data)
 
-    @auth.token_auto_auth
+    @util.token_auto_auth
     def get(self, instance_name):
         """Get an ObjectRocket instance by name.
 
@@ -145,11 +147,11 @@ class Instances(bases.BaseOperationsLayer):
     @property
     def _default_request_kwargs(self):
         """The default request keyword arguments to be passed to the requests library."""
-        default_kwargs = super(Instances, self)._default_request_kwargs
-        default_kwargs.setdefault('headers', {}).update({
-            'X-Auth-Token': self._client._token
+        defaults = copy.deepcopy(super(Instances, self)._default_request_kwargs)
+        defaults.setdefault('headers', {}).update({
+            'X-Auth-Token': self._client.auth._token
         })
-        return default_kwargs
+        return defaults
 
     @property
     def _service_class_map(self):
