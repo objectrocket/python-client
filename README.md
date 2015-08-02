@@ -51,6 +51,19 @@ To build the client, invoke `tox -e build` from the top level directory.
 Your artifact will appear in the `dist` directory, and will look
 something like `objectrocket-<version>-py2.py3-<abi>-<platform>.whl`.
 
+###### pypi
+To upload the built artifact to **pypytest** or **pypi**, you will need the account credentials. To upload to **pypytest**, invoke the following:
+
+```bash
+tox -e build -- upload -r pypitest
+```
+
+To upload to **pypi**, invoke the following:
+
+```bash
+tox -e build -- upload -r pypi
+```
+
 #### documentation
 To build the documentation, invoke `tox -e docs` from the top level directory.
 The HTML index can then be found at `docs/build/html/index.html`.
