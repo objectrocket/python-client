@@ -12,7 +12,7 @@ from objectrocket.client import Client
 #################################
 def test_client_binds_correct_default_url(patched_requests_map):
     client = Client()
-    assert client._url == constants.DEFAULT_API_URL
+    assert client._url == constants.OR_DEFAULT_API_URL
 
 
 def test_client_binds_alternative_url_properly(patched_requests_map):

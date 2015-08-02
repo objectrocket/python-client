@@ -11,7 +11,7 @@ class Client(bases.Extensible):
     :param str base_url: The base APIv2 URL to interface with.
     """
 
-    def __init__(self, base_url=constants.DEFAULT_API_URL):
+    def __init__(self, base_url=constants.OR_DEFAULT_API_URL):
         # Private interface attributes.
         self.__url = base_url
 
