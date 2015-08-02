@@ -6,6 +6,8 @@ ObjectRocket Python Client
 ==========================
 ObjectRocket API interface library for Python.
 
+**NOTICE:** this client is still undergoing intial stages of development, and some public interfaces may change as development continues. We will increment the version of this package to 1.0.0 once the public interface to this library is deemed stable.
+
 
 ### examples
 To use the library, simply do the following:
