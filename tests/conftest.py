@@ -1,5 +1,6 @@
 """Test configuration for the ObjectRocket Python Client."""
 import datetime
+import uuid
 
 import mock
 import pytest
@@ -62,6 +63,7 @@ def obj():
 def mongodb_replica_doc():
     now = datetime.datetime.utcnow()
     doc = {
+        'id': uuid.uuid4().hex,
         'api_endpoint': 'not_a_real_endpoint',
         'connect_string': 'REPLSET_60000/localhost:60000,localhost:60001,localhost:60002',
         'created': datetime.datetime.strftime(now, constants.TIME_FORMAT),
@@ -78,6 +80,7 @@ def mongodb_replica_doc():
 def mongodb_sharded_doc():
     now = datetime.datetime.utcnow()
     doc = {
+        'id': uuid.uuid4().hex,
         'api_endpoint': 'not_a_real_endpoint',
         'connect_string': 'localhost:50002',
         'created': datetime.datetime.strftime(now, constants.TIME_FORMAT),

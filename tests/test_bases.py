@@ -74,8 +74,8 @@ def test_instance_repr_is_as_expected(client, mongodb_sharded_doc):
     inst = InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
     inst_id = hex(id(inst))
     expected_repr = (
-        '<{!s} {!r} at {!s}>'
-        .format(inst.__class__.__name__, inst._instance_document, inst_id)
+        '<{!s} name={!s} id={!s} at {!s}>'
+        .format(inst.__class__.__name__, inst.name, inst.id, inst_id)
     )
 
     assert repr(inst) == expected_repr
