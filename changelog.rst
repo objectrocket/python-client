@@ -3,6 +3,7 @@ changelog
 
 0.2.x
 -----
+- Allow default API endpoint to be taken from the environment.
 - Updates to authentication pattern.
 - Built out extension patterns using stevedore.
 
