@@ -111,6 +111,7 @@ class BaseInstance(object):
 
         # Bind required pseudo private attributes from API response document.
         self._created = instance_document['created']
+        self._id = instance_document['id']
         self._name = instance_document['name']
         self._plan = instance_document['plan']
         self._service = instance_document['service']
@@ -121,8 +122,8 @@ class BaseInstance(object):
         """Represent this object as a string."""
         _id = hex(id(self))
         rep = (
-            '<{!s} {!r} at {!s}>'
-            .format(self.__class__.__name__, self._instance_document, _id)
+            '<{!s} name={!s} id={!s} at {!s}>'
+            .format(self.__class__.__name__, self.name, self.id, _id)
         )
         return rep
 
@@ -197,6 +198,11 @@ class BaseInstance(object):
     def get_connection(self):
         """Get a live connection to this instance."""
         pass
+
+    @property
+    def id(self):
+        """This instance's ID."""
+        return self._id
 
     @property
     def name(self):
