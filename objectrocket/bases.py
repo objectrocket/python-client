@@ -1,5 +1,7 @@
 """Base classes used throughout the library."""
 import abc
+import logging
+
 import requests
 import six
 
@@ -7,6 +9,8 @@ from objectrocket import errors
 from objectrocket import util
 
 from stevedore.extension import ExtensionManager
+
+log = logging.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -36,6 +40,19 @@ class BaseOperationsLayer(object):
             }
         }
         return default_kwargs
+
+    def _get_response_data(self, response):
+        """Return the data from a ``requests.Response`` object.
+
+        :param requests.Response response: The ``Response`` object from which to get the data.
+        """
+        try:
+            _json = response.json()
+            data = _json.get('data')
+            return data
+        except ValueError as ex:
+            log.exception(ex)
+            return None
 
     @abc.abstractproperty
     def _url(self):

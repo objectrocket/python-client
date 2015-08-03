@@ -132,18 +132,6 @@ class Instances(bases.BaseOperationsLayer):
 
         return filter(None, [self._concrete_instance(instance_doc=doc) for doc in instance_docs])
 
-    def _get_response_data(self, response):
-        """Return the data from a ``requests.Response`` object.
-
-        :param requests.Response response: The ``Response`` object from which to get the data.
-        """
-        try:
-            _json = response.json()
-            data = _json.get('data')
-            return data
-        except ValueError:
-            return None
-
     @property
     def _default_request_kwargs(self):
         """The default request keyword arguments to be passed to the requests library."""

@@ -7,6 +7,7 @@ import pytest
 import requests
 
 from objectrocket.client import Client
+from objectrocket import acls
 from objectrocket import instances
 from objectrocket import constants
 
@@ -54,6 +55,35 @@ def obj():
         pass
 
     return Obj()
+
+
+##########################
+# ACLs related fixtures. #
+##########################
+@pytest.fixture
+def acl_doc():
+    now = datetime.datetime.utcnow()
+    doc = {
+        'id': uuid.uuid4().hex,
+
+        'cidr_mask': '0.0.0.0/1',
+        'description': 'testing',
+        'instance': 'testinstance',
+        'login': 'testuser',
+        'port': 27017,
+
+        'date_created': datetime.datetime.strftime(now, constants.TIME_FORMAT),
+        'instance_id': uuid.uuid4().hex,
+        'instance_type': 'mongodb_sharded',
+        'metadata': {},
+        'service_type': 'mongodb'
+    }
+    return doc
+
+
+@pytest.fixture
+def acl(acl_doc, client):
+    return acls.Acl(document=acl_doc, acls=client.acls)
 
 
 ##############################
@@ -123,6 +153,14 @@ def patched_requests_map(request):
         which is patching the requests library in its respective module.
     """
     patches = {}
+
+    mocked = mock.patch('objectrocket.acls.requests', autospec=True)
+    request.addfinalizer(mocked.stop)
+    patches['acls'] = mocked.start()
+
+    mocked = mock.patch('objectrocket.auth.requests', autospec=True)
+    request.addfinalizer(mocked.stop)
+    patches['auth'] = mocked.start()
 
     mocked = mock.patch('objectrocket.instances.requests', autospec=True)
     request.addfinalizer(mocked.stop)
