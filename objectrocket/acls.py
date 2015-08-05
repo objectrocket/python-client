@@ -104,7 +104,7 @@ class Acls(bases.BaseOperationsLayer):
         try:
             return Acl(document=acl_doc, acls=self)
 
-        # If service is not recognized, log a warning and return None.
+        # If construction fails, log the exception and return None.
         except Exception as ex:
             logger.exception(ex)
             logger.error('Could not instantiate ACL document. You probably need to upgrade to a '

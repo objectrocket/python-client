@@ -102,23 +102,21 @@ class Instances(bases.BaseOperationsLayer):
         if not isinstance(instance_doc, dict):
             return None
 
-        service = instance_doc.setdefault('service', 'unknown')
-        inst = None
-
-        # If service key is a recognized service type, instantiate its respective instance.
-        if service in self._service_class_map:
+        # Attempt to instantiate the appropriate class for the given instance document.
+        try:
+            service = instance_doc['service']
             cls = self._service_class_map[service]
-            inst = cls(instance_document=instance_doc, instances=self)
+            return cls(instance_document=instance_doc, instances=self)
 
-        # If service is not recognized, log a warning and return None.
-        else:
-            logger.warning(
-                'Could not determine instance service. You probably need to upgrade to a more '
+        # If construction fails, log the exception and return None.
+        except Exception as ex:
+            logger.exception(ex)
+            logger.error(
+                'Instance construction failed. You probably need to upgrade to a more '
                 'recent version of the client. Instance document which generated this '
                 'warning: {}'.format(instance_doc)
             )
-
-        return inst
+            return None
 
     def _concrete_instance_list(self, instance_docs):
         """Concretize a list of instance documents.
@@ -130,7 +128,7 @@ class Instances(bases.BaseOperationsLayer):
         if not instance_docs:
             return []
 
-        return filter(None, [self._concrete_instance(instance_doc=doc) for doc in instance_docs])
+        return list(filter(None, [self._concrete_instance(instance_doc=doc) for doc in instance_docs]))
 
     @property
     def _default_request_kwargs(self):
