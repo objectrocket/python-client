@@ -67,7 +67,7 @@ def test_instance_creation_fails_with_missing_connect_string(client, mongodb_sha
     with pytest.raises(errors.InstancesException) as exinfo:
         InstancePrototype(instance_document=mongodb_sharded_doc, instances=client.instances)
 
-    assert exinfo.exconly() == u'InstancesException: No connection string found.'
+    assert str(exinfo.value) == 'No connection string found.'
 
 
 def test_instance_repr_is_as_expected(client, mongodb_sharded_doc):
