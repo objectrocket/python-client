@@ -37,5 +37,3 @@ def test_client_has_embedded_auth_class(client):
 
 def test_client_has_embedded_instances_class(client):
     assert isinstance(client.instances, instances.Instances)
-
-def test
