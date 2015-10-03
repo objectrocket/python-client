@@ -1,4 +1,4 @@
-"""MongoDB instance classes and logic."""
+"""Elasticsearch instance class and logic."""
 import datetime
 import json
 import logging
