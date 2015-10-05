@@ -8,7 +8,7 @@ import requests
 from objectrocket import bases
 from objectrocket import util
 from objectrocket.instances.mongodb import MongodbInstance
-from objectrocket.instances.mongodb import TokumxInstance
+from objectrocket.instances.elasticsearch import ESInstance
 from objectrocket.instances.redis import RedisInstance
 
 logger = logging.getLogger(__name__)
@@ -38,12 +38,12 @@ class Instances(bases.BaseOperationsLayer):
         return self._concrete_instance_list(data)
 
     @util.token_auto_auth
-    def create(self, name, size, zone,
+    def create(self, name, plan, zone,
                service_type='mongodb', instance_type='mongodb_sharded', version='2.4.6'):
         """Create an ObjectRocket instance.
 
         :param str name: The name to give to the new instance.
-        :param int size: The size in gigabytes of the new instance.
+        :param int plan: The size in gigabytes of the new instance. ** Unless == 500 and then it's in mb.
         :param str zone: The zone that the new instance is to exist in.
         :param str service_type: The type of service that the new instance is to provide.
         :param str instance_type: The instance type to create.
@@ -54,7 +54,7 @@ class Instances(bases.BaseOperationsLayer):
         request_data = {
             'name': name,
             'service': service_type,
-            'size': size,
+            'plan': plan,
             'type': instance_type,
             'version': version,
             'zone': zone
@@ -158,8 +158,8 @@ class Instances(bases.BaseOperationsLayer):
         """A mapping of service names to service classes."""
         service_map = {
             'mongodb': MongodbInstance,
+            'elasticsearch': ESInstance,
             'redis': RedisInstance,
-            'tokumx': TokumxInstance,
         }
         return service_map
 
