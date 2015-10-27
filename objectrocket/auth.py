@@ -46,8 +46,15 @@ class Auth(bases.BaseAuthLayer):
 
         # Attempt to extract authentication data.
         try:
-            json_data = resp.json()
-            token = json_data['data']['token']
+            if resp.status_code == 200:
+                json_data = resp.json()
+                token = json_data['data']['token']
+            elif resp.status_code == 401:
+                raise errors.AuthFailure(resp.json().get('message', 'Authentication Failure.'))
+            else:
+                raise errors.AuthFailure("Unknown exception while authenticating: '{}'".format(resp.text))
+        except errors.AuthFailure:
+            raise
         except Exception as ex:
             logging.exception(ex)
             raise errors.AuthFailure('{}: {}'.format(ex.__class__.__name__, ex))

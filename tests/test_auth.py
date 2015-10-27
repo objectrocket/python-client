@@ -1,33 +1,61 @@
 """Tests for the objectrocket.auth module."""
+import base64
+import json
 import mock
 import pytest
+import responses
 
 from objectrocket import errors
 from objectrocket.auth import Auth
+from objectrocket.client import Client
 
+@pytest.fixture
+def auth_url(mongodb_sharded_instance):
+    return "https://sjc-api.objectrocket.com/v2/tokens/"
+
+@pytest.yield_fixture(autouse=True)
+def ensure_auth_production_url(auth_url):
+    """Fixture that ensures that the proper production URLs are used in tests,
+    instead of the potentially overridden ones from environment variables.
+
+    See objectrocket.constants.OR_DEFAULT_API_URL
+    """
+    with mock.patch.object(Auth, '_url', new_callable=mock.PropertyMock) as mock_auth_url:
+        type(mock_auth_url).return_value = auth_url
+        with mock.patch.object(Client, '_url', new_callable=mock.PropertyMock) as mock_client_url:
+            type(mock_client_url).return_value = auth_url.replace('tokens/', '')
+            yield
+
+@pytest.fixture()
+def base64_basic_auth_header():
+    """Just returns a properly formatted basic author header for testing"""
+    return 'Basic {}'.format(base64.encodestring('%s:%s' % ('tester', 'testpass')).replace('\n', ''))
 
 ####################################
 # Tests for Auth public interface. #
 ####################################
-def test_authenticate_makes_expected_request(client, mocked_response, patched_requests_map):
+@responses.activate
+def test_authenticate_makes_expected_request(client, mocked_response, auth_url, base64_basic_auth_header):
     username, password, return_token = 'tester', 'testpass', 'return_token'
-    patched_requests_map['auth'].get.return_value = mocked_response
-    mocked_response.json.return_value = {'data': {'token': return_token}}
+    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+    responses.add(responses.GET, auth_url, status=200,
+                  body=json.dumps({'data': {'token': return_token}}),
+                  content_type="application/json")
 
     output = client.auth.authenticate(username, password)
 
     assert output == return_token
-    patched_requests_map['auth'].get.assert_called_with(
-        client.auth._url,
-        auth=(username, password),
-        **client.auth._default_request_kwargs
-    )
+
+    assert responses.calls[0].request.headers.get('Authorization') == base64_basic_auth_header
+    assert responses.calls[0].request.headers.get('Content-Type') == 'application/json'
 
 
-def test_authenticate_binds_given_credentials(client, mocked_response, patched_requests_map):
+@responses.activate
+def test_authenticate_binds_given_credentials(client, mocked_response, auth_url):
     username, password, return_token = 'tester', 'testpass', 'return_token'
-    patched_requests_map['auth'].get.return_value = mocked_response
-    mocked_response.json.return_value = {'data': {'token': return_token}}
+    responses.add(responses.GET, auth_url, status=200,
+                  body=json.dumps({'data': {'token': return_token}}),
+                  content_type="application/json")
     orig_username, orig_password = client.auth._username, client.auth._password
 
     client.auth.authenticate(username, password)
@@ -38,10 +66,12 @@ def test_authenticate_binds_given_credentials(client, mocked_response, patched_r
     assert client.auth._password == password
 
 
-def test_authenticate_binds_auth_token_properly(client, mocked_response, patched_requests_map):
+@responses.activate
+def test_authenticate_binds_auth_token_properly(client, mocked_response, auth_url):
     username, password, return_token = 'tester', 'testpass', 'return_token'
-    patched_requests_map['auth'].get.return_value = mocked_response
-    mocked_response.json.return_value = {'data': {'token': return_token}}
+    responses.add(responses.GET, auth_url, status=200,
+                  body=json.dumps({'data': {'token': return_token}}),
+                  content_type="application/json")
     orig_token = client.auth._token
 
     client.auth.authenticate(username, password)
@@ -50,11 +80,13 @@ def test_authenticate_binds_auth_token_properly(client, mocked_response, patched
     assert client.auth._token == return_token
 
 
-def test_authenticate_raises_when_no_data_returned(client, mocked_response, patched_requests_map):
+@responses.activate
+def test_authenticate_raises_when_no_data_returned(client, mocked_response, auth_url):
     username, password = 'tester', 'testpass'
     auth = Auth(base_client=client)
-    patched_requests_map['auth'].get.return_value = mocked_response
-    mocked_response.json.return_value = {}
+    responses.add(responses.GET, auth_url, status=200,
+                  body=json.dumps({}),
+                  content_type="application/json")
 
     with pytest.raises(errors.AuthFailure) as exinfo:
         auth.authenticate(username, password)
@@ -62,11 +94,13 @@ def test_authenticate_raises_when_no_data_returned(client, mocked_response, patc
     assert exinfo.value.args == ("KeyError: 'data'",)
 
 
-def test_authenticate_raises_when_no_token_returned(client, mocked_response, patched_requests_map):
+@responses.activate
+def test_authenticate_raises_when_no_token_returned(client, mocked_response, auth_url):
     username, password = 'tester', 'testpass'
     auth = Auth(base_client=client)
-    patched_requests_map['auth'].get.return_value = mocked_response
-    mocked_response.json.return_value = {'data': {}}
+    responses.add(responses.GET, auth_url, status=200,
+                  body=json.dumps({'data': {}}),
+                  content_type="application/json")
 
     with pytest.raises(errors.AuthFailure) as exinfo:
         auth.authenticate(username, password)
@@ -97,11 +131,13 @@ def test_auth_password_setter(client):
     assert orig_val is not testval
 
 
-def test_auth_refresh_simply_invokes_authenticate_with_current_creds(client, mocked_response, patched_requests_map):
+@responses.activate
+def test_auth_refresh_simply_invokes_authenticate_with_current_creds(client, mocked_response, auth_url):
     # Assemble.
     username, password, return_token = 'tester', 'testpass', 'return_token'
-    patched_requests_map['auth'].get.return_value = mocked_response
-    mocked_response.json.return_value = {'data': {'token': return_token}}
+    responses.add(responses.GET, auth_url, status=200,
+                  body=json.dumps({'data': {'token': return_token}}),
+                  content_type="application/json")
 
     auth_output = client.auth.authenticate(username, password)
     bound_username, bound_password = client.auth._username, client.auth._password
@@ -111,7 +147,7 @@ def test_auth_refresh_simply_invokes_authenticate_with_current_creds(client, moc
         refresh_output = client.auth._refresh()
 
     # Assert.
-    assert auth_output is refresh_output
+    assert auth_output == refresh_output
     patched_auth.assert_called_once_with(bound_username, bound_password)
 
 
