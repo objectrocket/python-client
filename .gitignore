@@ -9,5 +9,6 @@
 # Build ignores.
 .tox
 .coverage
+.cache
 build
 dist

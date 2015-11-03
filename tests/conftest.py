@@ -9,7 +9,6 @@ from objectrocket.client import Client
 from objectrocket import instances
 from objectrocket import constants
 
-
 # def pytest_generate_tests(metafunc):
 #     """Generate tests for the different instance types."""
 #     if '_docs' in metafunc.fixturenames:
@@ -93,15 +92,15 @@ def mongodb_sharded_doc():
 
 
 @pytest.fixture
-def mongodb_replicaset_instance(client_token_auth, mongodb_replica_doc):
+def mongodb_replicaset_instance(client, mongodb_replica_doc):
     return instances.MongodbInstance(instance_document=mongodb_replica_doc,
-                                     client=client_token_auth)
+                                     instances=client.instances)
 
 
 @pytest.fixture
-def mongodb_sharded_instance(client_token_auth, mongodb_sharded_doc):
+def mongodb_sharded_instance(client, mongodb_sharded_doc):
     return instances.MongodbInstance(instance_document=mongodb_sharded_doc,
-                                     client=client_token_auth)
+                                     instances=client.instances)
 
 
 ######################
@@ -121,10 +120,6 @@ def patched_requests_map(request):
         which is patching the requests library in its respective module.
     """
     patches = {}
-
-    mocked = mock.patch('objectrocket.auth.requests', autospec=True)
-    request.addfinalizer(mocked.stop)
-    patches['auth'] = mocked.start()
 
     mocked = mock.patch('objectrocket.instances.requests', autospec=True)
     request.addfinalizer(mocked.stop)
