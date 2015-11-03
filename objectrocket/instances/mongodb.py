@@ -152,19 +152,3 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible):
             connect_string = self.ssl_connect_string
 
         return pymongo.MongoClient(connect_string)
-
-
-class TokumxInstance(MongodbInstance):
-    """An ObjectRocket TokuMX service instance.
-
-    :param dict instance_document: A dictionary representing the instance object, most likey coming
-        from the ObjectRocket API.
-    :param objectrocket.instances.Instances instances: An instance of
-        :py:class:`objectrocket.instances.Instances`.
-    """
-
-    def __init__(self, instance_document, instances):
-        super(TokumxInstance, self).__init__(
-            instance_document=instance_document,
-            instances=instances
-        )

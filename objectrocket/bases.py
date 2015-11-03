@@ -103,8 +103,14 @@ class BaseInstance(object):
         self.__instances = instances
         self.__instance_document = instance_document
 
+        if 'connect_string' in instance_document:
+            self._connect_string = instance_document['connect_string']
+        elif 'connection_strings' in instance_document:
+            self._connect_string = instance_document['connection_strings']
+        else:
+            raise errors.InstancesException('No connection string found.')
+
         # Bind required pseudo private attributes from API response document.
-        self._connect_string = instance_document['connect_string']
         self._created = instance_document['created']
         self._name = instance_document['name']
         self._plan = instance_document['plan']

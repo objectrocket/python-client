@@ -40,6 +40,13 @@ To use the library, simply do the following:
 
 ### development
 #### test
+Testing against local you will want to export a couple environment variables:
+
+```sh
+export OR_DEFAULT_API_URL='http://localhost:5050/v2/'
+export OR_DEFAULT_ADMIN_API_URL='http://localhost:5050/admin/'
+```
+
 Before you push your code, run `tox` from the top level directory. If errors
 are reported, fix them.
 
