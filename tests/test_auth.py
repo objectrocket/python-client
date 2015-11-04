@@ -29,7 +29,9 @@ def ensure_auth_production_url(auth_url):
 @pytest.fixture()
 def base64_basic_auth_header():
     """Just returns a properly formatted basic author header for testing"""
-    return 'Basic {}'.format(base64.encodestring('%s:%s' % ('tester', 'testpass')).replace('\n', ''))
+    username = 'tester'
+    password = 'testpass'
+    return 'Basic ' + base64.encodestring(('%s:%s' % (username,password)).encode()).decode().replace('\n', '')
 
 ####################################
 # Tests for Auth public interface. #
@@ -37,7 +39,6 @@ def base64_basic_auth_header():
 @responses.activate
 def test_authenticate_makes_expected_request(client, mocked_response, auth_url, base64_basic_auth_header):
     username, password, return_token = 'tester', 'testpass', 'return_token'
-    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
     responses.add(responses.GET, auth_url, status=200,
                   body=json.dumps({'data': {'token': return_token}}),
                   content_type="application/json")

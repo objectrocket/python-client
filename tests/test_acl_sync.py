@@ -92,7 +92,7 @@ class TestSetGetAclSync:
             response = inst.acl_sync()
 
         assert exinfo is not None
-        assert exinfo.value[0] == 'Test Exception'
+        assert exinfo.value.args[0] == 'Test Exception'
 
 class TestRunAclSync:
 
