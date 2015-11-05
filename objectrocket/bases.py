@@ -1,6 +1,5 @@
 """Base classes used throughout the library."""
 import abc
-import json
 import requests
 import six
 
@@ -150,7 +149,7 @@ class BaseInstance(object):
             if rackspace_sync is not None:
                 data.update({"rackspace_acl_sync_enabled": rackspace_sync})
 
-            response = requests.put(url, data=json.dumps(data), **self._instances._default_request_kwargs)
+            response = requests.put(url, json=data, **self._instances._default_request_kwargs)
             return response.json()
         else:
             raise errors.ObjectRocketException("Couldn't get current status of instance, failing.  Error: {}".format(response.text))
@@ -170,7 +169,7 @@ class BaseInstance(object):
         if rackspace_sync:
             data.update({"rackspace_acl_sync_enabled": True})
 
-        response = requests.post(url, data=json.dumps(data), **self._instances._default_request_kwargs)
+        response = requests.post(url, json=data, **self._instances._default_request_kwargs)
         return response.json()
 
     @property

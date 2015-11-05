@@ -9,6 +9,7 @@ from objectrocket import errors
 from objectrocket.auth import Auth
 from objectrocket.client import Client
 
+
 @pytest.fixture
 def auth_url(mongodb_sharded_instance):
     return "https://sjc-api.objectrocket.com/v2/tokens/"
