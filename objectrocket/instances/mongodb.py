@@ -8,6 +8,7 @@ import requests
 
 from objectrocket import bases
 from objectrocket import util
+from objectrocket import errors
 
 logger = logging.getLogger(__name__)
 
