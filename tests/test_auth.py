@@ -142,9 +142,12 @@ def test_auth_refresh_simply_invokes_authenticate_with_current_creds(client, moc
                                                                      auth_url):
     # Assemble.
     username, password, return_token = 'tester', 'testpass', 'return_token'
-    responses.add(responses.GET, auth_url, status=200,
-                  body=json.dumps({'data': {'token': return_token}}),
-                  content_type="application/json")
+    responses.add(
+        responses.GET, auth_url,
+        status=200,
+        body=json.dumps({'data': {'token': return_token}}),
+        content_type="application/json"
+    )
 
     auth_output = client.auth.authenticate(username, password)
     bound_username, bound_password = client.auth._username, client.auth._password

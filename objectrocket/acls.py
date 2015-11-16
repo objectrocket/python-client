@@ -31,7 +31,7 @@ class Acls(bases.BaseOperationsLayer):
         :returns: A list of :py:class:`Acl` objects associated with the specified instance.
         :rtype: list
         """
-        url = self._url.format(instance)
+        url = self._url.format(instance=instance)
         response = requests.get(url, **self._default_request_kwargs)
         data = self._get_response_data(response)
         return self._concrete_acl_list(data)
@@ -48,7 +48,7 @@ class Acls(bases.BaseOperationsLayer):
             to fail with a 400 from the API.
         """
         # Build up request data.
-        url = self._url.format(instance)
+        url = self._url.format(instance=instance)
         request_data = {
             'cidr_mask': cidr_mask,
             'description': description
@@ -82,7 +82,8 @@ class Acls(bases.BaseOperationsLayer):
         :returns: An :py:class:`Acl` object, or None if ACL does not exist.
         :rtype: :py:class:`Acl`
         """
-        url = self._url.format(instance)
+        base_url = self._url.format(instance=instance)
+        url = '{base}{aclid}/'.format(base=base_url, aclid=acl)
         response = requests.get(url, **self._default_request_kwargs)
         data = self._get_response_data(response)
         return self._concrete_acl(data)

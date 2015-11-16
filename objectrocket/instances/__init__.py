@@ -128,7 +128,9 @@ class Instances(bases.BaseOperationsLayer):
         if not instance_docs:
             return []
 
-        return list(filter(None, [self._concrete_instance(instance_doc=doc) for doc in instance_docs]))
+        return list(
+            filter(None, [self._concrete_instance(instance_doc=doc) for doc in instance_docs])
+        )
 
     @property
     def _default_request_kwargs(self):

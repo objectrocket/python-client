@@ -11,20 +11,6 @@ from objectrocket import acls
 from objectrocket import instances
 from objectrocket import constants
 
-# def pytest_generate_tests(metafunc):
-#     """Generate tests for the different instance types."""
-#     if '_docs' in metafunc.fixturenames:
-#         metafunc.parametrize('_docs', [
-#             mongo_replica_doc(),
-#             mongo_sharded_doc(),
-#         ])
-
-#     if '_instances_and_docs' in metafunc.fixturenames:
-#         metafunc.parametrize('_instances_and_docs', [
-#             (self.mongo_replica_instance(mongo_replica_doc()), mongo_replica_doc()),
-#             (self.mongo_sharded_instance(mongo_sharded_doc()), mongo_sharded_doc()),
-#         ])
-
 
 #####################
 # Generic fixtures. #
@@ -32,7 +18,7 @@ from objectrocket import constants
 @pytest.fixture
 def client(patched_requests_map):
     """Build a client for use in testing."""
-    return Client()
+    return Client(base_url='http://localhost:5050/v2/')
 
 
 @pytest.fixture
@@ -149,18 +135,13 @@ def mocked_response(request):
 def patched_requests_map(request):
     """Return a dict of ``MagicMock``s which patch the requests library in various places.
 
+    .. deprecated:: 0.4.0
+        Let's go ahead and kill this as we go, and favor the `responses` lib, as it is way better.
+
     :returns: A dict where each key is the name of a module, and its value is the ``MagicMock``
         which is patching the requests library in its respective module.
     """
     patches = {}
-
-    mocked = mock.patch('objectrocket.acls.requests', autospec=True)
-    request.addfinalizer(mocked.stop)
-    patches['acls'] = mocked.start()
-
-    mocked = mock.patch('objectrocket.auth.requests', autospec=True)
-    request.addfinalizer(mocked.stop)
-    patches['auth'] = mocked.start()
 
     mocked = mock.patch('objectrocket.instances.requests', autospec=True)
     request.addfinalizer(mocked.stop)

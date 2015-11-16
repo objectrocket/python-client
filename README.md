@@ -8,10 +8,8 @@ ObjectRocket API interface library for Python.
 
 **NOTICE:** this client is still undergoing intial stages of development, and some public interfaces may change as development continues. We will increment the version of this package to 1.0.0 once the public interface to this library is deemed stable.
 
-
 ### examples
 To use the library, simply do the following:
-
 
 ```python
 >>> import objectrocket
@@ -32,17 +30,16 @@ To use the library, simply do the following:
 [<MongodbInstance {...} at 0x10aedb980>]
 ```
 
-
 ### installation
-
-    pip install objectrocket
-
+```bash
+pip install objectrocket
+```
 
 ### development
 #### test
 Testing against local you will want to export a couple environment variables:
 
-```sh
+```bash
 export OR_DEFAULT_API_URL='http://localhost:5050/v2/'
 export OR_DEFAULT_ADMIN_API_URL='http://localhost:5050/admin/'
 ```
