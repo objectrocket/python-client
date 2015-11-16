@@ -1,12 +1,7 @@
 """Elasticsearch instance class and logic."""
-import datetime
-import json
 import logging
 
-import requests
-
 from objectrocket import bases
-from objectrocket import util
 
 logger = logging.getLogger(__name__)
 

@@ -43,7 +43,7 @@ class Instances(bases.BaseOperationsLayer):
         """Create an ObjectRocket instance.
 
         :param str name: The name to give to the new instance.
-        :param int plan: The size in gigabytes of the new instance. ** Unless == 500 and then it's in mb.
+        :param int plan: The plan size of the new instance.
         :param str zone: The zone that the new instance is to exist in.
         :param str service_type: The type of service that the new instance is to provide.
         :param str instance_type: The instance type to create.
