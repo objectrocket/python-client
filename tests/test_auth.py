@@ -14,6 +14,7 @@ from objectrocket.client import Client
 def auth_url(mongodb_sharded_instance):
     return "https://sjc-api.objectrocket.com/v2/tokens/"
 
+
 @pytest.yield_fixture(autouse=True)
 def ensure_auth_production_url(auth_url):
     """Fixture that ensures that the proper production URLs are used in tests,
@@ -27,18 +28,21 @@ def ensure_auth_production_url(auth_url):
             type(mock_client_url).return_value = auth_url.replace('tokens/', '')
             yield
 
+
 @pytest.fixture()
 def base64_basic_auth_header():
     """Just returns a properly formatted basic author header for testing"""
-    username = 'tester'
-    password = 'testpass'
-    return 'Basic ' + base64.encodestring(('%s:%s' % (username,password)).encode()).decode().replace('\n', '')
+    user_passwd = '{}:{}'.format('tester', 'testpass').encode()
+    b64string = base64.encodestring(user_passwd).decode().replace('\n', '')
+    return 'Basic {}'.format(b64string)
+
 
 ####################################
 # Tests for Auth public interface. #
 ####################################
 @responses.activate
-def test_authenticate_makes_expected_request(client, mocked_response, auth_url, base64_basic_auth_header):
+def test_authenticate_makes_expected_request(client, mocked_response, auth_url,
+                                             base64_basic_auth_header):
     username, password, return_token = 'tester', 'testpass', 'return_token'
     responses.add(responses.GET, auth_url, status=200,
                   body=json.dumps({'data': {'token': return_token}}),
@@ -134,7 +138,8 @@ def test_auth_password_setter(client):
 
 
 @responses.activate
-def test_auth_refresh_simply_invokes_authenticate_with_current_creds(client, mocked_response, auth_url):
+def test_auth_refresh_simply_invokes_authenticate_with_current_creds(client, mocked_response,
+                                                                     auth_url):
     # Assemble.
     username, password, return_token = 'tester', 'testpass', 'return_token'
     responses.add(responses.GET, auth_url, status=200,

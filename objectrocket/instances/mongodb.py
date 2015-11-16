@@ -8,7 +8,6 @@ import requests
 
 from objectrocket import bases
 from objectrocket import util
-from objectrocket import errors
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +136,11 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible):
             'weekly': weekly,
         }
 
-        response = requests.post(url, data=json.dumps(data), **self._instances._default_request_kwargs)
+        response = requests.post(
+            url,
+            data=json.dumps(data),
+            **self._instances._default_request_kwargs
+        )
         return response.json()
 
     ######################

@@ -130,7 +130,8 @@ class BaseInstance(object):
         """Adjust Amazon Web Services and/or Rackspace Acl Sync feature for this instance.
 
         :param bool aws_sync: True/False whether to enable AWS acl sync for this instance.
-        :param bool rackspace_sync: True/False whether to enable Rackspace acl sync for this instance.
+        :param bool rackspace_sync: True/False whether to enable Rackspace acl sync for this
+            instance.
         """
         url = self._url + 'acl_sync'
 
@@ -142,23 +143,33 @@ class BaseInstance(object):
         if response.status_code == 200:
             resp_json = response.json()
             current_status = resp_json.get('data', {})
-            data.update({"aws_acl_sync_enabled": current_status.get("aws_acl_sync_enabled", False),
-                         "rackspace_acl_sync_enabled": current_status.get("rackspace_acl_sync_enabled", False)})
+            current_aws_sync_status = current_status.get("aws_acl_sync_enabled", False)
+            current_rax_sync_status = current_status.get("rackspace_acl_sync_enabled", False)
+            data.update({
+                "aws_acl_sync_enabled": current_aws_sync_status,
+                "rackspace_acl_sync_enabled": current_rax_sync_status
+            })
+
             if aws_sync is not None:
                 data.update({"aws_acl_sync_enabled": aws_sync})
+
             if rackspace_sync is not None:
                 data.update({"rackspace_acl_sync_enabled": rackspace_sync})
 
             response = requests.put(url, json=data, **self._instances._default_request_kwargs)
             return response.json()
+
         else:
-            raise errors.ObjectRocketException("Couldn't get current status of instance, failing.  Error: {}".format(response.text))
+            raise errors.ObjectRocketException(
+                "Couldn't get current status of instance, failing. Error: {}".format(response.text)
+            )
 
     def run_acl_sync(self, aws_sync=False, rackspace_sync=False):
         """Run Acl sync for this instance.
 
         :param bool aws_sync: True/False whether to run AWS acl sync for this instance immediately.
-        :param bool rackspace_sync: True/False whether to run Rackspace acl sync for this instance immediately.
+        :param bool rackspace_sync: True/False whether to run Rackspace acl sync for this instance
+            immediately.
         """
         url = self._url + 'acl_sync'
 

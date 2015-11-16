@@ -1,5 +1,4 @@
 """Authentication operations."""
-import copy
 import logging
 import requests
 
@@ -52,7 +51,9 @@ class Auth(bases.BaseAuthLayer):
             elif resp.status_code == 401:
                 raise errors.AuthFailure(resp.json().get('message', 'Authentication Failure.'))
             else:
-                raise errors.AuthFailure("Unknown exception while authenticating: '{}'".format(resp.text))
+                raise errors.AuthFailure(
+                    "Unknown exception while authenticating: '{}'".format(resp.text)
+                )
         except errors.AuthFailure:
             raise
         except Exception as ex:
