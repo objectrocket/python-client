@@ -12,7 +12,7 @@ from objectrocket import util
 logger = logging.getLogger(__name__)
 
 
-class MongodbInstance(bases.BaseInstance, bases.Extensible):
+class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsInterface):
     """An ObjectRocket MongoDB service instance.
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming

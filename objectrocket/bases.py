@@ -303,3 +303,49 @@ class Extensible(object):
         )
         if extmanager.extensions:
             extmanager.map(util.register_extension_method, base=self)
+
+
+class InstanceAclsInterface(object):
+    """A mixin implementing support for instance the bound ACLs interface.
+
+    Should only be mixed in with an Instance class.
+    """
+
+    _acls = None
+
+    @property
+    def acls(self):
+        """The instance bound ACLs operations layer."""
+        if self._acls is None:
+            self._acls = InstanceAcls(instance=self)
+        return self._acls
+
+
+class InstanceAcls(object):
+    """An object implementing the ACLs interface bound to a specific instance."""
+
+    def __init__(self, instance):
+        self._instance = instance
+
+    def all(self):
+        """Get all ACLs for this instance."""
+        return self._instance._client.acls.all(self._instance.name)
+
+    def create(self, cidr_mask, description, **kwargs):
+        """Create an ACL for this instance.
+
+        See :py:meth:`Acls.create` for call signature.
+        """
+        return self._instance._client.acls.create(
+            self._instance.name,
+            cidr_mask,
+            description,
+            **kwargs
+        )
+
+    def get(self, acl):
+        """Get the ACL specified by ID belonging to this instance.
+
+        See :py:meth:`Acls.get` for call signature.
+        """
+        return self._instance._client.acls.get(self._instance.name, acl)

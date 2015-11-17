@@ -6,7 +6,7 @@ import redis
 from objectrocket import bases
 
 
-class RedisInstance(bases.BaseInstance):
+class RedisInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsInterface):
     """An ObjectRocket Reids service instance.
 
     :param dict instance_document: A dictionary representing the instance object.

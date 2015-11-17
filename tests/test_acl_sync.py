@@ -20,7 +20,7 @@ def ensure_production_url(mongodb_sharded_instance, instance_acl_url):
 
 @pytest.fixture
 def instance_acl_url(mongodb_sharded_instance):
-    return "https://sjc-api.objectrocket.com/v2/instances/{}/acl_sync".format(
+    return "http://localhost:5050/v2/instances/{}/acl_sync".format(
         mongodb_sharded_instance.name
     )
 
