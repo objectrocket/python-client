@@ -1,4 +1,5 @@
 """ObjectRocket Python client."""
+from objectrocket import acls
 from objectrocket import auth
 from objectrocket import bases
 from objectrocket import constants
@@ -16,6 +17,7 @@ class Client(bases.Extensible):
         self.__url = base_url
 
         # Public interface attributes.
+        self.acls = acls.Acls(base_client=self)
         self.auth = auth.Auth(base_client=self)
         self.instances = instances.Instances(base_client=self)
 
