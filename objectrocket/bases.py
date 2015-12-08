@@ -306,7 +306,7 @@ class Extensible(object):
 
 
 class InstanceAclsInterface(object):
-    """A mixin implementing support for instance the bound ACLs interface.
+    """A mixin implementing support for the instance bound ACLs interface.
 
     Should only be mixed in with an Instance class.
     """
