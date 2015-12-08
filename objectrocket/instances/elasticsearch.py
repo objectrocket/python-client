@@ -6,7 +6,7 @@ from objectrocket import bases
 logger = logging.getLogger(__name__)
 
 
-class ESInstance(bases.BaseInstance, bases.Extensible):
+class ESInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsInterface):
     """An ObjectRocket Elasticsearch service instance.
 
     :param dict instance_document: A dictionary representing the instance object, most likey coming
