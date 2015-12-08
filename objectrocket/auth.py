@@ -120,3 +120,21 @@ class Auth(bases.BaseAuthLayer):
     def _username(self, new_username):
         """Update the username to be used for authentication."""
         self.__username = new_username
+
+    def _verify(self, token):
+        """Verify that the given token is valid.
+
+        :param str token: The API token to verify.
+        :returns: The token's corresponding user model as a dict, or None if invalid.
+        :rtype: dict
+        """
+        # Attempt to authenticate.
+        url = '{}{}'.format(self._url, 'verify')
+        resp = requests.post(
+            url,
+            json={'token': token},
+            **self._default_request_kwargs
+        )
+        if resp.status_code == 200:
+            return resp.json().get('data', None)
+        return None
