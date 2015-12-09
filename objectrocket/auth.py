@@ -129,7 +129,7 @@ class Auth(bases.BaseAuthLayer):
         :rtype: dict
         """
         # Attempt to authenticate.
-        url = '{}{}'.format(self._url, 'verify')
+        url = '{}{}/'.format(self._url, 'verify')
         resp = requests.post(
             url,
             json={'token': token},
