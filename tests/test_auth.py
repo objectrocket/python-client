@@ -175,3 +175,21 @@ def test_auth_username_setter(client):
     client.auth._username = testval
     assert client.auth._username is testval
     assert orig_val is not testval
+
+
+@responses.activate
+def test_auth_verify_makes_expected_call(client):
+    token = 'testing'
+    expected_url = 'https://sjc-api.objectrocket.com/v2/tokens/verify/'
+    expected_user_data = {'testing': 'testing'}
+    responses.add(
+        responses.POST,
+        expected_url,
+        status=200,
+        body=json.dumps({'data': expected_user_data}),
+        content_type="application/json"
+    )
+
+    output = client.auth._verify(token)
+
+    assert output == expected_user_data
