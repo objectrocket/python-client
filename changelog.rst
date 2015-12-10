@@ -5,6 +5,8 @@ changelog
 -----
 - Modify ``Instance.__repr__`` to show only name and id. Less noisy.
 - Implement the instance ACLs interface.
+- Implement the instance bound ACLs interface.
+- Implement the auth._verify method for token verification.
 
 0.3.x
 -----
