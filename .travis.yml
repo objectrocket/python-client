@@ -4,6 +4,6 @@ python:
 before_install:
   pip install coveralls codecov
 install: "pip install tox>=2.1"
-script: "tox -e ALL,py33"
+script: "tox -e ALL,py33,py34"
 after_success:
   "codecov && coveralls"
