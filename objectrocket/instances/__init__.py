@@ -14,7 +14,7 @@ from objectrocket.instances.redis import RedisInstance
 logger = logging.getLogger(__name__)
 
 
-class Instances(bases.BaseOperationsLayer):
+class Instances(bases.Extensible, bases.BaseOperationsLayer):
     """Instance operations.
 
     :param objectrocket.client.Client base_client: An instance of objectrocket.client.Client.
@@ -22,6 +22,9 @@ class Instances(bases.BaseOperationsLayer):
 
     def __init__(self, base_client):
         super(Instances, self).__init__(base_client=base_client)
+
+        # Register any extensions for this class.
+        self._register_extensions('objectrocket.instances.Instances')
 
     #####################
     # Public interface. #

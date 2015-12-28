@@ -7,6 +7,7 @@ changelog
 - Implement the instance ACLs interface.
 - Implement the instance bound ACLs interface.
 - Implement the auth._verify method for token verification.
+- Allowing instances to be extensible.
 
 0.3.x
 -----
