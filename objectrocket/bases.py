@@ -293,6 +293,7 @@ class Extensible(object):
             'extensions.classes.{}'.format(namespace),
             propagate_map_exceptions=True
         )
+
         if extmanager.extensions:
             extmanager.map(util.register_extension_class, base=self)
 
