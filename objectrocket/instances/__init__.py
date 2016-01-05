@@ -14,7 +14,7 @@ from objectrocket.instances.redis import RedisInstance
 logger = logging.getLogger(__name__)
 
 
-class Instances(bases.Extensible, bases.BaseOperationsLayer):
+class Instances(bases.BaseOperationsLayer, bases.Extensible):
     """Instance operations.
 
     :param objectrocket.client.Client base_client: An instance of objectrocket.client.Client.
