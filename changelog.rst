@@ -3,6 +3,7 @@ changelog
 
 0.4.x
 -----
+- Require lib elasticsearch >= 2.
 - Modify ``Instance.__repr__`` to show only name and id. Less noisy.
 - Implement the instance ACLs interface.
 - Implement the instance bound ACLs interface.
