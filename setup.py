@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 """Setup script for ObjectRocket Python client."""
-import objectrocket
-from setuptools import find_packages, setup
+from setuptools import find_packages
+from setuptools import setup
+
+VERSION = ('0', '4', '2')
+__version__ = '.'.join(VERSION)
 
 with open('README.md') as f:
     readme = f.read()
@@ -20,7 +23,7 @@ setup(
     name='objectrocket',
     packages=find_packages(exclude=['tests*']),
     url='https://github.com/objectrocket/python-client/',
-    version=objectrocket.__version__,
+    version=__version__,
     zip_safe=False,
     classifiers=(
         'Development Status :: 5 - Production/Stable',
