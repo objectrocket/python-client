@@ -1,6 +1,7 @@
 """Utility code for the objectrocket package."""
 import functools
-import types
+
+from six import create_bound_method
 
 from objectrocket import errors
 
@@ -23,7 +24,7 @@ def register_extension_method(ext, base, *args, **kwargs):
     It will be bound to the specified base as a method, and then set as a public attribute of that
     base.
     """
-    bound_method = types.MethodType(ext.plugin, base, base.__class__)
+    bound_method = create_bound_method(ext.plugin, base)
     setattr(base, ext.name.lstrip('_'), bound_method)
 
 
