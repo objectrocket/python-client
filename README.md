@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/objectrocket/python-client.svg)](https://travis-ci.org/objectrocket/python-client)
+[![Circle CI](https://circleci.com/gh/objectrocket/python-client.svg?style=svg)](https://circleci.com/gh/objectrocket/python-client)
 [![codecov.io](http://codecov.io/github/objectrocket/python-client/coverage.svg?branch=master)](http://codecov.io/github/objectrocket/python-client?branch=master)
 [![Coverage Status](https://coveralls.io/repos/objectrocket/python-client/badge.svg?branch=master&service=github)](https://coveralls.io/github/objectrocket/python-client?branch=master)
 
@@ -50,23 +50,8 @@ are reported, fix them.
 #### coverage
 To receive a test coverage report, run `tox -e coverage` from the top level directory.
 
-#### build
-To build the client, invoke `tox -e build` from the top level directory.
-Your artifact will appear in the `dist` directory, and will look
-something like `objectrocket-<version>-py2.py3-<abi>-<platform>.whl`.
-
-###### pypi
-To upload the built artifact to **pypytest** or **pypi**, you will need the account credentials. To upload to **pypytest**, invoke the following:
-
-```bash
-tox -e build -- upload -r pypitest
-```
-
-To upload to **pypi**, invoke the following:
-
-```bash
-tox -e build -- upload -r pypi
-```
+#### pypi build
+Pushing a tag following the pattern `/^[0-9]+.[0-9]+.[0-9]+$/` will automatically trigger a new version of the client to be built and uploaded to [pypi](https://pypi.python.org). A pattern of `/^[0-9]+.[0-9]+.[0-9]+-rc[0-9]+$/` will cause it to be pushed to [testpypi](https://testpypi.python.org).
 
 #### documentation
 To build the documentation, invoke `tox -e docs` from the top level directory.
