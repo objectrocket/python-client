@@ -134,7 +134,7 @@ class BaseInstance(object):
         self._service = instance_document['service']
         self._type = instance_document['type']
         self._version = instance_document['version']
-        self._settings = instance_document['settings']
+        self._settings = instance_document.get('settings', [])
 
     def __repr__(self):
         """Represent this object as a string."""
