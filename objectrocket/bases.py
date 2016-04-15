@@ -134,6 +134,7 @@ class BaseInstance(object):
         self._service = instance_document['service']
         self._type = instance_document['type']
         self._version = instance_document['version']
+        self._settings = instance_document.get('settings', [])
 
     def __repr__(self):
         """Represent this object as a string."""
@@ -245,6 +246,11 @@ class BaseInstance(object):
     def version(self):
         """The version of this instance's service."""
         return self._version
+
+    @property
+    def settings(self):
+        """The settings on this instance's service."""
+        return self._settings
 
     def to_dict(self):
         """Render this object as a dictionary."""
