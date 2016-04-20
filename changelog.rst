@@ -3,6 +3,8 @@ changelog
 
 0.4.x
 -----
+- New stats endpoint that provides instance stats (for consumption by newrelic)
+- Instance details now include instance settings.
 - Use ``six`` to allow extensions under py3.
 - Require lib elasticsearch >= 2.
 - Modify ``Instance.__repr__`` to show only name and id. Less noisy.
@@ -10,7 +12,6 @@ changelog
 - Implement the instance bound ACLs interface.
 - Implement the auth._verify method for token verification.
 - Allowing instances to be extensible.
-- Instance details now included instance settings too.
 
 0.3.x
 -----
