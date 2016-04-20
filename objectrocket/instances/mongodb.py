@@ -104,7 +104,8 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         """Get stats for this instance.
         """
         if self._new_relic_stats is None:
-            self._new_relic_stats = json.loads(requests.get(self._stats_url,
+            self._new_relic_stats = json.loads(requests.get('{}{}'.format(
+                                                self._url, 'new-relic-stats'),
                                            **self._instances._default_request_kwargs
                                            ).content)
         return self._new_relic_stats
@@ -170,8 +171,3 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
             connect_string = self.ssl_connect_string
 
         return pymongo.MongoClient(connect_string)
-
-    @property
-    def _stats_url(self):
-        """The URL for stats of this instance."""
-        return self._instances._url + '{}/{}/'.format(self.name, 'new-relic-stats')
