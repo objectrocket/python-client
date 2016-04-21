@@ -108,7 +108,8 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
             self._new_relic_stats = \
                 json.loads(requests.get('{}{}'.format(self._url,
                            'new-relic-stats'),
-                           **self._instances._default_request_kwargs).content)
+                           **self._instances._default_request_kwargs).content
+                           ).get('data')
         return self._new_relic_stats
 
 
