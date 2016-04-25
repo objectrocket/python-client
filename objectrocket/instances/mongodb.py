@@ -34,6 +34,10 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         # Register any extensions for this class.
         self._register_extensions('objectrocket.instances.mongodb.MongodbInstance')
 
+        # on demand initialization of new_relic_stats
+        # TODO: (kmagge) we can get rid of this when we have newer version of stats
+        self._new_relic_stats = None
+
     #####################
     # Public interface. #
     #####################
@@ -93,6 +97,21 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
             response = requests.get(url, **self._instances._default_request_kwargs)
 
         return response.json()
+
+    @property
+    @util.token_auto_auth
+    def new_relic_stats(self):
+        """
+        Get stats for this instance.
+        """
+        if self._new_relic_stats is None:
+            response = requests.get('{}{}'.format(self._url,
+                                    'new-relic-stats'),
+                                    **self._instances._default_request_kwargs)
+            self._new_relic_stats = json.loads(response.content).get(
+                'data') if response.status_code == 200 else {}
+        return self._new_relic_stats
+
 
     @property
     def ssl_connect_string(self):
