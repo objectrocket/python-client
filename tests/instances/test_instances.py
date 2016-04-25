@@ -101,3 +101,19 @@ def test_instance_acls_create_makes_expected_call(mongodb_sharded_instance, acl)
 
     assert isinstance(output, Acl)
     assert output.id == acl.id
+
+
+@responses.activate
+def test_instance_new_relic_stats(mongodb_sharded_instance):
+    inst = mongodb_sharded_instance
+    expected_url = 'http://localhost:5050/v2/instances/{}/new-relic-stats'.format(inst.name)
+    responses.add(
+        responses.GET,
+        expected_url,
+        status=200,
+        body='{}',
+        content_type="application/json",
+    )
+
+    assert hasattr(mongodb_sharded_instance, 'new_relic_stats')
+    assert mongodb_sharded_instance.new_relic_stats == {}

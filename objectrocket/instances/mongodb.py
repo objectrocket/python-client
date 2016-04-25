@@ -101,15 +101,15 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
     @property
     @util.token_auto_auth
     def new_relic_stats(self):
-        """Get stats for this instance.
         """
-
+        Get stats for this instance.
+        """
         if self._new_relic_stats is None:
-            self._new_relic_stats = \
-                json.loads(requests.get('{}{}'.format(self._url,
-                           'new-relic-stats'),
-                           **self._instances._default_request_kwargs).content
-                           ).get('data')
+            response = requests.get('{}{}'.format(self._url,
+                                    'new-relic-stats'),
+                                    **self._instances._default_request_kwargs)
+            self._new_relic_stats = json.loads(response.content).get(
+                'data') if response.status_code == 200 else {}
         return self._new_relic_stats
 
 
