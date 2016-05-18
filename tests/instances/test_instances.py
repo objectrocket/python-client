@@ -88,7 +88,7 @@ def test_instance_acls_all_returns_expected_acl_object(mongodb_sharded_instance,
 @responses.activate
 def test_instance_acls_create_makes_expected_call(mongodb_sharded_instance, acl):
     inst = mongodb_sharded_instance
-    expected_url = 'http://localhost:5050/v2/instances/{}/acls/'.format(inst.name)
+    expected_url = 'http://localhost:5050/v2/mongodb/{}/shards/'.format(inst.name)
     responses.add(
         responses.POST,
         expected_url,
@@ -104,16 +104,16 @@ def test_instance_acls_create_makes_expected_call(mongodb_sharded_instance, acl)
 
 
 @responses.activate
-def test_instance_new_relic_stats(mongodb_sharded_instance):
-    inst = mongodb_sharded_instance
+def test_instance_new_relic_stats(mongodb_replicaset_instance,):
+    inst = mongodb_replicaset_instance
     expected_url = 'http://localhost:5050/v2/instances/{}/new-relic-stats'.format(inst.name)
     responses.add(
         responses.GET,
         expected_url,
-        status=200,
-        body='{}',
+            status=200,
+        body={},
         content_type="application/json",
     )
 
-    assert hasattr(mongodb_sharded_instance, 'new_relic_stats')
-    assert mongodb_sharded_instance.new_relic_stats == {}
+    assert hasattr(mongodb_replicaset_instance, 'new_relic_stats')
+    assert mongodb_replicaset_instance.new_relic_stats == {}
