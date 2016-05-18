@@ -103,19 +103,6 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         return [Shard(self.name, url, self._client, shard_doc) for shard_doc in response.json().get('data')]
 
 
-    @util.token_auto_auth
-    def replica_sets(self):
-        """Get a list of shards belonging to this instance.
-
-        :param bool add_shard: A boolean indicating whether to add a new shard to the specified
-            instance.
-        """
-        url = self._service_url + 'replicasets/'
-        response = requests.get(url, **self._instances._default_request_kwargs)
-
-        return response.json()
-
-
     def get_aggregate_database_stats(self):
         return requests.get(self._service_url + 'aggregate_database_stats/',
                             **self._instances._default_request_kwargs).json()['data']
