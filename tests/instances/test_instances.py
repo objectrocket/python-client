@@ -88,7 +88,7 @@ def test_instance_acls_all_returns_expected_acl_object(mongodb_sharded_instance,
 @responses.activate
 def test_instance_acls_create_makes_expected_call(mongodb_sharded_instance, acl):
     inst = mongodb_sharded_instance
-    expected_url = 'http://localhost:5050/v2/mongodb/{}/shards/'.format(inst.name)
+    expected_url = 'http://localhost:5050/v2/instances/{}/acls/'.format(inst.name)
     responses.add(
         responses.POST,
         expected_url,
