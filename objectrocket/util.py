@@ -1,5 +1,6 @@
 """Utility code for the objectrocket package."""
 import functools
+import datetime
 
 from six import create_bound_method
 
@@ -57,3 +58,35 @@ def token_auto_auth(func):
 
     # TODO(TheDodd): match func call signature and docs.
     return wrapper
+
+def sum_values(value1, value2):
+    # TODO: Kill this method with fire, it's the only way to be sure
+    if value1 is None:
+        return value2
+    if value2 is None:
+        return value1
+
+    number_types = (int, float, long, bool)
+
+    if isinstance(value1, number_types) and isinstance(value2, number_types):
+        return int(value1 + value2)
+
+    # make sure the entries are of the same type
+    if not (isinstance(value1, value2.__class__) or isinstance(value2, value1.__class__)):
+        message = ("Entry %s type %s and entry %s type %s are not of the same type"
+                   % (str(value1), str(type(value1)), str(value2), str(type(value2))))
+        raise Exception(message)
+
+    if isinstance(value1, list):
+        return list(set(value1 + value2))
+    elif isinstance(value1, str) or isinstance(value1, datetime.datetime) or isinstance(value1, unicode):
+        return value1
+    elif isinstance(value1, dict):
+        keys = set(value1.iterkeys()) | set(value2.iterkeys())
+        return dict((key, sum_values(value1.get(key), value2.get(key))) for key in keys)
+    else:
+        try:
+            return value1 + value2
+        except TypeError:
+            message = "Could not sum %s, type %s and %s, type %s" % (str(value1), str(type(value1)), str(value2), str(type(value2)))
+            raise Exception(message)
