@@ -1,9 +1,13 @@
 """Tests for the objectrocket.instances module."""
+import sys
 import responses
+
+import pytest
 
 from objectrocket.instances.mongodb import MongodbInstance
 from objectrocket.acls import Acl
 
+from ..utils import comparable_dictionaries
 
 ##########################################
 # Tests for Instances private interface. #
@@ -117,3 +121,22 @@ def test_instance_new_relic_stats(mongodb_replicaset_instance,):
 
     assert hasattr(mongodb_replicaset_instance, 'new_relic_stats')
     assert mongodb_replicaset_instance.new_relic_stats == {}
+
+
+@pytest.mark.skipif(sys.version_info[0] >= 3, reason='long and unincode use in objectrocket.utils.sum_values should be cleaned up before running this test on python 3')
+def test_instance_rollup_shard_stats_to_instance_stats(mongodb_sharded_instance,
+                                                       mock_shard_stats,
+                                                       mock_instance_stats_this_second):
+
+    rolled_up_instance_stats = mongodb_sharded_instance._rollup_shard_stats_to_instance_stats(mock_shard_stats)
+    # we check just the keys because some rolled up values won't be the same every time even if the same set
+    # of shard stats were to be rolled up to instance level.
+    assert comparable_dictionaries(rolled_up_instance_stats, mock_instance_stats_this_second)
+
+
+def test_compile_new_relic_stats(mongodb_sharded_instance, mock_instance_stats_this_second,
+                                 mock_instance_stats_next_second, mock_new_relic_stats):
+
+    new_relic_stats = mongodb_sharded_instance._compile_new_relic_stats(
+        mock_instance_stats_this_second, mock_instance_stats_next_second)
+    assert comparable_dictionaries(new_relic_stats, mock_new_relic_stats)
