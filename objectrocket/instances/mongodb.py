@@ -128,6 +128,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
                 # power nap
                 time.sleep(1)
                 # fetch again
+                fs = []
                 with futures.ThreadPoolExecutor(len(shards)) as executor:
                     for shard in shards:
                         fs.append(executor.submit(shard.get_shard_stats))
