@@ -60,6 +60,7 @@ def token_auto_auth(func):
     return wrapper
 
 def sum_values(value1, value2):
+    # function borrowed from core, keeping original comment intact
     # TODO: Kill this method with fire, it's the only way to be sure
     if value1 is None:
         return value2
