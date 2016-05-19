@@ -4,3 +4,4 @@ redis>=2.0
 requests>=2.0.0
 six<2.0
 stevedore
+futures==3.0.5
