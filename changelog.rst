@@ -12,6 +12,7 @@ changelog
 - Implement the instance bound ACLs interface.
 - Implement the auth._verify method for token verification.
 - Allowing instances to be extensible.
+- sharded mongodb instance stats are now fetching using a pool of threads (one per shard)
 
 0.3.x
 -----
