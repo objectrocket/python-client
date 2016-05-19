@@ -87,7 +87,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         return self._get_connection(ssl=ssl)
 
     @util.token_auto_auth
-    def shards(self, add_shard=False):
+    def shards(self, add_shard=False, include_stats=False):
         """Get a list of shards belonging to this instance.
 
         :param bool add_shard: A boolean indicating whether to add a new shard to the specified
@@ -97,7 +97,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         if add_shard:
             response = requests.post(url, **self._instances._default_request_kwargs)
         else:
-            response = requests.get(url, params={'include_stats': True},
+            response = requests.get(url, params={'include_stats': include_stats},
                                     **self._instances._default_request_kwargs)
 
         return response.json()
@@ -118,7 +118,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
             if self.type == 'mongodb_sharded':
                 shards = [Shard(self.name, self._service_url + 'shards/',
                                 self._client, shard_doc)
-                          for shard_doc in self.shards().get('data')]
+                          for shard_doc in self.shards(include_stats=True).get('data')]
                 fs = []
                 with futures.ThreadPoolExecutor(len(shards)) as executor:
                     for shard in shards:
