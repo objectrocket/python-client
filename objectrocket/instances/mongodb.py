@@ -100,7 +100,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
             response = requests.get(url, params={'include_stats': True},
                                     **self._instances._default_request_kwargs)
 
-        return [Shard(self.name, url, self._client, shard_doc) for shard_doc in response.json().get('data')]
+        return response.json()
 
 
     def get_aggregate_database_stats(self):
@@ -116,7 +116,9 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         if self._new_relic_stats is None:
             # if this is a sharded instance, fetch shard stats in parallel
             if self.type == 'mongodb_sharded':
-                shards = self.shards()
+                shards = [Shard(self.name, self._service_url + 'shards/',
+                                self._client, shard_doc)
+                          for shard_doc in self.shards().get('data')]
                 fs = []
                 with futures.ThreadPoolExecutor(len(shards)) as executor:
                     for shard in shards:
