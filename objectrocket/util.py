@@ -59,6 +59,7 @@ def token_auto_auth(func):
     # TODO(TheDodd): match func call signature and docs.
     return wrapper
 
+
 def sum_values(value1, value2):
     # function borrowed from core, keeping original comment intact
     # TODO: Kill this method with fire, it's the only way to be sure
@@ -76,7 +77,7 @@ def sum_values(value1, value2):
     if not (isinstance(value1, value2.__class__) or isinstance(value2, value1.__class__)):
         message = ("Entry %s type %s and entry %s type %s are not of the same type"
                    % (str(value1), str(type(value1)), str(value2), str(type(value2))))
-        raise Exception(message)
+        raise TypeError(message)
 
     if isinstance(value1, list):
         return list(set(value1 + value2))
@@ -86,8 +87,4 @@ def sum_values(value1, value2):
         keys = set(value1.iterkeys()) | set(value2.iterkeys())
         return dict((key, sum_values(value1.get(key), value2.get(key))) for key in keys)
     else:
-        try:
-            return value1 + value2
-        except TypeError:
-            message = "Could not sum %s, type %s and %s, type %s" % (str(value1), str(type(value1)), str(value2), str(type(value2)))
-            raise Exception(message)
+        return value1 + value2

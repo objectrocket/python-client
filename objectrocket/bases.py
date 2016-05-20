@@ -284,6 +284,7 @@ class BaseInstance(object):
         """The service specific URL of this instance object."""
         return self._client._url + '{}/{}/'.format(self.service, self.name)
 
+
 ###########
 # Mixins. #
 ###########

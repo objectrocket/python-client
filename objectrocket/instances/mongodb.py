@@ -101,7 +101,6 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
 
         return response.json()
 
-
     def get_aggregate_database_stats(self):
         return requests.get(self._service_url + 'aggregate_database_stats/',
                             **self._instances._default_request_kwargs).json()['data']
@@ -147,9 +146,9 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
 
     def _rollup_shard_stats_to_instance_stats(self, shard_stats):
         """
+        roll up all shard stats to instance level stats
 
         :param shard_stats: dict of {shard_name: shard level stats}
-        :return: roll up all shard stats to instance level
         """
         instance_stats = {}
         opcounters_per_node = []
@@ -175,6 +174,21 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         return instance_stats
 
     def _compile_new_relic_stats(self, stats_this_second, stats_next_second):
+        """
+        from instance 'stats_this_second' and instance 'stats_next_second', compute some per
+        second stats metrics and other aggregated metrics
+
+        :param dict stats_this_second:
+        :param dict stats_next_second:
+        :return: compiled instance stats that has metrics
+
+        {'opcounters_per_node_per_second': {...},
+         'server_statistics_per_second': {...},
+         'aggregate_server_statistics': {...},
+         'replication_lag': 0.0,
+         'aggregate_database_statistics': {}
+         }
+        """
         server_statistics_per_second = {}
         opcounters_per_node_per_second = []
         for subdoc in ["opcounters", "network"]:
@@ -197,7 +211,6 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
                 'aggregate_server_statistics': stats_next_second.get('aggregate_server_statistics'),
                 'replication_lag': stats_next_second.get('replication_lag'),
                 'aggregate_database_statistics': self.get_aggregate_database_stats()}
-
 
     @property
     def ssl_connect_string(self):
@@ -263,6 +276,14 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
 
 
 class Shard(bases.Extensible):
+    """An ObjectRocket MongoDB instance shard.
+
+    :param dict instance_name: Name of the instance the shard belongs to
+    :param string stats_base_url: Base url to fetch information and stats for this shard.
+    :param objectrocket.client.Client or_client: handle to talk to OR API
+    :param dict shard_document: a dictionary representing a mongodb shard
+    """
+
     def __init__(self, instance_name, stats_base_url, or_client, shard_document):
         self._instance_name = instance_name
         self._shardstr = shard_document['shardstr']
@@ -274,29 +295,50 @@ class Shard(bases.Extensible):
 
     @property
     def instance_name(self):
+        """
+        :return: name of parent instance
+        """
         return self._instance_name
 
     @property
     def shard_string(self):
+        """
+        :return: shard string
+        """
         return self._shardstr
 
     @property
     def plan(self):
+        """
+        :return: Objectrocket plan that the parent instance is on
+        """
         return self._plan
 
     @property
     def name(self):
+        """
+        :return: shard's name
+        """
         return self._name
 
     @property
     def id(self):
+        """
+        :return: shard's unique ID
+        """
         return self._id
 
     def get_shard_stats(self):
+        """
+        :return: get stats for this mongodb shard
+        """
         return requests.get(self._stats_url, params={'include_stats': True},
-                                   headers={'X-Auth-Token': self._client.auth._token}
-                                   ).json()['data']['stats']
+                            headers={'X-Auth-Token': self._client.auth._token}
+                            ).json()['data']['stats']
 
     @property
     def _stats_url(self):
+        """
+        :return: Objectrocket API endpoint to send shard stats request to
+        """
         return '%s%s/' % (self._stats_base_url, self.name)
