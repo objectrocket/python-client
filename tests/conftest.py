@@ -11,6 +11,8 @@ from objectrocket import acls
 from objectrocket import instances
 from objectrocket import constants
 
+from .mock_stats import (SHARD_STATS_THIS_SECOND, INSTANCE_STATS_THIS_SECOND,
+                         INSTANCE_STATS_NEXT_SECOND, NEW_RELIC_STATS)
 
 #####################
 # Generic fixtures. #
@@ -152,3 +154,27 @@ def patched_requests_map(request):
     patches['instances.mongodb'] = mocked.start()
 
     return patches
+
+
+@pytest.fixture
+def mock_shard_stats():
+    """Mock shard stats."""
+    return SHARD_STATS_THIS_SECOND
+
+
+@pytest.fixture
+def mock_instance_stats_this_second():
+    """Mock shard stats."""
+    return INSTANCE_STATS_THIS_SECOND
+
+
+@pytest.fixture
+def mock_instance_stats_next_second():
+    """Mock shard stats."""
+    return INSTANCE_STATS_NEXT_SECOND
+
+
+@pytest.fixture
+def mock_new_relic_stats():
+    """Mock shard stats."""
+    return NEW_RELIC_STATS
