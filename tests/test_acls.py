@@ -89,6 +89,23 @@ def test_get_makes_expected_api_request(client, acl_doc):
     assert output.id == expected_acl_object.id
     assert isinstance(output, Acl)
 
+# Tests for delete. #
+@responses.activate
+def test_delete_makes_expected_api_request(client, acl):
+    instance_name = 'test_instance'
+    expected_url = 'http://localhost:5050/v2/instances/{}/acls/{}/'.format(
+        instance_name,
+        acl.id
+    )
+    responses.add(
+        responses.DELETE,
+        expected_url,
+        status=200,
+        json={'data':{}},
+        content_type="application/json",
+    )
+
+    client.acls.delete(instance_name, acl.id)
 
 #####################################
 # Tests for Acls private interface. #
