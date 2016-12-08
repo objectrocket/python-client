@@ -68,7 +68,7 @@ def sum_values(value1, value2):
     if value2 is None:
         return value1
 
-    number_types = (int, float, long, bool)
+    number_types = (int, float, long, bool) # noqa
 
     if isinstance(value1, number_types) and isinstance(value2, number_types):
         return int(value1 + value2)
@@ -81,7 +81,7 @@ def sum_values(value1, value2):
 
     if isinstance(value1, list):
         return list(set(value1 + value2))
-    elif isinstance(value1, str) or isinstance(value1, datetime.datetime) or isinstance(value1, unicode):
+    elif isinstance(value1, str) or isinstance(value1, datetime.datetime) or isinstance(value1, unicode): # noqa
         return value1
     elif isinstance(value1, dict):
         keys = set(value1.iterkeys()) | set(value2.iterkeys())

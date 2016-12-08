@@ -224,13 +224,13 @@ class DocParityCheck(object):
         :rtype: None
         """
         if missing_pys:
-            print 'The following Python files appear to be missing:'
+            print('The following Python files appear to be missing:')
             for pyfile in missing_pys:
                 print(pyfile)
             print('\n')
 
         if missing_docs:
-            print 'The following documentation files appear to be missing:'
+            print('The following documentation files appear to be missing:')
             for docfiile in missing_docs:
                 print(docfiile)
             print('\n')
