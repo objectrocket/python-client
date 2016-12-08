@@ -52,7 +52,7 @@ def obj():
 def acl_doc():
     now = datetime.datetime.utcnow()
     doc = {
-        'id': uuid.uuid4().hex,
+        '_id': uuid.uuid4().hex,
 
         'cidr_mask': '0.0.0.0/1',
         'description': 'testing',

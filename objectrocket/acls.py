@@ -156,7 +156,7 @@ class Acl(object):
         # Bind required pseudo private attributes from API response document.
         self._cidr_mask = document['cidr_mask']
         self._description = document['description']
-        self._id = document['id']
+        self._id = document['_id']
         self._instance_name = document['instance']
         self._login = document['login']
         self._port = document['port']
