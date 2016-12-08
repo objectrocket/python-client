@@ -9,6 +9,7 @@ from objectrocket.acls import Acl
 
 from ..utils import comparable_dictionaries
 
+
 ##########################################
 # Tests for Instances private interface. #
 ##########################################
@@ -114,7 +115,7 @@ def test_instance_new_relic_stats(mongodb_replicaset_instance,):
     responses.add(
         responses.GET,
         expected_url,
-            status=200,
+        status=200,
         body={},
         content_type="application/json",
     )
@@ -123,7 +124,8 @@ def test_instance_new_relic_stats(mongodb_replicaset_instance,):
     assert mongodb_replicaset_instance.new_relic_stats == {}
 
 
-@pytest.mark.skipif(sys.version_info[0] >= 3, reason='long and unincode use in objectrocket.utils.sum_values should be cleaned up before running this test on python 3')
+@pytest.mark.skipif(sys.version_info[0] >= 3, reason=('long and unincode use in objectrocket.utils.sum_values'
+                                                      'should be cleaned up before running this test on python 3'))
 def test_instance_rollup_shard_stats_to_instance_stats(mongodb_sharded_instance,
                                                        mock_shard_stats,
                                                        mock_instance_stats_this_second):

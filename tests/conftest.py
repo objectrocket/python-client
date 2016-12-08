@@ -14,6 +14,7 @@ from objectrocket import constants
 from .mock_stats import (SHARD_STATS_THIS_SECOND, INSTANCE_STATS_THIS_SECOND,
                          INSTANCE_STATS_NEXT_SECOND, NEW_RELIC_STATS)
 
+
 #####################
 # Generic fixtures. #
 #####################
