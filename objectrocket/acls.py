@@ -7,6 +7,7 @@ import requests
 
 from objectrocket import bases
 from objectrocket import util
+from objectrocket import errors
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,24 @@ class Acls(bases.BaseOperationsLayer):
         response = requests.get(url, **self._default_request_kwargs)
         data = self._get_response_data(response)
         return self._concrete_acl(data)
+
+    @util.token_auto_auth
+    def delete(self, instance, acl):
+        """Delete an ACL by ID belonging to the instance specified by name.
+
+        :param str instance: The name of the instance on which the ACL exists.
+        :param str acll: The ID of the ACL to delete.
+        """
+        base_url = self._url.format(instance=instance)
+        url = '{base}{aclid}/'.format(base=base_url, aclid=acl)
+        response = requests.delete(url, **self._default_request_kwargs)
+
+        if response.status_code == 200:
+            logger.info('Successfully deleted ACL {}'.format(acl))
+        else:
+            logger.info('Failed to delete ACL {}'.format(acl))
+            logger.info('Response: [{0}] {1}'.format(response.status_code, response.content))
+            raise errors.ObjectRocketException('Failed to delete ACL.')
 
     ######################
     # Private interface. #
