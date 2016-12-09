@@ -4,7 +4,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-VERSION = ('0', '4', '6')
+VERSION = ('0', '4', '8')
 __version__ = '.'.join(VERSION)
 
 with open('README.md') as f:

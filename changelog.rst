@@ -13,6 +13,7 @@ changelog
 - Implement the auth._verify method for token verification.
 - Allowing instances to be extensible.
 - sharded mongodb instance stats are fetched using a pool of threads (one thread per shard)
+- Added acl delete functionality
 
 0.3.x
 -----
