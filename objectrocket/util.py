@@ -86,7 +86,7 @@ def sum_values(value1, value2):
     elif isinstance(value1, str) or isinstance(value1, datetime.datetime) or isinstance(value1, six.text_type):  # noqa
         return value1
     elif isinstance(value1, dict):
-        keys = set(value1.iterkeys()) | set(value2.iterkeys())
+        keys = set(six.iterkeys(value1)) | set(six.iterkeys(value2))
         return dict((key, sum_values(value1.get(key), value2.get(key))) for key in keys)
     else:
         return value1 + value2
