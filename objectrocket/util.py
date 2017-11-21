@@ -1,6 +1,8 @@
 """Utility code for the objectrocket package."""
 import functools
 import datetime
+import six
+import sys
 
 from six import create_bound_method
 
@@ -68,7 +70,7 @@ def sum_values(value1, value2):
     if value2 is None:
         return value1
 
-    number_types = (int, float, long, bool) # noqa
+    number_types = (float, bool) + six.integer_types  # noqa
 
     if isinstance(value1, number_types) and isinstance(value2, number_types):
         return int(value1 + value2)
@@ -81,10 +83,10 @@ def sum_values(value1, value2):
 
     if isinstance(value1, list):
         return list(set(value1 + value2))
-    elif isinstance(value1, str) or isinstance(value1, datetime.datetime) or isinstance(value1, unicode): # noqa
+    elif isinstance(value1, str) or isinstance(value1, datetime.datetime) or isinstance(value1, six.text_type):  # noqa
         return value1
     elif isinstance(value1, dict):
-        keys = set(value1.iterkeys()) | set(value2.iterkeys())
+        keys = set(six.iterkeys(value1)) | set(six.iterkeys(value2))
         return dict((key, sum_values(value1.get(key), value2.get(key))) for key in keys)
     else:
         return value1 + value2

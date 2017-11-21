@@ -7,7 +7,7 @@ machine:
 
 dependencies:
   override:
-    - pip install -r requirements/prod.txt -r requirements/dev.txt
+    - pip install -r requirements/dev.txt
     - pip install tox-pyenv codecov coveralls twine
     - pyenv local 2.7.10 3.5.0
 
