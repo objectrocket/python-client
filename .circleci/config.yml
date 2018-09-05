@@ -20,14 +20,18 @@ jobs:
         - image: circleci/python:3.5
     steps:
       - run:
-          command: tox -e build_pypi
+          command: |
+            pip install --upgrade pip tox
+            tox -e build_pypi
 
   pypi_upload_rc:
     docker:
       - image: circleci/python:3.5
     steps:
       - run:
-          command: tox -e build_testpypi
+          command: |
+            pip install --upgrade pip tox
+            tox -e build_testpypi
 
 workflows:
   version: 2
