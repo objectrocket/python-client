@@ -37,8 +37,6 @@ workflows:
   pypi_upload:
     jobs:
       - pypi_upload:
-          requires:
-            - test
           filters:
             tags:
               only:
@@ -47,8 +45,6 @@ workflows:
               ignore: /.*/
 
       - pypi_upload_rc:
-          requires:
-            - test
           filters:
             tags:
               only:
