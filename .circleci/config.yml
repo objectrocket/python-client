@@ -26,17 +26,6 @@ jobs:
             pip install --upgrade pip tox
             tox -e build_pypi
 
-  pypi_upload_rc:
-    docker:
-      - image: python:3.5
-    steps:
-      - checkout
-
-      - run:
-          command: |
-            pip install --upgrade pip tox
-            tox -e build_testpypi
-
 workflows:
   version: 2
   test:
@@ -51,14 +40,3 @@ workflows:
                 - /^[0-9]+.[0-9]+.[0-9]+$/
             branches:
               ignore: /.*/
-
-      - pypi_upload_rc:
-          filters:
-            tags:
-              only:
-                - /^[0-9]+.[0-9]+.[0-9]+-rc[0-9]+$/
-            branches:
-              ignore: /.*/
-
-
-  
