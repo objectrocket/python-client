@@ -195,7 +195,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
             first_doc = stats_this_second['aggregate_server_statistics'][subdoc]
             second_doc = stats_next_second['aggregate_server_statistics'][subdoc]
             keys = set(first_doc.keys()) | set(second_doc.keys())
-            server_statistics_per_second[subdoc] = {key: int(second_doc[key]) - int(first_doc[key]) for key in keys}
+            server_statistics_per_second[subdoc] = {key: int(second_doc[key]) - int(first_doc[key]) for key in keys if isinstance(first_doc[key], int)}
         for node1, node2 in zip(stats_this_second['opcounters_per_node'], stats_next_second['opcounters_per_node']):
             node_opcounters_per_second = {}
             for repl, members in node2.items():
