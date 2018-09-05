@@ -1,0 +1,56 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: python:3.5
+    working_directory: ~/python-client
+    steps:
+      - checkout
+
+      - run:
+          command: pip install --upgrade pip tox
+      
+      - run:
+          command: | 
+            tox -e lint
+            tox -e py35
+  
+  pypi_upload:
+    docker:
+        - image: circleci/python:3.5
+    steps:
+      - run:
+          command: tox -e build_pypi
+
+  pypi_upload_rc:
+    docker:
+      - image: circleci/python:3.5
+    steps:
+      - run:
+          command: tox -e build_testpypi
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
+  pypi_upload:
+    jobs:
+      - pypi_upload:
+          requires:
+            - test
+          filters:
+            tags:
+              only:
+                - /^[0-9]+.[0-9]+.[0-9]+$/
+
+      - pypi_upload_rc:
+          requires:
+            - test
+          filters:
+            tags:
+              only:
+                - /^[0-9]+.[0-9]+.[0-9]+-rc[0-9]+$/
+
+
+  
