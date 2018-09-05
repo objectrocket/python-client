@@ -19,6 +19,8 @@ jobs:
     docker:
         - image: python:3.5
     steps:
+      - checkout
+
       - run:
           command: |
             pip install --upgrade pip tox
@@ -28,6 +30,8 @@ jobs:
     docker:
       - image: python:3.5
     steps:
+      - checkout
+
       - run:
           command: |
             pip install --upgrade pip tox
