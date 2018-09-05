@@ -36,7 +36,7 @@ workflows:
       - test
   pypi_upload:
     jobs:
-      - pypi_updload:
+      - pypi_upload:
           requires:
             - test
           filters:
