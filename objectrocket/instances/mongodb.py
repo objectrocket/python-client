@@ -334,7 +334,7 @@ class Shard(bases.Extensible):
         """
         return requests.get(self._stats_url, params={'include_stats': True},
                             headers={'X-Auth-Token': self._client.auth._token}
-                            ).json()['data']['stats']
+                            ).json().get('data', {}).get('stats', {})
 
     @property
     def _stats_url(self):
