@@ -4,7 +4,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-VERSION = ('0', '5', '0')
+VERSION = ('0', '5', '1')
 __version__ = '.'.join(VERSION)
 
 with open('README.md') as f:
@@ -20,6 +20,7 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     long_description=readme,
+    long_description_content_type='text/markdown',
     name='objectrocket',
     packages=find_packages(exclude=['tests*']),
     url='https://github.com/objectrocket/python-client/',
@@ -31,8 +32,7 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Database'
     )
 )
