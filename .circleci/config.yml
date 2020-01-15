@@ -1,42 +1,38 @@
 version: 2
 jobs:
-  test:
+  test-py2:
     docker:
-      - image: python:3.5
+      - image: python:2.7
     working_directory: ~/python-client
     steps:
       - checkout
 
       - run:
           command: pip install --upgrade pip tox
-      
+
       - run:
-          command: | 
+          command: |
             tox -e lint
-            tox -e py35
-  
-  pypi_upload:
+            tox -e py27
+
+  test-py3:
     docker:
-        - image: python:3.5
+      - image: python:3.7
+    working_directory: ~/python-client
     steps:
       - checkout
 
       - run:
+          command: pip install --upgrade pip tox
+
+      - run:
           command: |
-            pip install --upgrade pip tox
-            tox -e build_pypi
+            tox -e lint
+            tox -e py37
 
 workflows:
   version: 2
   test:
     jobs:
-      - test
-  pypi_upload:
-    jobs:
-      - pypi_upload:
-          filters:
-            tags:
-              only:
-                - /^[0-9]+.[0-9]+.[0-9]+$/
-            branches:
-              ignore: /.*/
+      - test-py2
+      - test-py3
