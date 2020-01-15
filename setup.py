@@ -4,7 +4,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-__version__ = '0.6.0rc0'
+__version__ = '0.6.0'
 
 with open('README.md') as f:
     readme = f.read()
