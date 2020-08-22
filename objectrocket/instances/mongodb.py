@@ -8,6 +8,7 @@ import pymongo
 import requests
 
 from concurrent import futures
+from distutils.version import LooseVersion
 
 from objectrocket import bases
 from objectrocket import util
@@ -72,6 +73,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         try:
             connection = self.get_connection(ssl=ssl)
             connection[db].authenticate(user, passwd)
+
             return connection
 
         # Catch exception here for logging, then just re-raise.
@@ -79,12 +81,12 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
             logger.exception(ex)
             raise
 
-    def get_connection(self, ssl=True):
+    def get_connection(self, ssl=True, **kwargs):
         """Get a live connection to this instance.
 
         :param bool ssl: Use SSL/TLS if available for this instance.
         """
-        return self._get_connection(ssl=ssl)
+        return self._get_connection(ssl=ssl, **kwargs)
 
     @util.token_auto_auth
     def shards(self, add_shard=False):
@@ -264,7 +266,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
     ######################
     # Private interface. #
     ######################
-    def _get_connection(self, ssl):
+    def _get_connection(self, ssl, **kwargs):
         """Get a live connection to this instance."""
 
         # Use SSL/TLS if requested and available.
@@ -272,7 +274,19 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         if ssl and self.ssl_connect_string:
             connect_string = self.ssl_connect_string
 
-        return pymongo.MongoClient(connect_string)
+        client = pymongo.MongoClient(connect_string, **kwargs)
+
+        # TODO: question? does python client require to know this? or should kwargs be enough?
+        # TODO: does python client admin need to know about retryWrites? or passing kwargs be enough?
+        # retryWrites first released in MongoDB version 3.6+
+        # pymongo 3.9+ requires `retryWrites` to be explicitly set for deprecated mmapv1 storage engine
+        srv_info = connection.server_info()
+        srv_version = LooseVersion(srv_info["version"])
+        if LooseVersion("3.6") <= srv_version < LooseVersion("4.2"):
+            storage_engine = connection.admin.command("serverStatus")["storageEngine"]["name"]
+            if storage_engine == "mmapv1":
+                connection = self.get_connection(ssl=ssl, retryWrites=False)
+                connection[db].authenticate(user, passwd)
 
 
 class Shard(bases.Extensible):
