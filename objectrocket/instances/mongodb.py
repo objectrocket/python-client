@@ -60,18 +60,19 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
 
         return response.json()
 
-    def get_authenticated_connection(self, user, passwd, db='admin', ssl=True):
+    def get_authenticated_connection(self, user, passwd, db='admin', ssl=True, **kwargs):
         """Get an authenticated connection to this instance.
 
         :param str user: The username to use for authentication.
         :param str passwd: The password to use for authentication.
         :param str db: The name of the database to authenticate against. Defaults to ``'Admin'``.
         :param bool ssl: Use SSL/TLS if available for this instance. Defaults to ``True``.
+        :param kwargs: Additional keyword arguments to pass to MongoClient.
         :raises: :py:class:`pymongo.errors.OperationFailure` if authentication fails.
         """
         # Attempt to establish an authenticated connection.
         try:
-            connection = self.get_connection(ssl=ssl)
+            connection = self.get_connection(ssl=ssl, **kwargs)
             connection[db].authenticate(user, passwd)
 
             return connection
@@ -274,20 +275,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         if ssl and self.ssl_connect_string:
             connect_string = self.ssl_connect_string
 
-        client = pymongo.MongoClient(connect_string, **kwargs)
-
-        # TODO: question? does python client require to know this? or should kwargs be enough?
-        # TODO: does python client admin need to know about retryWrites? or passing kwargs be enough?
-        # retryWrites first released in MongoDB version 3.6+
-        # pymongo 3.9+ requires `retryWrites` to be explicitly set for deprecated mmapv1 storage engine
-        srv_info = connection.server_info()
-        srv_version = LooseVersion(srv_info["version"])
-        if LooseVersion("3.6") <= srv_version < LooseVersion("4.2"):
-            storage_engine = connection.admin.command("serverStatus")["storageEngine"]["name"]
-            if storage_engine == "mmapv1":
-                connection = self.get_connection(ssl=ssl, retryWrites=False)
-                connection[db].authenticate(user, passwd)
-
+        return pymongo.MongoClient(connect_string, **kwargs)
 
 class Shard(bases.Extensible):
     """An ObjectRocket MongoDB instance shard.

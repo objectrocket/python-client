@@ -1,6 +1,10 @@
 changelog
 =========
 
+0.7.x
+-----
+- Add ability to pass additional arguments when retrieving authenticated connection to instance.
+
 0.4.x
 -----
 - New stats endpoint that provides instance stats (for consumption by newrelic)

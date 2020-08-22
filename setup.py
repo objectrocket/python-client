@@ -3,8 +3,8 @@
 """Setup script for ObjectRocket Python client."""
 from setuptools import find_packages
 from setuptools import setup
+from objectrocket import __version__
 
-__version__ = '0.6.0'
 
 with open('README.md') as f:
     readme = f.read()
