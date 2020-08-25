@@ -1,7 +1,7 @@
 changelog
 =========
 
-0.7.x
+0.7.0
 -----
 - Add ability to pass additional arguments when retrieving authenticated connection to instance.
 
