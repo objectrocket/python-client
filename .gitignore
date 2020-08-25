@@ -12,3 +12,6 @@
 .cache
 build
 dist
+.vscode/
+.python-version
+.idea/

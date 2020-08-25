@@ -8,6 +8,7 @@ import pymongo
 import requests
 
 from concurrent import futures
+from distutils.version import LooseVersion
 
 from objectrocket import bases
 from objectrocket import util
@@ -59,19 +60,21 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
 
         return response.json()
 
-    def get_authenticated_connection(self, user, passwd, db='admin', ssl=True):
+    def get_authenticated_connection(self, user, passwd, db='admin', ssl=True, **kwargs):
         """Get an authenticated connection to this instance.
 
         :param str user: The username to use for authentication.
         :param str passwd: The password to use for authentication.
         :param str db: The name of the database to authenticate against. Defaults to ``'Admin'``.
         :param bool ssl: Use SSL/TLS if available for this instance. Defaults to ``True``.
+        :param kwargs: Additional keyword arguments to pass to MongoClient.
         :raises: :py:class:`pymongo.errors.OperationFailure` if authentication fails.
         """
         # Attempt to establish an authenticated connection.
         try:
-            connection = self.get_connection(ssl=ssl)
+            connection = self.get_connection(ssl=ssl, **kwargs)
             connection[db].authenticate(user, passwd)
+
             return connection
 
         # Catch exception here for logging, then just re-raise.
@@ -79,12 +82,12 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
             logger.exception(ex)
             raise
 
-    def get_connection(self, ssl=True):
+    def get_connection(self, ssl=True, **kwargs):
         """Get a live connection to this instance.
 
         :param bool ssl: Use SSL/TLS if available for this instance.
         """
-        return self._get_connection(ssl=ssl)
+        return self._get_connection(ssl=ssl, **kwargs)
 
     @util.token_auto_auth
     def shards(self, add_shard=False):
@@ -264,7 +267,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
     ######################
     # Private interface. #
     ######################
-    def _get_connection(self, ssl):
+    def _get_connection(self, ssl, **kwargs):
         """Get a live connection to this instance."""
 
         # Use SSL/TLS if requested and available.
@@ -272,8 +275,7 @@ class MongodbInstance(bases.BaseInstance, bases.Extensible, bases.InstanceAclsIn
         if ssl and self.ssl_connect_string:
             connect_string = self.ssl_connect_string
 
-        return pymongo.MongoClient(connect_string)
-
+        return pymongo.MongoClient(connect_string, **kwargs)
 
 class Shard(bases.Extensible):
     """An ObjectRocket MongoDB instance shard.
