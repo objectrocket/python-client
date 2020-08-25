@@ -10,3 +10,4 @@ tox>=2.1
 wheel>=0.22.0
 git+https://github.com/mverteuil/pytest-ipdb.git
 responses>=0.4.0
+twine
