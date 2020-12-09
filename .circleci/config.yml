@@ -1,38 +1,47 @@
 version: 2
+references:
+  objectrocket-docker-auth: &objectrocket-docker-auth
+    auth:
+      username: ${DOCKER_USERNAME}
+      password: ${DOCKER_PASSWORD}
+  context-to-use: &context-to-use
+    context: objectrocket-shared
 jobs:
   test-py2:
     docker:
-      - image: python:2.7
+    - <<: *objectrocket-docker-auth
+      image: python:2.7
     working_directory: ~/python-client
     steps:
-      - checkout
+    - checkout
 
-      - run:
-          command: pip install --upgrade pip tox
+    - run:
+        command: pip install --upgrade pip tox
 
-      - run:
-          command: |
-            tox -e lint
-            tox -e py27
+    - run:
+        command: |
+          tox -e lint
+          tox -e py27
 
   test-py3:
     docker:
-      - image: python:3.8
+    - <<: *objectrocket-docker-auth
+      image: python:3.8
     working_directory: ~/python-client
     steps:
-      - checkout
+    - checkout
 
-      - run:
-          command: pip install --upgrade pip tox
+    - run:
+        command: pip install --upgrade pip tox
 
-      - run:
-          command: |
-            tox -e lint
-            tox -e py38
+    - run:
+        command: |
+          tox -e lint
+          tox -e py38
 
 workflows:
   version: 2
   test:
     jobs:
-      - test-py2
-      - test-py3
+    - test-py2: *context-to-use
+    - test-py3: *context-to-use
